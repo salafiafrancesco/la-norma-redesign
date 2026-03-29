@@ -1,0 +1,48 @@
+.not-found {
+  min-height: 100vh;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--section-py) var(--gutter);
+  text-align: center;
+}
+
+.not-found__inner {
+  max-width: 560px;
+}
+
+.not-found__label {
+  font-family: var(--ff-display);
+  font-size: clamp(5rem, 18vw, 12rem);
+  font-weight: 700;
+  color: var(--linen);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  -webkit-text-stroke: 1px var(--ivory);
+}
+
+.not-found__heading {
+  font-family: var(--ff-display);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 500;
+  color: var(--charcoal);
+  margin-bottom: 1rem;
+  line-height: 1.15;
+}
+
+.not-found__sub {
+  font-family: var(--ff-accent);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-style: italic;
+  color: var(--text-mid);
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.not-found__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}

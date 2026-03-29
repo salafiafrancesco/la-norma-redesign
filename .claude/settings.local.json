@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(node db/seed.js)",
+      "Bash(npm install:*)",
+      "Bash(curl -s http://localhost:3001/api/classes)",
+      "Bash(node -e \"const d=JSON.parse\\(require\\(''''fs''''\\).readFileSync\\(''''/dev/stdin'''',''''utf8''''\\)\\); console.log\\(''''Classes:'''', d.length\\); console.log\\(''''First:'''', d[0]?.theme, d[0]?.date\\)\")",
+      "Bash(npx kill-port:*)",
+      "Bash(find C:Usersfrancreactwebsitela-norma-redesign -not -path */node_modules* -not -path */dist/* -not -path */.git/*)",
+      "Bash(/tmp/tree.txt:*)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

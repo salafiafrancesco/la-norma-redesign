@@ -1,0 +1,345 @@
+/* ============================================================
+   DESIGN TOKENS — La Norma Ristorante & Pizzeria
+   ============================================================ */
+:root {
+  /* --- Colors: richer, warmer palette --- */
+  --cream:         #F8F3EB;
+  --ivory:         #EDE4D2;
+  --parchment:     #F2EAD8;
+  --linen:         #EBE2CE;
+  --olive:         #3B5844;
+  --olive-light:   #587265;
+  --olive-dark:    #273D2F;
+  --olive-muted:   rgba(59,88,68,0.08);
+  --terracotta:    #B85C38;
+  --terracotta-dk: #974929;
+  --charcoal:      #1A2120;
+  --charcoal-soft: #252F2C;
+  --charcoal-warm: #2C2A26;
+  --bordeaux:      #65293A;
+  --gold:          #C4973A;
+  --gold-light:    #D9B86A;
+  --gold-pale:     #EDD99A;
+  --white:         #FFFFFF;
+  --text-dark:     #1A2120;
+  --text-mid:      #464640;
+  --text-light:    #887D6F;
+  --text-faint:    #B5AB9C;
+
+  /* --- Typography --- */
+  --ff-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --ff-accent:  'Cormorant Garamond', Georgia, serif;
+  --ff-body:    'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* --- Fluid type scale (bigger & more range) --- */
+  --fs-hero:    clamp(3.5rem, 8.5vw, 7.25rem);
+  --fs-xxl:     clamp(2.75rem, 5.5vw, 4.5rem);
+  --fs-xl:      clamp(2.125rem, 3.75vw, 3.25rem);
+  --fs-lg:      clamp(1.5rem, 2.5vw, 2.25rem);
+  --fs-md:      clamp(1.125rem, 1.8vw, 1.375rem);
+  --fs-base:    1rem;
+  --fs-sm:      0.9375rem;
+  --fs-xs:      0.8125rem;
+  --fs-label:   0.6875rem;
+
+  /* --- Spacing (more breathing room) --- */
+  --sp-2xs:  0.25rem;
+  --sp-xs:   0.5rem;
+  --sp-sm:   0.75rem;
+  --sp-md:   1rem;
+  --sp-lg:   1.5rem;
+  --sp-xl:   2rem;
+  --sp-2xl:  3rem;
+  --sp-3xl:  4.5rem;
+  --sp-4xl:  6.5rem;
+  --sp-5xl:  10rem;
+
+  /* Section padding */
+  --section-py: clamp(4rem, 7vw, 7rem);
+
+  /* --- Layout --- */
+  --max-width: 1320px;
+  --gutter:    clamp(1.375rem, 5.5vw, 3.5rem);
+  --radius-sm: 3px;
+  --radius-md: 8px;
+  --radius-lg: 18px;
+  --radius-xl: 32px;
+
+  /* --- Shadows (softer, more diffused) --- */
+  --shadow-xs: 0 1px 4px rgba(26,33,32,0.06);
+  --shadow-sm: 0 2px 12px rgba(26,33,32,0.08);
+  --shadow-md: 0 10px 36px rgba(26,33,32,0.11);
+  --shadow-lg: 0 24px 64px rgba(26,33,32,0.15);
+  --shadow-xl: 0 40px 96px rgba(26,33,32,0.20);
+
+  /* --- Transitions --- */
+  --ease:     cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --dur-fast: 0.2s;
+  --dur-base: 0.38s;
+  --dur-slow: 0.65s;
+}
+
+/* Skip-to-content link */
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  background: var(--charcoal);
+  color: var(--cream);
+  padding: 0.6rem 1.25rem;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  font-family: var(--ff-body);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition: top 0.15s;
+}
+.skip-to-content:focus {
+  top: 0;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--ff-body);
+  font-size: var(--fs-base);
+  line-height: 1.75;
+  color: var(--text-dark);
+  background-color: var(--cream);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+img, picture, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a { color: inherit; text-decoration: none; }
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+ul, ol { list-style: none; }
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.container--narrow { max-width: 880px; }
+.container--wide   { max-width: 1480px; }
+
+/* Section label — editorial, prominent */
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75em;
+  font-family: var(--ff-accent);
+  font-size: 0.75rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin-bottom: var(--sp-xl);
+}
+
+/* Horizontal line before label */
+.section-label::before {
+  content: '';
+  display: inline-block;
+  width: 32px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ============================================================
+   FADE-IN ANIMATION
+   ============================================================ */
+.fade-up {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity var(--dur-slow) var(--ease-out),
+              transform var(--dur-slow) var(--ease-out);
+}
+
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-up.delay-1 { transition-delay: 0.12s; }
+.fade-up.delay-2 { transition-delay: 0.24s; }
+.fade-up.delay-3 { transition-delay: 0.36s; }
+.fade-up.delay-4 { transition-delay: 0.50s; }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-xs);
+  padding: 1rem 2rem;
+  font-family: var(--ff-body);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--dur-base) var(--ease),
+    color var(--dur-base) var(--ease),
+    border-color var(--dur-base) var(--ease),
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-base) var(--ease);
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+}
+
+.btn:hover  { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+/* Primary — terracotta */
+.btn--primary {
+  background: var(--terracotta);
+  color: var(--white);
+  border: 1.5px solid var(--terracotta);
+}
+.btn--primary:hover {
+  background: var(--terracotta-dk);
+  border-color: var(--terracotta-dk);
+  box-shadow: 0 8px 32px rgba(184,92,56,0.30);
+}
+
+/* Outline on dark bg */
+.btn--outline-light {
+  background: transparent;
+  color: var(--cream);
+  border: 1.5px solid rgba(248,243,235,0.45);
+}
+.btn--outline-light:hover {
+  background: rgba(248,243,235,0.10);
+  border-color: rgba(248,243,235,0.85);
+}
+
+/* Outline on light bg */
+.btn--outline-dark {
+  background: transparent;
+  color: var(--charcoal);
+  border: 1.5px solid var(--charcoal);
+}
+.btn--outline-dark:hover {
+  background: var(--charcoal);
+  color: var(--cream);
+}
+
+/* Olive outline */
+.btn--outline-olive {
+  background: transparent;
+  color: var(--olive);
+  border: 1.5px solid var(--olive);
+}
+.btn--outline-olive:hover {
+  background: var(--olive);
+  color: var(--cream);
+}
+
+/* Ghost underline on dark */
+.btn--ghost-cream {
+  background: transparent;
+  color: var(--cream);
+  border: none;
+  padding-inline: 0;
+  letter-spacing: 0.09em;
+  position: relative;
+  padding-bottom: 2px;
+}
+.btn--ghost-cream::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 100%;
+  height: 1px;
+  background: rgba(248,243,235,0.5);
+  transition: right var(--dur-base) var(--ease);
+}
+.btn--ghost-cream:hover::after { right: 0; }
+.btn--ghost-cream:hover { transform: none; }
+
+/* ── Global focus-visible styles ──────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--olive);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Remove default focus ring for mouse users, keep for keyboard */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Ensure buttons and links have visible focus */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--olive);
+  outline-offset: 3px;
+}
+
+/* ── Print styles ────────────────────────────────────────────── */
+@media print {
+  .navbar, .hero__infobar, footer { display: none; }
+  body { background: white; color: black; }
+}

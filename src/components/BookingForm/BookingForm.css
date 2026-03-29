@@ -1,0 +1,661 @@
+/* ============================================================
+   Booking Section Wrapper
+   ============================================================ */
+.booking-section {
+  padding-block: var(--section-py);
+  background: var(--cream);
+}
+
+.booking-section__header {
+  text-align: center;
+  margin-bottom: clamp(3rem, 5vw, 5rem);
+  max-width: 600px;
+  margin-inline: auto;
+}
+
+.booking-section__heading {
+  font-family: var(--ff-display);
+  font-size: var(--fs-xl);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--charcoal);
+  letter-spacing: -0.025em;
+  margin-bottom: var(--sp-md);
+}
+
+.booking-section__subheading {
+  font-family: var(--ff-accent);
+  font-size: 1.0625rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--text-light);
+  line-height: 1.7;
+}
+
+/* ============================================================
+   Form Shell
+   ============================================================ */
+.booking-form {
+  max-width: 900px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+/* ---- Fieldset ---- */
+.bf-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xl);
+}
+
+.bf-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  font-family: var(--ff-display);
+  font-size: clamp(1.125rem, 2vw, 1.375rem);
+  font-weight: 500;
+  color: var(--charcoal);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--sp-xl);
+  width: 100%;
+}
+
+.bf-legend__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--olive);
+  color: var(--cream);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--ff-body);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Date Card Grid
+   ============================================================ */
+.bf-date-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-md);
+}
+
+/* Date card */
+.date-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--white);
+  border: 1.5px solid var(--linen);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-lg) var(--sp-xl);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-base) var(--ease),
+    box-shadow var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease),
+    background var(--dur-base) var(--ease);
+  user-select: none;
+  overflow: hidden;
+}
+
+.date-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--olive);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease);
+}
+
+.date-card:hover:not(.date-card--sold-out) {
+  border-color: var(--olive-light);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.date-card:hover:not(.date-card--sold-out)::before {
+  transform: scaleX(1);
+}
+
+.date-card--selected {
+  border-color: var(--olive) !important;
+  background: rgba(59,88,68,0.04);
+  box-shadow: 0 0 0 1px var(--olive), var(--shadow-sm);
+}
+
+.date-card--selected::before {
+  transform: scaleX(1) !important;
+}
+
+.date-card--sold-out {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.date-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--sp-xs);
+  margin-bottom: 4px;
+}
+
+.date-card__short-date {
+  font-family: var(--ff-display);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.date-card__spots {
+  font-family: var(--ff-accent);
+  font-size: 0.6875rem;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  color: var(--olive);
+  background: rgba(59,88,68,0.09);
+  padding: 2px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+.date-card__spots--low {
+  color: var(--terracotta);
+  background: rgba(184,92,56,0.09);
+}
+
+.date-card__sold-out-badge {
+  font-family: var(--ff-accent);
+  font-size: 0.6875rem;
+  font-style: italic;
+  color: var(--text-faint);
+  background: var(--linen);
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.date-card__theme {
+  font-family: var(--ff-display);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--charcoal);
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+
+.date-card__time {
+  font-family: var(--ff-accent);
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--text-light);
+  letter-spacing: 0.04em;
+}
+
+.date-card__difficulty {
+  font-size: 0.6875rem;
+  color: var(--text-faint);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-family: var(--ff-accent);
+}
+
+/* Checkmark */
+.date-card__check {
+  position: absolute;
+  bottom: var(--sp-md);
+  right: var(--sp-md);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--olive);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
+}
+
+.date-card--selected .date-card__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.date-card__check svg {
+  width: 11px;
+  height: 11px;
+}
+
+/* Selected class detail banner */
+.selected-class-detail {
+  margin-top: var(--sp-md);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: detailFadeIn 0.4s var(--ease-out) both;
+}
+
+@keyframes detailFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.selected-class-detail__inner {
+  background: rgba(59,88,68,0.06);
+  border: 1px solid rgba(59,88,68,0.15);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-xl) var(--sp-2xl);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-sm) var(--sp-xl);
+  align-items: baseline;
+}
+
+.selected-class-detail__badge {
+  font-family: var(--ff-accent);
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--olive);
+  background: rgba(59,88,68,0.12);
+  padding: 3px 10px;
+  border-radius: 100px;
+  align-self: center;
+}
+
+.selected-class-detail__heading {
+  font-family: var(--ff-display);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  color: var(--charcoal);
+  letter-spacing: -0.01em;
+}
+
+.selected-class-detail__info {
+  font-family: var(--ff-accent);
+  font-size: var(--fs-sm);
+  font-style: italic;
+  color: var(--text-light);
+  width: 100%;
+}
+
+.selected-class-detail__desc {
+  font-size: 0.875rem;
+  color: var(--text-mid);
+  line-height: 1.7;
+  width: 100%;
+}
+
+/* ============================================================
+   Guest Stepper
+   ============================================================ */
+.bf-guests-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(2rem, 4vw, 4rem);
+  flex-wrap: wrap;
+}
+
+.bf-guests-wrap .bf-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.bf-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  border: 1.5px solid var(--linen);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  width: fit-content;
+  margin-top: var(--sp-sm);
+}
+
+.bf-stepper__btn {
+  width: 48px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.375rem;
+  font-weight: 300;
+  color: var(--charcoal);
+  background: var(--white);
+  border: none;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+  line-height: 1;
+}
+
+.bf-stepper__btn:hover:not(:disabled) {
+  background: var(--ivory);
+}
+
+.bf-stepper__btn:disabled {
+  color: var(--text-faint);
+  cursor: not-allowed;
+}
+
+.bf-stepper__value {
+  min-width: 110px;
+  text-align: center;
+  font-family: var(--ff-display);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--charcoal);
+  padding: 0 var(--sp-md);
+  border-left: 1px solid var(--linen);
+  border-right: 1px solid var(--linen);
+  letter-spacing: -0.01em;
+}
+
+/* Price preview */
+.bf-price-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--sp-xl) var(--sp-2xl);
+  background: var(--white);
+  border: 1px solid var(--linen);
+  border-radius: var(--radius-lg);
+  min-width: 160px;
+  align-self: flex-start;
+  margin-top: calc(var(--sp-lg) + 1.5rem); /* align with stepper */
+}
+
+.bf-price-preview__amount {
+  font-family: var(--ff-display);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--olive);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.bf-price-preview__breakdown {
+  font-family: var(--ff-accent);
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--text-light);
+}
+
+.bf-price-preview__note {
+  font-size: 0.6875rem;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: var(--ff-accent);
+  margin-top: 4px;
+}
+
+/* ============================================================
+   Form Fields
+   ============================================================ */
+.bf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-xl);
+}
+
+.bf-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xs);
+}
+
+.bf-label {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-dark);
+  letter-spacing: 0.02em;
+}
+
+.bf-required {
+  color: var(--terracotta);
+  margin-left: 2px;
+}
+
+.bf-optional {
+  font-weight: 300;
+  color: var(--text-faint);
+  font-style: italic;
+  font-size: 0.8125rem;
+}
+
+.bf-input,
+.bf-textarea {
+  width: 100%;
+  padding: 0.9375rem 1.125rem;
+  font-family: var(--ff-body);
+  font-size: var(--fs-base);
+  color: var(--text-dark);
+  background: var(--white);
+  border: 1.5px solid var(--linen);
+  border-radius: var(--radius-md);
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+  -webkit-appearance: none;
+  appearance: none;
+  line-height: 1.5;
+}
+
+.bf-input::placeholder,
+.bf-textarea::placeholder {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.bf-input:focus,
+.bf-textarea:focus {
+  outline: none;
+  border-color: var(--olive);
+  box-shadow: 0 0 0 3px rgba(59,88,68,0.10);
+}
+
+.bf-textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+/* Error state */
+.bf-field--error .bf-input,
+.bf-field--error .bf-textarea {
+  border-color: var(--terracotta);
+  box-shadow: 0 0 0 3px rgba(184,92,56,0.10);
+}
+
+.bf-error-msg {
+  font-size: 0.8125rem;
+  color: var(--terracotta);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.bf-error-msg::before {
+  content: '↑';
+  font-size: 0.75em;
+}
+
+/* Also apply error border to date grid */
+.bf-date-grid.bf-field--error {
+  padding: var(--sp-md);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--terracotta);
+  background: rgba(184,92,56,0.02);
+}
+
+.bf-hint {
+  font-size: 0.8125rem;
+  color: var(--text-faint);
+  font-style: italic;
+  font-family: var(--ff-accent);
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+}
+
+/* ============================================================
+   Trust Signals
+   ============================================================ */
+.bf-trust {
+  display: flex;
+  gap: var(--sp-xl);
+  flex-wrap: wrap;
+  padding: var(--sp-xl) var(--sp-2xl);
+  background: var(--ivory);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--linen);
+}
+
+.bf-trust__item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  font-size: var(--fs-xs);
+  color: var(--text-mid);
+  letter-spacing: 0.01em;
+}
+
+.bf-trust__item svg {
+  width: 15px;
+  height: 15px;
+  color: var(--olive);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Submit
+   ============================================================ */
+.bf-submit-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-md);
+}
+
+.bf-submit-btn {
+  min-width: 260px;
+  padding: 1.125rem 3rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  position: relative;
+}
+
+.bf-submit-btn--loading {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+/* Spinner */
+.bf-spinner {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.bf-submit-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.bf-submit-note {
+  font-family: var(--ff-accent);
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--text-faint);
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+/* Server error */
+.bf-submit-error {
+  background: rgba(184,92,56,0.06);
+  border: 1px solid rgba(184,92,56,0.25);
+  border-radius: var(--radius-md);
+  padding: var(--sp-lg) var(--sp-xl);
+  color: var(--terracotta);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 800px) {
+  .bf-date-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .bf-row {
+    grid-template-columns: 1fr;
+  }
+
+  .bf-date-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-sm);
+  }
+
+  .bf-guests-wrap {
+    flex-direction: column;
+  }
+
+  .bf-price-preview {
+    margin-top: 0;
+    width: 100%;
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--sp-md);
+    padding: var(--sp-lg) var(--sp-xl);
+  }
+
+  .bf-price-preview__note { display: none; }
+
+  .bf-trust {
+    flex-direction: column;
+    gap: var(--sp-md);
+    padding: var(--sp-lg);
+  }
+
+  .bf-submit-btn {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+@media (max-width: 400px) {
+  .bf-date-grid {
+    grid-template-columns: 1fr;
+  }
+}

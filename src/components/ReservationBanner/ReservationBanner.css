@@ -1,0 +1,129 @@
+.reservation-banner {
+  position: relative;
+  overflow: hidden;
+}
+
+.reservation-banner__bg {
+  position: absolute;
+  inset: 0;
+  background: var(--olive);
+  background: linear-gradient(135deg, var(--olive-dark) 0%, var(--olive) 60%, var(--olive-light) 100%);
+}
+
+/* Grain texture overlay */
+.reservation-banner__bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+}
+
+.reservation-banner__inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding-block: var(--section-py);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 760px;
+}
+
+.reservation-banner__label {
+  color: var(--gold-light) !important;
+}
+
+.reservation-banner__leaf {
+  width: 60px;
+  color: var(--cream);
+  opacity: 0.2;
+  position: absolute;
+  top: clamp(2rem, 5vw, 4rem);
+  right: 10%;
+  transform: rotate(15deg);
+  pointer-events: none;
+}
+
+.reservation-banner__heading {
+  font-family: var(--ff-display);
+  font-size: var(--fs-xl);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--cream);
+  letter-spacing: -0.025em;
+  margin-bottom: var(--sp-xl);
+}
+
+.reservation-banner__heading em {
+  font-style: italic;
+  color: var(--gold-light);
+}
+
+.reservation-banner__body {
+  font-family: var(--ff-accent);
+  font-size: 1.0625rem;
+  font-style: italic;
+  font-weight: 300;
+  color: rgba(248,243,235,0.68);
+  max-width: 460px;
+  line-height: 1.8;
+  margin-bottom: var(--sp-xl);
+  letter-spacing: 0.01em;
+}
+
+.reservation-banner__hours {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  font-family: var(--ff-accent);
+  font-size: var(--fs-sm);
+  font-weight: 300;
+  color: rgba(250,247,242,0.65);
+  letter-spacing: 0.05em;
+  margin-bottom: var(--sp-2xl);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.reservation-banner__sep {
+  color: var(--gold);
+  font-size: 1.2em;
+}
+
+.reservation-banner__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-md);
+  justify-content: center;
+  margin-bottom: var(--sp-xl);
+}
+
+.reservation-banner__btn {
+  padding: 1rem 2.25rem;
+}
+
+.reservation-banner__note {
+  font-family: var(--ff-accent);
+  font-size: 0.75rem;
+  color: rgba(250,247,242,0.42);
+  letter-spacing: 0.06em;
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .reservation-banner__ctas {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .reservation-banner__btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .reservation-banner__leaf {
+    display: none;
+  }
+}

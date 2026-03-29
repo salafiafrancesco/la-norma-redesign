@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Block admin panel from indexing
+Disallow: /admin
+Disallow: /admin/
+
+# Block API
+Disallow: /api/
+Disallow: /uploads/
+
+Sitemap: https://www.lanormarestaurant.com/sitemap.xml
