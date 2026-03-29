@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db, { save } from '../db/database.js';
 import requireAuth from '../middleware/auth.js';
+import { JWT_SECRET } from '../config.js';
 
 const router = Router();
 
@@ -16,7 +17,7 @@ router.post('/login', (req, res) => {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
-  const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
   res.json({ token, username: user.username });
 });
 
