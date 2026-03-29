@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigation } from '../context/NavigationContext';
 import Footer from '../components/Footer/Footer';
+import API_BASE from '../config/api';
 import './EventPages.css';
 
 const FAQ = [
@@ -28,11 +29,9 @@ export default function LiveMusicPage() {
   const [submitted, setSubmitted]   = useState(false);
   const [formError, setFormError]   = useState('');
 
-  const _API = import.meta.env.VITE_API_URL ?? '';
-
   useEffect(() => {
     document.title = 'Live Music — La Norma Ristorante & Pizzeria';
-    fetch(`${_API}/api/events?category=live_music`)
+    fetch(`${API_BASE}/api/events?category=live_music`)
       .then(r => r.json())
       .then(setEvents)
       .catch(() => {});
@@ -48,7 +47,7 @@ export default function LiveMusicPage() {
     setFormError('');
     setSubmitting(true);
     try {
-      const res = await fetch(`${_API}/api/inquiries`, {
+      const res = await fetch(`${API_BASE}/api/inquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, type: 'live_music', guests: Number(form.guests) }),

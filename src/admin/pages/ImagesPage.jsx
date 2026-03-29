@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { uploads as uploadsApi } from '../api/client';
+import API_BASE from '../../config/api';
 
 export default function ImagesPage() {
   const [files, setFiles]     = useState([]);
@@ -47,7 +48,7 @@ export default function ImagesPage() {
   };
 
   const copyUrl = (url) => {
-    const base = import.meta.env.VITE_API_URL || window.location.origin;
+    const base = API_BASE || window.location.origin;
     navigator.clipboard.writeText(base + url);
     setCopied(url);
     setTimeout(() => setCopied(''), 2000);
@@ -90,7 +91,7 @@ export default function ImagesPage() {
           {files.map(f => (
             <div key={f.filename} className="adm-card" style={{ padding: '0.75rem' }}>
               <img
-                src={(import.meta.env.VITE_API_URL ?? '') + f.url}
+                src={API_BASE + f.url}
                 alt={f.filename}
                 style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 6, display: 'block', marginBottom: '0.75rem' }}
               />

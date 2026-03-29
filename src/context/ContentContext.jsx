@@ -5,10 +5,11 @@
  */
 import { createContext, useContext, useEffect, useState } from 'react';
 import * as S from '../data/content'; // static fallback
+import API_BASE from '../config/api';
 
 const ContentContext = createContext(null);
 
-const _API = import.meta.env.VITE_API_URL ?? '';
+const _API = API_BASE;
 
 // Resolve upload-relative URLs to absolute backend URLs in production
 function resolveUrl(url) {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useId } from 'react';
 import BookingConfirmation from '../BookingConfirmation/BookingConfirmation';
+import API_BASE from '../../config/api';
 import './BookingForm.css';
 
 // Transform API class record → shape expected by UI
@@ -21,10 +22,8 @@ function formatClass(cls) {
   };
 }
 
-const _API = import.meta.env.VITE_API_URL ?? '';
-
 async function submitRsvp(payload) {
-  const res = await fetch(`${_API}/api/rsvp`, {
+  const res = await fetch(`${API_BASE}/api/rsvp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -72,7 +71,7 @@ export default function BookingForm() {
   const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
-    fetch(`${_API}/api/classes`)
+    fetch(`${API_BASE}/api/classes`)
       .then(r => r.json())
       .then(data => setClasses(data.map(formatClass)))
       .catch(() => {

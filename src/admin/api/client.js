@@ -1,9 +1,10 @@
 /**
  * Admin API client
- * All requests go to /api/* (proxied to the Express server by Vite)
+ * All requests go to VITE_API_URL/api/* (backend on Render).
  */
+import API_BASE from '../../config/api';
 
-const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api`;
+const BASE = `${API_BASE}/api`;
 
 function getToken() {
   return localStorage.getItem('ln_admin_token');

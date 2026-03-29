@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigation } from '../context/NavigationContext';
 import Footer from '../components/Footer/Footer';
+import API_BASE from '../config/api';
 import './EventPages.css';
 
 const PACKAGES = [
@@ -46,7 +47,6 @@ const EMPTY = {
 
 export default function PrivateEventsPage() {
   const { navigate } = useNavigation();
-  const _API = import.meta.env.VITE_API_URL ?? '';
   const [openFaq, setOpenFaq]   = useState(null);
   const [form, setForm]         = useState(EMPTY);
   const [submitting, setSubmitting] = useState(false);
@@ -67,7 +67,7 @@ export default function PrivateEventsPage() {
     setFormError('');
     setSubmitting(true);
     try {
-      const res = await fetch(`${_API}/api/inquiries`, {
+      const res = await fetch(`${API_BASE}/api/inquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
