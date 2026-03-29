@@ -21,8 +21,22 @@ const app = express();
 // Auto-create admin user on first run (safe to call every startup)
 ensureInitialized();
 
-// ── Allowed origins (add your production domain here) ─────────
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,http://localhost:5177,http://localhost:5178,http://localhost:5179,http://localhost:5180,http://localhost:5181,http://localhost:5182,http://localhost:5183,http://localhost:5184,http://localhost:5185,http://localhost:4173,http://localhost:3000').split(',').map(s => s.trim());
+// ── Allowed origins ───────────────────────────────────────────
+// Reads both CORS_ORIGIN (single value set on Render) and
+// ALLOWED_ORIGINS (comma-separated list) and merges them.
+const LOCAL_DEV = [
+  'http://localhost:5173','http://localhost:5174','http://localhost:5175',
+  'http://localhost:5176','http://localhost:5177','http://localhost:5178',
+  'http://localhost:5179','http://localhost:5180','http://localhost:5181',
+  'http://localhost:5182','http://localhost:5183','http://localhost:5184',
+  'http://localhost:5185','http://localhost:4173','http://localhost:3000',
+];
+const fromEnv = [
+  ...(process.env.CORS_ORIGIN     ? process.env.CORS_ORIGIN.split(',')     : []),
+  ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : []),
+].map(s => s.trim()).filter(Boolean);
+
+const ALLOWED_ORIGINS = [...new Set([...LOCAL_DEV, ...fromEnv])];
 
 // ── Security headers ──────────────────────────────────────────
 app.use(helmet({
@@ -31,14 +45,18 @@ app.use(helmet({
 }));
 
 // ── CORS ─────────────────────────────────────────────────────
-app.use(cors({
+const corsMiddleware = cors({
   origin: (origin, cb) => {
     // Allow requests with no origin (curl, Postman, server-to-server)
     if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
-}));
+});
+
+// Handle preflight OPTIONS requests for all routes
+app.options('*', corsMiddleware);
+app.use(corsMiddleware);
 
 app.use(express.json({ limit: '2mb' }));
 
