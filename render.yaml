@@ -5,6 +5,13 @@ services:
     rootDir: server
     buildCommand: npm install
     startCommand: node index.js
+    # ── Persistent disk ───────────────────────────────────────────
+    # Mounts a persistent volume at server/data/ so db.json survives
+    # deploys and restarts. Requires Render Starter plan or higher.
+    disk:
+      name: la-norma-db
+      mountPath: /opt/render/project/src/server/data
+      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
@@ -16,5 +23,5 @@ services:
         value: admin
       - key: ADMIN_PASSWORD
         sync: false                # Set manually in Render dashboard
-      - key: ALLOWED_ORIGINS
-        sync: false                # Set to your Vercel/Netlify URL
+      - key: CORS_ORIGIN
+        sync: false                # Set to your Vercel frontend URL
