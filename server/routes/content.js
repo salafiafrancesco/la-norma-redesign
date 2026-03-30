@@ -26,9 +26,10 @@ router.get('/', (_req, res) => {
 
 // GET /api/content/:section  — single section (public)
 router.get('/:section', (req, res) => {
+  if (!db.data.site_content) db.data.site_content = {};
   const raw = db.data.site_content[req.params.section];
-  if (!raw) return res.status(404).json({ error: 'Section not found' });
-  res.json(buildSection(raw));
+  // Return empty object instead of 404 so the admin editor shows empty fields
+  res.json(raw ? buildSection(raw) : {});
 });
 
 // PUT /api/content/:section  — update section (admin only)
