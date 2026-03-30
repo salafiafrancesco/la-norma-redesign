@@ -105,7 +105,15 @@ app.use('/api/upload',                uploadRoutes);
 app.use('/api/events',                eventRoutes);
 app.use('/api/inquiries', rsvpLimiter, inquiryRoutes);
 
-// ── Health check ──────────────────────────────────────────────
+// ── Root & health ─────────────────────────────────────────────
+app.get('/', (_req, res) => res.send('La Norma backend is running.'));
+
+app.get('/health', (_req, res) => res.json({
+  status: 'ok',
+  time: new Date().toISOString(),
+  env: process.env.NODE_ENV || 'development',
+}));
+
 app.get('/api/health', (_req, res) => res.json({
   status: 'ok',
   time: new Date().toISOString(),
