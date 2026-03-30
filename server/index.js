@@ -119,7 +119,8 @@ app.use('/api/*', (_req, res) => {
 
 // ── Error handler ─────────────────────────────────────────────
 app.use((err, _req, res, _next) => {
-  if (process.env.NODE_ENV !== 'production') console.error(err.stack);
+  // Always log — Render captures console output in service logs
+  console.error('[express error]', err.message, err.stack);
   res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
 });
 

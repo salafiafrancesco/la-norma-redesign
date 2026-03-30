@@ -14,22 +14,33 @@ if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
 
 const DEFAULTS = {
   admin_users:     [],
-  site_content:    {},   // { section: { key: { value, type } } }
+  site_content:    {},
   cooking_classes: [],
   rsvp:            [],
   events:          [],
   inquiries:       [],
 };
 
-// Load existing db or initialise from defaults
-const db = {
-  data: existsSync(DB_PATH)
-    ? JSON.parse(readFileSync(DB_PATH, 'utf-8'))
-    : { ...DEFAULTS },
-};
+function loadDb() {
+  if (!existsSync(DB_PATH)) return JSON.parse(JSON.stringify(DEFAULTS));
+  try {
+    const parsed = JSON.parse(readFileSync(DB_PATH, 'utf-8'));
+    // Merge with DEFAULTS so any missing collection is always an array/object
+    return { ...JSON.parse(JSON.stringify(DEFAULTS)), ...parsed };
+  } catch (err) {
+    console.error('[db] Failed to parse db.json, starting fresh:', err.message);
+    return JSON.parse(JSON.stringify(DEFAULTS));
+  }
+}
+
+const db = { data: loadDb() };
 
 export function save() {
-  writeFileSync(DB_PATH, JSON.stringify(db.data, null, 2));
+  try {
+    writeFileSync(DB_PATH, JSON.stringify(db.data, null, 2));
+  } catch (err) {
+    console.error('[db] Failed to write db.json:', err.message);
+  }
 }
 
 export function getNextId(collection) {
