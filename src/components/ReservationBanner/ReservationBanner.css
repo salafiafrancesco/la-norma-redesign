@@ -6,124 +6,167 @@
 .reservation-banner__bg {
   position: absolute;
   inset: 0;
-  background: var(--olive);
-  background: linear-gradient(135deg, var(--olive-dark) 0%, var(--olive) 60%, var(--olive-light) 100%);
-}
-
-/* Grain texture overlay */
-.reservation-banner__bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.4;
-  mix-blend-mode: overlay;
+  background:
+    radial-gradient(circle at left center, rgba(196, 151, 58, 0.12), transparent 30%),
+    linear-gradient(135deg, var(--olive-dark) 0%, var(--olive) 60%, var(--olive-light) 100%);
 }
 
 .reservation-banner__inner {
   position: relative;
   z-index: 1;
-  text-align: center;
-  padding-block: var(--section-py);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.92fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
   align-items: center;
-  max-width: 760px;
+  padding-block: var(--section-py);
 }
 
-.reservation-banner__label {
+.reservation-banner__copy {
+  display: grid;
+  gap: var(--section-gap);
+}
+
+.reservation-banner__partner-row,
+.reservation-banner__hours,
+.reservation-banner__ctas,
+.reservation-banner__windows {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.reservation-banner__label,
+.reservation-banner__panel-label {
   color: var(--gold-light) !important;
 }
 
-.reservation-banner__leaf {
-  width: 60px;
-  color: var(--cream);
-  opacity: 0.2;
-  position: absolute;
-  top: clamp(2rem, 5vw, 4rem);
-  right: 10%;
-  transform: rotate(15deg);
-  pointer-events: none;
+.reservation-banner__partner-row {
+  gap: 0.65rem;
+  margin-top: -0.35rem;
+}
+
+.reservation-banner__partner,
+.reservation-banner__status,
+.reservation-banner__window {
+  padding: 0.52rem 0.78rem;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 243, 235, 0.14);
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.reservation-banner__partner {
+  background: rgba(196, 151, 58, 0.16);
+  color: var(--gold-light);
+}
+
+.reservation-banner__status,
+.reservation-banner__window {
+  background: rgba(248, 243, 235, 0.08);
+  color: rgba(248, 243, 235, 0.74);
+}
+
+.reservation-banner__panel-label {
+  font-family: var(--ff-accent);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .reservation-banner__heading {
   font-family: var(--ff-display);
   font-size: var(--fs-xl);
-  font-weight: 400;
-  line-height: 1.15;
+  line-height: 1.08;
   color: var(--cream);
-  letter-spacing: -0.025em;
-  margin-bottom: var(--sp-xl);
-}
-
-.reservation-banner__heading em {
-  font-style: italic;
-  color: var(--gold-light);
+  max-width: 12ch;
 }
 
 .reservation-banner__body {
-  font-family: var(--ff-accent);
-  font-size: 1.0625rem;
-  font-style: italic;
-  font-weight: 300;
-  color: rgba(248,243,235,0.68);
-  max-width: 460px;
+  max-width: 34rem;
+  color: rgba(248, 243, 235, 0.72);
   line-height: 1.8;
-  margin-bottom: var(--sp-xl);
-  letter-spacing: 0.01em;
 }
 
 .reservation-banner__hours {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-md);
-  font-family: var(--ff-accent);
-  font-size: var(--fs-sm);
-  font-weight: 300;
-  color: rgba(250,247,242,0.65);
-  letter-spacing: 0.05em;
-  margin-bottom: var(--sp-2xl);
-  flex-wrap: wrap;
-  justify-content: center;
+  gap: 0.75rem;
+  padding-top: 0.35rem;
+  color: rgba(248, 243, 235, 0.72);
 }
 
-.reservation-banner__sep {
-  color: var(--gold);
-  font-size: 1.2em;
+.reservation-banner__benefits {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 0.35rem;
+}
+
+.reservation-banner__benefit {
+  display: grid;
+  grid-template-columns: 0.7rem 1fr;
+  gap: 0.8rem;
+  align-items: start;
+}
+
+.reservation-banner__benefit span {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 999px;
+  margin-top: 0.45rem;
+  background: var(--gold);
+}
+
+.reservation-banner__benefit p {
+  color: rgba(248, 243, 235, 0.74);
+  line-height: 1.7;
+}
+
+.reservation-banner__panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1.6rem;
+  border-radius: 1.7rem;
+  border: 1px solid rgba(248, 243, 235, 0.12);
+  background: rgba(248, 243, 235, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.reservation-banner__panel-heading {
+  font-family: var(--ff-display);
+  font-size: clamp(1.5rem, 2.8vw, 2.15rem);
+  line-height: 1.08;
+  color: var(--cream);
+}
+
+.reservation-banner__panel-copy {
+  color: rgba(248, 243, 235, 0.76);
+  line-height: 1.7;
+}
+
+.reservation-banner__windows {
+  gap: 0.65rem;
 }
 
 .reservation-banner__ctas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-md);
-  justify-content: center;
-  margin-bottom: var(--sp-xl);
-}
-
-.reservation-banner__btn {
-  padding: 1rem 2.25rem;
+  gap: 0.8rem;
 }
 
 .reservation-banner__note {
+  color: rgba(248, 243, 235, 0.56);
   font-family: var(--ff-accent);
-  font-size: 0.75rem;
-  color: rgba(250,247,242,0.42);
-  letter-spacing: 0.06em;
   font-style: italic;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 900px) {
+  .reservation-banner__inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
   .reservation-banner__ctas {
     flex-direction: column;
-    width: 100%;
   }
 
   .reservation-banner__btn {
     width: 100%;
-    text-align: center;
-  }
-
-  .reservation-banner__leaf {
-    display: none;
   }
 }

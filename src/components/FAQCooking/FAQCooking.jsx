@@ -16,7 +16,7 @@ export default function FAQCooking() {
         <div className={`faq-section__header fade-up${visible ? ' visible' : ''}`} ref={ref}>
           <p className="section-label">Common Questions</p>
           <h2 id="faq-heading" className="faq-section__heading">
-            Everything You<br /><em>Need to Know</em>
+            A few practical details<br /><em>before you reserve</em>
           </h2>
         </div>
 
@@ -60,13 +60,13 @@ export default function FAQCooking() {
 
         <div className={`faq-section__footer fade-up${visible ? ' visible' : ''}`}>
           <p className="faq-section__footer-text">
-            Still have questions?
+            Planning a private class or booking for a celebration?
           </p>
           <a
             href="mailto:info@lanormarestaurant.com"
-            className="btn btn--outline-dark faq-section__cta"
+            className="btn btn--outline-light faq-section__cta"
           >
-            Ask Us Directly
+            Email the team directly
           </a>
         </div>
 

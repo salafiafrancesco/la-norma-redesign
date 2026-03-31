@@ -1,10 +1,18 @@
 import { useSection } from '../../context/ContentContext';
 import { useInView } from '../../hooks/useInView';
+import { OPENTABLE_RESERVATION_URL } from '../../utils/hospitalityMedia';
 import './ReservationBanner.css';
+
+const DINNER_WINDOWS = ['5:00 PM', '6:30 PM', '8:00 PM'];
+const RESERVATION_BENEFITS = [
+  'Instant availability check on OpenTable',
+  'Best way to secure weekend dinner times',
+  'Ideal when planning wine nights, live music, or a celebratory evening',
+];
 
 export default function ReservationBanner() {
   const restaurant = useSection('restaurant');
-  const links      = useSection('links');
+  const reservationBanner = useSection('reservationBanner');
   const [ref, visible] = useInView();
 
   return (
@@ -12,42 +20,71 @@ export default function ReservationBanner() {
       <div className="reservation-banner__bg" aria-hidden="true" />
 
       <div className={`reservation-banner__inner container fade-up${visible ? ' visible' : ''}`} ref={ref}>
-        <div className="reservation-banner__leaf" aria-hidden="true">
-          {/* Decorative leaf SVG */}
-          <svg viewBox="0 0 80 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M40 110 C40 110 5 75 5 40 C5 18 21 5 40 5 C59 5 75 18 75 40 C75 75 40 110 40 110Z" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.3"/>
-            <path d="M40 110 C40 110 40 60 40 5" stroke="currentColor" strokeWidth="1" opacity="0.2"/>
-          </svg>
+        <div className="reservation-banner__copy">
+          <p className="section-label reservation-banner__label">Dinner reservations</p>
+          <div className="reservation-banner__partner-row">
+            <span className="reservation-banner__partner">Powered by OpenTable</span>
+            <span className="reservation-banner__status">Secure, live availability</span>
+          </div>
+          <h2 id="reserve-heading" className="reservation-banner__heading">
+            Reserve dinner in a few taps, then let the rest of the evening unfold naturally.
+          </h2>
+          <p className="reservation-banner__body">
+            {reservationBanner.sub} Use OpenTable for the fastest path to confirmed seating, then plan the rest of the
+            night around music, wine, or a slower dinner pace.
+          </p>
+
+          <div className="reservation-banner__hours">
+            <span>{restaurant.hours}</span>
+            <span className="reservation-banner__sep" aria-hidden="true">|</span>
+            <span>{restaurant.address}, {restaurant.city}</span>
+          </div>
+
+          <div className="reservation-banner__benefits">
+            {RESERVATION_BENEFITS.map((item) => (
+              <div key={item} className="reservation-banner__benefit">
+                <span aria-hidden="true" />
+                <p>{item}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <p className="section-label reservation-banner__label">Reserve Your Table</p>
+        <aside className="reservation-banner__panel">
+          <p className="reservation-banner__panel-label">OpenTable dinner booking</p>
+          <h3 className="reservation-banner__panel-heading">Choose your time, confirm faster, arrive relaxed.</h3>
+          <p className="reservation-banner__panel-copy">
+            Dinner reservations are handled through OpenTable so guests can move from browsing to a confirmed table
+            without extra back-and-forth.
+          </p>
 
-        <h2 id="reserve-heading" className="reservation-banner__heading">
-          A Table Awaits.<br />
-          <em>Make it Yours.</em>
-        </h2>
+          <div className="reservation-banner__windows" aria-label="Popular dinner windows">
+            {DINNER_WINDOWS.map((window) => (
+              <span key={window} className="reservation-banner__window">
+                {window}
+              </span>
+            ))}
+          </div>
 
-        <p className="reservation-banner__body">
-          Whether it's a quiet dinner for two or a celebration with friends — we'd be honored to set the table.
-          Book directly or call us anytime.
-        </p>
+          <div className="reservation-banner__ctas">
+            <a
+              href={OPENTABLE_RESERVATION_URL}
+              className="btn btn--primary reservation-banner__btn"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Reserve on OpenTable
+            </a>
+            <a href={`tel:${restaurant.phone}`} className="btn btn--outline-light reservation-banner__btn">
+              Call the host stand
+            </a>
+          </div>
 
-        <div className="reservation-banner__hours">
-          <span>{restaurant.hours}</span>
-          <span className="reservation-banner__sep" aria-hidden="true">·</span>
-          <span>{restaurant.address}, {restaurant.city}</span>
-        </div>
-
-        <div className="reservation-banner__ctas">
-          <a href={links.reserve} className="btn btn--primary reservation-banner__btn">
-            Reserve Online
-          </a>
-          <a href={`tel:${restaurant.phone}`} className="btn btn--outline-light reservation-banner__btn">
-            {restaurant.phone}
-          </a>
-        </div>
-
-        <p className="reservation-banner__note">{restaurant.hoursNote}</p>
+          <p className="reservation-banner__note">
+            {reservationBanner.note} Dinner reservations are confirmed on OpenTable; larger celebrations can still be
+            arranged directly with the restaurant.
+          </p>
+        </aside>
       </div>
     </section>
   );

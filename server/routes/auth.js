@@ -4,80 +4,79 @@ import jwt from 'jsonwebtoken';
 import db, { save } from '../db/database.js';
 import requireAuth from '../middleware/auth.js';
 import { JWT_SECRET } from '../config.js';
+import { isValidEmail, normalizeText } from '../lib/validation.js';
 
 const router = Router();
 
-// POST /api/auth/login
 router.post('/login', (req, res) => {
   try {
-    const { username, password } = req.body;
+    const username = normalizeText(req.body.username);
+    const password = normalizeText(req.body.password, { trim: false });
 
     if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
+      return res.status(400).json({ error: 'Username and password are required.' });
     }
 
-    const users = db.data.admin_users;
-    if (!Array.isArray(users)) {
-      console.error('[auth/login] admin_users collection is not initialized');
-      return res.status(500).json({ error: 'Server configuration error — admin data unavailable' });
+    const user = db.data.admin_users.find((entry) => entry.username === username);
+    if (!user || !user.password_hash) {
+      return res.status(401).json({ error: 'Invalid credentials.' });
     }
 
-    const user = users.find(u => u.username === username);
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    if (!user.password_hash) {
-      console.error('[auth/login] user record is missing password_hash');
-      return res.status(500).json({ error: 'Server configuration error — corrupted user record' });
-    }
-
-    const passwordOk = bcrypt.compareSync(password, user.password_hash);
-    if (!passwordOk) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    const isMatch = bcrypt.compareSync(password, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid credentials.' });
     }
 
     const token = jwt.sign(
       { id: user.id, username: user.username },
       JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '7d' },
     );
 
-    res.json({ token, username: user.username });
-
-  } catch (err) {
-    console.error('[auth/login] unexpected error:', err.message, err.stack);
-    res.status(500).json({ error: 'Login failed due to a server error' });
+    return res.json({ token, username: user.username });
+  } catch (error) {
+    console.error('[auth/login]', error);
+    return res.status(500).json({ error: 'Unable to complete login right now.' });
   }
 });
 
-// GET /api/auth/me
 router.get('/me', requireAuth, (req, res) => {
   res.json({ username: req.admin.username });
 });
 
-// POST /api/auth/change-password
 router.post('/change-password', requireAuth, (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
-    if (!currentPassword || !newPassword)
-      return res.status(400).json({ error: 'Both fields are required' });
-    if (newPassword.length < 8)
-      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    const currentPassword = normalizeText(req.body.currentPassword, { trim: false });
+    const newPassword = normalizeText(req.body.newPassword, { trim: false });
 
-    const user = db.data.admin_users.find(u => u.id === req.admin.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current password and new password are required.' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+    }
+
+    if (isValidEmail(newPassword)) {
+      // Gentle guard against pasting the wrong value into the password field.
+      return res.status(400).json({ error: 'New password looks invalid. Please choose a secure password.' });
+    }
+
+    const user = db.data.admin_users.find((entry) => entry.id === req.admin.id);
+    if (!user) {
+      return res.status(404).json({ error: 'Admin user not found.' });
+    }
 
     if (!bcrypt.compareSync(currentPassword, user.password_hash)) {
-      return res.status(401).json({ error: 'Current password is incorrect' });
+      return res.status(401).json({ error: 'Current password is incorrect.' });
     }
 
     user.password_hash = bcrypt.hashSync(newPassword, 10);
     save();
-    res.json({ message: 'Password updated successfully' });
-  } catch (err) {
-    console.error('[auth/change-password] unexpected error:', err.message);
-    res.status(500).json({ error: 'Password change failed due to a server error' });
+    return res.json({ message: 'Password updated successfully.' });
+  } catch (error) {
+    console.error('[auth/change-password]', error);
+    return res.status(500).json({ error: 'Unable to change the password right now.' });
   }
 });
 

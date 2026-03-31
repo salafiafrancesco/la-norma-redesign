@@ -19,14 +19,24 @@ export default function InquiriesManager() {
   const [error, setError]     = useState('');
 
   const load = () => {
-    setLoading(true);
+    let cancelled = false;
     const params = {};
     if (typeFilter)   params.type   = typeFilter;
     if (statusFilter) params.status = statusFilter;
     inquiriesApi.list(params)
-      .then(setItems)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (!cancelled) setItems(data);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   };
 
   useEffect(load, [typeFilter, statusFilter]);
@@ -76,13 +86,13 @@ export default function InquiriesManager() {
 
       {/* Filters */}
       <div className="adm-flex adm-gap-2" style={{ marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-        <select className="adm-select" style={{ width: 'auto', minWidth: 160 }} value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+        <select className="adm-select" style={{ width: 'auto', minWidth: 160 }} value={typeFilter} onChange={e => { setLoading(true); setTypeFilter(e.target.value); }}>
           <option value="">All types</option>
           <option value="wine_tasting">Wine Tasting</option>
           <option value="live_music">Live Music</option>
           <option value="private_event">Private Event</option>
         </select>
-        <select className="adm-select" style={{ width: 'auto', minWidth: 140 }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+        <select className="adm-select" style={{ width: 'auto', minWidth: 140 }} value={statusFilter} onChange={e => { setLoading(true); setStatusFilter(e.target.value); }}>
           <option value="">All statuses</option>
           <option value="new">New</option>
           <option value="read">Read</option>

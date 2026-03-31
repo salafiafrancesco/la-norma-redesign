@@ -5,6 +5,7 @@ import AdminLayout from './components/AdminLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ContentEditor from './pages/ContentEditor';
+import BlogManager from './pages/BlogManager';
 import ClassesManager from './pages/ClassesManager';
 import RSVPList from './pages/RSVPList';
 import ImagesPage from './pages/ImagesPage';
@@ -29,6 +30,7 @@ function AdminContent() {
   const pages = {
     dashboard:  <Dashboard setPage={setPage} />,
     content:    <ContentEditor />,
+    blog:       <BlogManager />,
     classes:    <ClassesManager />,
     rsvp:       <RSVPList />,
     images:     <ImagesPage />,

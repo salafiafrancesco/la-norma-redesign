@@ -1,158 +1,260 @@
-/**
- * ContentContext — loads all site content from the API.
- * Falls back to the static content.js if the API is unavailable.
- * Transforms flat API keys into the exact shape expected by components.
- */
 import { createContext, useContext, useEffect, useState } from 'react';
-import * as S from '../data/content'; // static fallback
 import API_BASE from '../config/api';
+import * as defaults from '../data/content';
+import { PAGE_KEYS, buildPageHref, resolveNavigationTarget } from '../../shared/routes.js';
 
 const ContentContext = createContext(null);
 
-const _API = API_BASE;
+function normalizeTextValue(value) {
+  return String(value ?? '').trim().toLowerCase();
+}
 
-// Resolve upload-relative URLs to absolute backend URLs in production
+function getExperiencePageKey(item = {}) {
+  const signals = [
+    item.title,
+    item.label,
+    item.icon,
+    item.cta,
+  ]
+    .map((value) => normalizeTextValue(value))
+    .filter(Boolean)
+    .join(' ');
+
+  if (signals.includes('wine')) return PAGE_KEYS.wineTastings;
+  if (signals.includes('cook') || signals.includes('class')) return PAGE_KEYS.cookingClasses;
+  if (signals.includes('music') || signals.includes('jazz') || signals.includes('acoustic')) return PAGE_KEYS.liveMusic;
+  if (signals.includes('private') || signals.includes('event')) return PAGE_KEYS.privateEvents;
+
+  return null;
+}
+
+function normalizeInternalContentHref(href, fallbackPageKey = null) {
+  const rawHref = String(href ?? '').trim();
+  const destination = resolveNavigationTarget(rawHref);
+
+  if (destination.isInternal && destination.pageKey !== PAGE_KEYS.home) {
+    return destination.href;
+  }
+
+  if ((!rawHref || rawHref.startsWith('#')) && fallbackPageKey) {
+    return buildPageHref(fallbackPageKey);
+  }
+
+  if (destination.isInternal) {
+    return destination.href;
+  }
+
+  return fallbackPageKey ? buildPageHref(fallbackPageKey) : rawHref;
+}
+
+function getFooterPageKey(item = {}) {
+  const signals = [item.label, item.href]
+    .map((value) => normalizeTextValue(value))
+    .filter(Boolean)
+    .join(' ');
+
+  if (signals.includes('menu')) return PAGE_KEYS.menu;
+  if (signals.includes('about')) return PAGE_KEYS.about;
+  if (signals.includes('faq') || signals.includes('questions')) return PAGE_KEYS.faq;
+  if (signals.includes('contact')) return PAGE_KEYS.contact;
+  if (signals.includes('journal') || signals.includes('blog')) return PAGE_KEYS.blog;
+  if (signals.includes('cooking')) return PAGE_KEYS.cookingClasses;
+  if (signals.includes('wine tasting') || signals.includes('wine tastings')) return PAGE_KEYS.wineTastings;
+  if (signals.includes('live music')) return PAGE_KEYS.liveMusic;
+  if (signals.includes('private event') || signals.includes('private events')) return PAGE_KEYS.privateEvents;
+
+  return null;
+}
+
 function resolveUrl(url) {
-  if (url && url.startsWith('/uploads/')) return _API + url;
+  if (url?.startsWith('/uploads/')) {
+    return `${API_BASE}${url}`;
+  }
+
   return url;
 }
 
-// ── Transform raw API response → component-ready shapes ───────────
-function transform(api) {
-  const r   = api.restaurant || {};
-  const lnk = api.links       || {};
-  const h   = api.hero        || {};
-  const st  = api.story       || {};
-  const sp  = api.specialties || {};
-  const exp = api.experiences || {};
-  const mn  = api.menu        || {};
-  const rb  = api.reservation_banner || {};
-  const oo  = api.order_online || {};
-  const te  = api.testimonials || {};
-  const ft  = api.footer       || {};
+function uniqueValues(values = []) {
+  return [...new Set(values.filter(Boolean))];
+}
 
-  // Derived links object (used by multiple sections)
+const SYSTEM_FOOTER_LINKS = [
+  { label: 'Menu', href: buildPageHref(PAGE_KEYS.menu) },
+  { label: 'About La Norma', href: buildPageHref(PAGE_KEYS.about) },
+  { label: 'Cooking Classes', href: buildPageHref(PAGE_KEYS.cookingClasses) },
+  { label: 'Wine Tastings', href: buildPageHref(PAGE_KEYS.wineTastings) },
+  { label: 'Private Events', href: buildPageHref(PAGE_KEYS.privateEvents) },
+  { label: 'Journal', href: buildPageHref(PAGE_KEYS.blog) },
+  { label: 'FAQ', href: buildPageHref(PAGE_KEYS.faq) },
+  { label: 'Contact', href: buildPageHref(PAGE_KEYS.contact) },
+  { label: 'Privacy Policy', href: buildPageHref(PAGE_KEYS.privacyPolicy) },
+];
+
+function transform(api = {}) {
+  const restaurantData = api.restaurant || {};
+  const linksData = api.links || {};
+  const heroData = api.hero || {};
+  const storyData = api.story || {};
+  const specialtiesData = api.specialties || {};
+  const experiencesData = api.experiences || {};
+  const menuData = api.menu || {};
+  const reservationBannerData = api.reservation_banner || {};
+  const orderOnlineData = api.order_online || {};
+  const testimonialsData = api.testimonials || {};
+  const footerData = api.footer || {};
+
   const links = {
-    reserve:       lnk.reserve       ?? S.links.reserve,
-    menuPdf:       lnk.menu_pdf      ?? S.links.menuPdf,
-    orderDelivery: lnk.order_delivery ?? S.links.orderDelivery,
-    orderPickup:   lnk.order_pickup  ?? S.links.orderPickup,
-    giftCards:     lnk.gift_cards    ?? S.links.giftCards,
+    reserve: linksData.reserve ?? defaults.links.reserve,
+    menuPdf: normalizeInternalContentHref(linksData.menu_pdf ?? defaults.links.menuPdf, PAGE_KEYS.menu),
+    orderDelivery: linksData.order_delivery ?? defaults.links.orderDelivery,
+    orderPickup: linksData.order_pickup ?? defaults.links.orderPickup,
+    giftCards: linksData.gift_cards ?? defaults.links.giftCards,
   };
 
   const restaurant = {
-    name:       r.name       ?? S.restaurant.name,
-    tagline:    r.tagline    ?? S.restaurant.tagline,
-    description:r.description ?? S.restaurant.description,
-    address:    r.address    ?? S.restaurant.address,
-    city:       r.city       ?? S.restaurant.city,
-    state:      r.state      ?? S.restaurant.state,
-    zip:        r.zip        ?? S.restaurant.zip,
-    phone:      r.phone      ?? S.restaurant.phone,
-    email:      r.email      ?? S.restaurant.email,
-    hours:      r.hours      ?? S.restaurant.hours,
-    hoursNote:  r.hours_note ?? S.restaurant.hoursNote,
-    mapEmbedUrl: r.map_embed_url ?? S.restaurant.mapEmbedUrl,
+    name: restaurantData.name ?? defaults.restaurant.name,
+    tagline: restaurantData.tagline ?? defaults.restaurant.tagline,
+    description: restaurantData.description ?? defaults.restaurant.description,
+    address: restaurantData.address ?? defaults.restaurant.address,
+    city: restaurantData.city ?? defaults.restaurant.city,
+    state: restaurantData.state ?? defaults.restaurant.state,
+    zip: restaurantData.zip ?? defaults.restaurant.zip,
+    phone: restaurantData.phone ?? defaults.restaurant.phone,
+    email: restaurantData.email ?? defaults.restaurant.email,
+    hours: restaurantData.hours ?? defaults.restaurant.hours,
+    hoursNote: restaurantData.hours_note ?? defaults.restaurant.hoursNote,
+    mapEmbedUrl: restaurantData.map_embed_url ?? defaults.restaurant.mapEmbedUrl,
     social: {
-      instagram:   r.social_instagram   ?? S.restaurant.social?.instagram,
-      facebook:    r.social_facebook    ?? S.restaurant.social?.facebook,
-      tripadvisor: r.social_tripadvisor ?? S.restaurant.social?.tripadvisor,
-      yelp:        r.social_yelp        ?? S.restaurant.social?.yelp,
+      instagram: restaurantData.social_instagram ?? defaults.restaurant.social.instagram,
+      facebook: restaurantData.social_facebook ?? defaults.restaurant.social.facebook,
+      tripadvisor: restaurantData.social_tripadvisor ?? defaults.restaurant.social.tripadvisor,
+      yelp: restaurantData.social_yelp ?? defaults.restaurant.social.yelp,
     },
   };
 
   const hero = {
-    eyebrow:     h.eyebrow      ?? S.hero.eyebrow,
-    headline:    [h.headline1 ?? S.hero.headline?.[0], h.headline2 ?? S.hero.headline?.[1]],
-    subheadline: h.subheadline  ?? S.hero.subheadline,
-    imageUrl:    resolveUrl(h.image_url    ?? S.hero.imageUrl),
-    imageAlt:    h.image_alt    ?? S.hero.imageAlt,
+    eyebrow: heroData.eyebrow ?? defaults.hero.eyebrow,
+    headline: [
+      heroData.headline1 ?? defaults.hero.headline[0],
+      heroData.headline2 ?? defaults.hero.headline[1],
+    ],
+    subheadline: heroData.subheadline ?? defaults.hero.subheadline,
+    imageUrl: resolveUrl(heroData.image_url ?? defaults.hero.imageUrl),
+    imageAlt: heroData.image_alt ?? defaults.hero.imageAlt,
+    gallery: uniqueValues([
+      resolveUrl(heroData.image_url ?? defaults.hero.imageUrl),
+      ...((Array.isArray(heroData.gallery) ? heroData.gallery : defaults.hero.gallery) ?? []).map(resolveUrl),
+    ]),
   };
 
   const story = {
-    label:    st.label    ?? S.story.label,
-    quote:    st.quote    ?? S.story.quote,
-    body:     [st.body1 ?? S.story.body?.[0], st.body2 ?? S.story.body?.[1]],
-    stat1:    { value: st.stat1_value ?? S.story.stat1?.value, label: st.stat1_label ?? S.story.stat1?.label },
-    stat2:    { value: st.stat2_value ?? S.story.stat2?.value, label: st.stat2_label ?? S.story.stat2?.label },
-    stat3:    { value: st.stat3_value ?? S.story.stat3?.value, label: st.stat3_label ?? S.story.stat3?.label },
-    imageUrl: resolveUrl(st.image_url ?? S.story.imageUrl),
-    imageAlt: st.image_alt ?? S.story.imageAlt,
+    label: storyData.label ?? defaults.story.label,
+    quote: storyData.quote ?? defaults.story.quote,
+    body: [
+      storyData.body1 ?? defaults.story.body[0],
+      storyData.body2 ?? defaults.story.body[1],
+    ],
+    stat1: {
+      value: storyData.stat1_value ?? defaults.story.stat1.value,
+      label: storyData.stat1_label ?? defaults.story.stat1.label,
+    },
+    stat2: {
+      value: storyData.stat2_value ?? defaults.story.stat2.value,
+      label: storyData.stat2_label ?? defaults.story.stat2.label,
+    },
+    stat3: {
+      value: storyData.stat3_value ?? defaults.story.stat3.value,
+      label: storyData.stat3_label ?? defaults.story.stat3.label,
+    },
+    imageUrl: resolveUrl(storyData.image_url ?? defaults.story.imageUrl),
+    imageAlt: storyData.image_alt ?? defaults.story.imageAlt,
   };
 
-  // specialties: array matching static shape
-  const specialties = (sp.items ?? S.specialties).map(item => ({
-    id:          item.id,
-    tag:         item.tag,
-    name:        item.name,
+  const specialties = (specialtiesData.items ?? defaults.specialties).map((item) => ({
+    id: item.id,
+    tag: item.tag,
+    badge: item.badge || null,
+    name: item.name,
     description: item.description,
-    price:       item.price,
-    imageUrl:    resolveUrl(item.imageUrl    || item.image_url),
-    imageAlt:    item.imageAlt    || item.image_alt,
-    featured:    item.featured    ?? false,
-    badge:       item.badge       || null,
+    price: item.price,
+    imageUrl: resolveUrl(item.imageUrl || item.image_url),
+    imageAlt: item.imageAlt || item.image_alt,
+    featured: Boolean(item.featured),
   }));
 
-  // experiences: array
-  const experiences = (exp.items ?? S.experiences).map(item => ({
-    id:          item.id,
-    icon:        item.icon,
-    label:       item.label,
-    title:       item.title,
+  const experiences = (experiencesData.items ?? defaults.experiences).map((item) => ({
+    id: item.id,
+    icon: item.icon,
+    label: item.label,
+    title: item.title,
     description: item.description,
-    cta:         item.cta,
-    ctaHref:     item.ctaHref || item.cta_href || '#',
-  }));
-
-  // menuHighlights: object with {label, headline, note, categories}
-  const apiCategories = mn.categories;
-  const staticCategories = S.menuHighlights.categories;
-  const categories = (apiCategories ?? staticCategories).map(cat => ({
-    name:  cat.name  || cat.title,
-    items: (cat.items || []).map(item => ({
-      name:  item.name,
-      desc:  item.desc || item.description, // normalise field name
-      price: item.price,
-    })),
+    cta: item.cta,
+    ctaHref: normalizeInternalContentHref(item.ctaHref || item.cta_href || '', getExperiencePageKey(item)),
   }));
 
   const menuHighlights = {
-    label:      mn.label      ?? S.menuHighlights.label,
-    headline:   mn.headline   ?? S.menuHighlights.headline,
-    note:       mn.note       ?? S.menuHighlights.note,
-    categories,
+    label: menuData.label ?? defaults.menuHighlights.label,
+    headline: menuData.headline ?? defaults.menuHighlights.headline,
+    note: menuData.note ?? defaults.menuHighlights.note,
+    categories: (menuData.categories ?? defaults.menuHighlights.categories).map((category) => ({
+      name: category.name || category.title,
+      items: (category.items || []).map((item) => ({
+        name: item.name,
+        desc: item.desc || item.description,
+        price: item.price,
+      })),
+    })),
   };
 
-  // testimonials: array matching static shape
-  const testimonials = (te.items ?? S.testimonials).map(item => ({
-    id:       item.id,
-    text:     item.text   || item.quote, // DB uses 'quote', static uses 'text'
-    author:   item.author,
+  const testimonialItems = (testimonialsData.items ?? defaults.testimonials).map((item) => ({
+    id: item.id,
+    text: item.text || item.quote,
+    author: item.author,
     location: item.location,
-    source:   item.source || 'Google Reviews',
-    rating:   item.rating ?? 5,
+    source: item.source || 'Guest review',
+    rating: item.rating ?? 5,
   }));
 
-  // footerNav: array
-  const footerNav = (ft.nav_items ?? S.footerNav).map(item => ({
-    label: item.label,
-    href:  item.href,
-  }));
+  const testimonialSection = {
+    label: testimonialsData.label ?? defaults.testimonialSection.label,
+    headline: testimonialsData.headline ?? defaults.testimonialSection.headline,
+    items: testimonialItems,
+  };
 
-  // Reservation banner
   const reservationBanner = {
-    headline: rb.headline  ?? 'A Table Awaits',
-    sub:      rb.sub       ?? 'Reserve your evening at La Norma.',
-    ctaText:  rb.cta_text  ?? 'Reserve a Table',
-    note:     rb.note      ?? '',
+    headline: reservationBannerData.headline ?? defaults.reservationBanner.headline,
+    sub: reservationBannerData.sub ?? defaults.reservationBanner.sub,
+    ctaText: reservationBannerData.cta_text ?? defaults.reservationBanner.ctaText,
+    note: reservationBannerData.note ?? defaults.reservationBanner.note,
   };
 
-  // Order online
   const orderOnline = {
-    eyebrow:  oo.eyebrow  ?? "Can\u2019t Make It Tonight?",
-    headline: oo.headline ?? 'Bring La Norma Home',
-    sub:      oo.sub      ?? 'Our most-loved dishes, packed with care.',
+    eyebrow: orderOnlineData.eyebrow ?? defaults.orderOnline.eyebrow,
+    headline: orderOnlineData.headline ?? defaults.orderOnline.headline,
+    sub: orderOnlineData.sub ?? defaults.orderOnline.sub,
   };
+
+  const footer = {
+    tagline: footerData.tagline ?? defaults.footer.tagline,
+  };
+
+  const footerNav = (footerData.nav_items ?? defaults.footerNav).map((item) => ({
+    label: item.label,
+    href: normalizeInternalContentHref(item.href, getFooterPageKey(item)),
+  }));
+
+  SYSTEM_FOOTER_LINKS.forEach((item) => {
+    const labelKey = normalizeTextValue(item.label);
+    const existingIndex = footerNav.findIndex(
+      (entry) => normalizeTextValue(entry.label) === labelKey,
+    );
+
+    if (existingIndex >= 0) {
+      footerNav[existingIndex] = item;
+    } else {
+      footerNav.push(item);
+    }
+  });
 
   return {
     restaurant,
@@ -162,26 +264,47 @@ function transform(api) {
     specialties,
     experiences,
     menuHighlights,
-    testimonials,
-    footerNav,
+    testimonialSection,
+    testimonials: testimonialItems,
     reservationBanner,
     orderOnline,
+    footer,
+    footerNav,
   };
 }
 
-// ── Provider ──────────────────────────────────────────────────────
 export function ContentProvider({ children }) {
-  const [content, setContent] = useState(() => transform({})); // static fallback immediately
+  const [content, setContent] = useState(() => transform());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${_API}/api/content`)
-      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
-      .then(data => { if (!cancelled) setContent(transform(data)); })
-      .catch(() => { /* keep static fallback silently */ })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+
+    fetch(`${API_BASE}/api/content`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Unable to load API content.');
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        if (!cancelled) {
+          setContent(transform(data));
+        }
+      })
+      .catch(() => {
+        // Static defaults stay in place when the API is unavailable.
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -192,12 +315,15 @@ export function ContentProvider({ children }) {
 }
 
 export function useContent() {
-  const ctx = useContext(ContentContext);
-  if (!ctx) throw new Error('useContent must be used inside ContentProvider');
-  return ctx;
+  const context = useContext(ContentContext);
+
+  if (!context) {
+    throw new Error('useContent must be used inside ContentProvider.');
+  }
+
+  return context;
 }
 
-/** Get a single top-level key from content */
 export function useSection(key) {
   const { content } = useContent();
   return content[key];

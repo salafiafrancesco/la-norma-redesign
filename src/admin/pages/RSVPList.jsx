@@ -12,12 +12,22 @@ export default function RSVPList() {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     const params = filter !== 'all' ? { status: filter } : {};
     rsvpApi.list(params)
-      .then(setItems)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (!cancelled) setItems(data);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [filter]);
 
   const handleStatusChange = async (id, status) => {
@@ -73,7 +83,10 @@ export default function RSVPList() {
           <button
             key={s}
             className={`adm-tab${filter === s ? ' is-active' : ''}`}
-            onClick={() => setFilter(s)}
+            onClick={() => {
+              setLoading(true);
+              setFilter(s);
+            }}
           >
             {s.charAt(0).toUpperCase() + s.slice(1)}
             <span style={{ marginLeft: '0.35rem', fontSize: '0.7rem', opacity: 0.7 }}>

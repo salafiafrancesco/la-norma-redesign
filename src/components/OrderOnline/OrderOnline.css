@@ -5,13 +5,15 @@
 
 .order-online__header {
   text-align: center;
-  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  margin-bottom: var(--section-header-space);
+  max-width: 46rem;
+  margin-inline: auto;
 }
 
 .order-online__heading {
   font-family: var(--ff-display);
   font-size: var(--fs-xl);
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.15;
   color: var(--charcoal);
   margin-bottom: var(--sp-md);
@@ -19,9 +21,9 @@
 }
 
 .order-online__subheading {
-  font-size: var(--fs-sm);
+  font-size: 1rem;
   color: var(--text-mid);
-  max-width: 400px;
+  max-width: 42rem;
   margin-inline: auto;
   line-height: 1.7;
   font-style: italic;
@@ -31,7 +33,7 @@
 .order-online__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--sp-xl);
+  gap: var(--card-gap);
   max-width: 860px;
   margin-inline: auto;
 }
@@ -44,8 +46,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--sp-lg);
-  box-shadow: var(--shadow-sm);
+  gap: 1.25rem;
+  box-shadow: 0 24px 60px rgba(19, 28, 24, 0.08);
   position: relative;
   overflow: hidden;
   transition: box-shadow var(--dur-base) var(--ease),

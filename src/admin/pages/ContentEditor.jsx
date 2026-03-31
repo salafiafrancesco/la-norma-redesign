@@ -1,69 +1,79 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  CONTENT_SECTIONS,
+  CONTENT_SECTION_MAP,
+} from '../../../shared/contentSchema.js';
 import { content as contentApi, uploads as uploadsApi } from '../api/client';
-
-const SECTIONS = [
-  { key: 'restaurant', label: 'Restaurant Info',      icon: '🍽' },
-  { key: 'links',      label: 'External Links',        icon: '🔗' },
-  { key: 'hero',       label: 'Hero Section',          icon: '🖼' },
-  { key: 'story',      label: 'Our Story',             icon: '📖' },
-  { key: 'specialties',label: 'Specialties',           icon: '⭐', isJson: true },
-  { key: 'experiences',label: 'Experiences',           icon: '🥂', isJson: true },
-  { key: 'menu',       label: 'Menu Highlights',       icon: '📋', isJson: true },
-  { key: 'testimonials',label: 'Testimonials',         icon: '💬', isJson: true },
-  { key: 'reservation_banner', label: 'Reservation Banner', icon: '🗓' },
-  { key: 'order_online',label: 'Order Online',         icon: '📦' },
-  { key: 'footer',     label: 'Footer',                icon: '⬇', isJson: true },
-];
 
 const IMAGE_KEYS = ['image_url', 'imageUrl'];
 
-export default function ContentEditor() {
-  const [activeSection, setActiveSection] = useState('restaurant');
-  const [sectionData, setSectionData]     = useState({});
-  const [editData, setEditData]           = useState({});
-  const [loading, setLoading]             = useState(false);
-  const [saving, setSaving]               = useState(false);
-  const [saved, setSaved]                 = useState(false);
-  const [error, setError]                 = useState('');
+function buildEditState(sectionConfig, data = {}) {
+  if (!sectionConfig) return {};
 
-  const section = SECTIONS.find(s => s.key === activeSection);
+  if (sectionConfig.editor === 'json') {
+    return { _json: JSON.stringify(data, null, 2) };
+  }
+
+  return Object.fromEntries(
+    sectionConfig.fields.map((field) => [field.key, String(data[field.key] ?? '')]),
+  );
+}
+
+export default function ContentEditor() {
+  const [activeSection, setActiveSection] = useState(CONTENT_SECTIONS[0].key);
+  const [editData, setEditData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
+
+  const sectionConfig = useMemo(
+    () => CONTENT_SECTION_MAP[activeSection],
+    [activeSection],
+  );
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     setError('');
     setSaved(false);
+
     contentApi.getSection(activeSection)
       .then((data) => {
-        setSectionData(data);
-        if (section?.isJson) {
-          setEditData({ _json: JSON.stringify(data, null, 2) });
-        } else {
-          setEditData(Object.fromEntries(
-            Object.entries(data).map(([k, v]) => [k, String(v ?? '')])
-          ));
+        if (!cancelled) {
+          setEditData(buildEditState(sectionConfig, data));
         }
       })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [activeSection]);
+      .catch((requestError) => {
+        if (!cancelled) {
+          setError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSection, sectionConfig]);
 
   const handleSave = async () => {
     setSaving(true);
-    setError('');
     setSaved(false);
+    setError('');
+
     try {
-      let payload;
-      if (section?.isJson) {
-        try { payload = JSON.parse(editData._json); }
-        catch { throw new Error('Invalid JSON — please check the syntax'); }
-      } else {
-        payload = editData;
-      }
+      const payload = sectionConfig.editor === 'json'
+        ? JSON.parse(editData._json || '{}')
+        : editData;
+
       await contentApi.updateSection(activeSection, payload);
       setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (e) {
-      setError(e.message);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (saveError) {
+      setError(saveError.message || 'Unable to save this section.');
     } finally {
       setSaving(false);
     }
@@ -72,58 +82,64 @@ export default function ContentEditor() {
   const handleImageUpload = async (key, file) => {
     try {
       const { url } = await uploadsApi.upload(file);
-      setEditData(d => ({ ...d, [key]: url }));
-    } catch (e) {
-      setError('Image upload failed: ' + e.message);
+      setEditData((current) => ({ ...current, [key]: url }));
+    } catch (uploadError) {
+      setError(`Image upload failed: ${uploadError.message}`);
     }
   };
 
   return (
     <>
-      {/* Section tabs */}
       <div className="adm-tabs">
-        {SECTIONS.map(s => (
+        {CONTENT_SECTIONS.map((section) => (
           <button
-            key={s.key}
-            className={`adm-tab${activeSection === s.key ? ' is-active' : ''}`}
-            onClick={() => setActiveSection(s.key)}
+            key={section.key}
+            className={`adm-tab${activeSection === section.key ? ' is-active' : ''}`}
+            type="button"
+            onClick={() => {
+              setLoading(true);
+              setActiveSection(section.key);
+            }}
           >
-            {s.icon} {s.label}
+            {section.label}
           </button>
         ))}
       </div>
 
       {error && <div className="adm-alert adm-alert--error">{error}</div>}
-      {saved && <div className="adm-alert adm-alert--success">✓ Changes saved successfully</div>}
+      {saved && <div className="adm-alert adm-alert--success">Changes saved successfully.</div>}
 
       <div className="adm-card">
         <div className="adm-section-header">
-          <h2 className="adm-card__title" style={{ marginBottom: 0 }}>
-            {section?.icon} {section?.label}
-          </h2>
-          <button
-            className="adm-btn adm-btn--primary"
-            onClick={handleSave}
-            disabled={saving || loading}
-          >
-            {saving ? 'Saving…' : 'Save Changes'}
+          <div>
+            <h2 className="adm-card__title" style={{ marginBottom: '0.4rem' }}>
+              {sectionConfig.label}
+            </h2>
+            <p className="adm-text-muted adm-text-sm">{sectionConfig.description}</p>
+          </div>
+          <button className="adm-btn adm-btn--primary" type="button" onClick={handleSave} disabled={saving || loading}>
+            {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
 
-        <div className="adm-divider" />
+        {sectionConfig.hint && (
+          <div className="adm-alert adm-alert--info">
+            <strong>Structure:</strong> {sectionConfig.hint}
+          </div>
+        )}
 
         {loading ? (
-          <div className="adm-page-loader"><div className="adm-spinner" /> Loading…</div>
-        ) : section?.isJson ? (
-          <JsonEditor
-            value={editData._json || ''}
-            onChange={(v) => setEditData({ _json: v })}
-            section={activeSection}
-          />
+          <div className="adm-page-loader">
+            <div className="adm-spinner" />
+            Loading section...
+          </div>
+        ) : sectionConfig.editor === 'json' ? (
+          <JsonEditor value={editData._json || ''} onChange={(value) => setEditData({ _json: value })} />
         ) : (
           <FieldsEditor
+            sectionConfig={sectionConfig}
             data={editData}
-            onChange={(k, v) => setEditData(d => ({ ...d, [k]: v }))}
+            onChange={(key, value) => setEditData((current) => ({ ...current, [key]: value }))}
             onImageUpload={handleImageUpload}
           />
         )}
@@ -132,24 +148,21 @@ export default function ContentEditor() {
   );
 }
 
-// ── Flat key-value fields editor ──────────────────────────────
-function FieldsEditor({ data, onChange, onImageUpload }) {
+function FieldsEditor({ data, onChange, onImageUpload, sectionConfig }) {
   return (
     <div className="adm-form">
-      {Object.entries(data).map(([key, value]) => {
-        const isImageKey = IMAGE_KEYS.includes(key) || key.endsWith('_url');
-        const isLong = key.includes('body') || key.includes('sub') ||
-                       key.includes('description') || key.includes('note') ||
-                       key.includes('quote') || key.includes('tagline');
+      {sectionConfig.fields.map((field) => {
+        const value = data[field.key] ?? '';
+        const isImageField = IMAGE_KEYS.includes(field.key) || field.key.endsWith('_url');
 
         return (
-          <div key={key} className="adm-field">
+          <div key={field.key} className="adm-field">
             <label className="adm-label">
-              {formatLabel(key)}
-              <span className="adm-label-hint">{key}</span>
+              {field.label}
+              <span className="adm-label-hint">{field.key}</span>
             </label>
 
-            {isImageKey ? (
+            {isImageField ? (
               <div className="adm-img-upload">
                 {value && <img src={value} className="adm-img-preview" alt="" />}
                 <div>
@@ -157,7 +170,7 @@ function FieldsEditor({ data, onChange, onImageUpload }) {
                     className="adm-input"
                     type="url"
                     value={value}
-                    onChange={(e) => onChange(key, e.target.value)}
+                    onChange={(event) => onChange(field.key, event.target.value)}
                     placeholder="https://... or upload below"
                     style={{ marginBottom: '0.5rem' }}
                   />
@@ -167,24 +180,24 @@ function FieldsEditor({ data, onChange, onImageUpload }) {
                       type="file"
                       accept="image/*"
                       style={{ display: 'none' }}
-                      onChange={(e) => e.target.files[0] && onImageUpload(key, e.target.files[0])}
+                      onChange={(event) => event.target.files?.[0] && onImageUpload(field.key, event.target.files[0])}
                     />
                   </label>
                 </div>
               </div>
-            ) : isLong ? (
+            ) : field.multiline ? (
               <textarea
                 className="adm-textarea"
                 rows={4}
                 value={value}
-                onChange={(e) => onChange(key, e.target.value)}
+                onChange={(event) => onChange(field.key, event.target.value)}
               />
             ) : (
               <input
                 className="adm-input"
                 type="text"
                 value={value}
-                onChange={(e) => onChange(key, e.target.value)}
+                onChange={(event) => onChange(field.key, event.target.value)}
               />
             )}
           </div>
@@ -194,43 +207,20 @@ function FieldsEditor({ data, onChange, onImageUpload }) {
   );
 }
 
-// ── JSON array editor ─────────────────────────────────────────
-function JsonEditor({ value, onChange, section }) {
-  const hints = {
-    specialties:  'Array of objects: id, tag, name, description, price, imageUrl, imageAlt, badge (optional)',
-    experiences:  'Array of objects: id, icon, label, title, description, cta, ctaHref',
-    menu:         'Object with: label, headline1, headline2, note, categories (array of {id, title, items[]})',
-    testimonials: 'Object with: label, headline, items (array of {id, quote, author, location, rating})',
-    footer:       'Object with: tagline, nav_items (array of {label, href})',
-  };
-
+function JsonEditor({ value, onChange }) {
   return (
-    <div>
-      {hints[section] && (
-        <div className="adm-alert adm-alert--info" style={{ marginBottom: '1rem' }}>
-          <strong>Structure:</strong> {hints[section]}
-        </div>
-      )}
-      <div className="adm-field">
-        <label className="adm-label">
-          JSON Content
-          <span className="adm-label-hint">Edit carefully — must be valid JSON</span>
-        </label>
-        <textarea
-          className="adm-textarea adm-textarea--code"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          spellCheck={false}
-          rows={20}
-        />
-      </div>
+    <div className="adm-field">
+      <label className="adm-label">
+        JSON content
+        <span className="adm-label-hint">Edit carefully. This must remain valid JSON.</span>
+      </label>
+      <textarea
+        className="adm-textarea adm-textarea--code"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        spellCheck={false}
+        rows={20}
+      />
     </div>
   );
-}
-
-function formatLabel(key) {
-  return key
-    .replace(/_/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/\b\w/g, c => c.toUpperCase());
 }

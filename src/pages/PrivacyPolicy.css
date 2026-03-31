@@ -3,16 +3,9 @@
   background: var(--cream);
 }
 
-.pp-topbar {
-  padding: 1.25rem var(--gutter);
-  border-bottom: 1px solid var(--linen);
-  background: var(--cream);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
 .pp-back {
+  display: inline-flex;
+  margin-bottom: 1.5rem;
   font-family: var(--ff-accent);
   font-style: italic;
   font-size: var(--fs-sm);
@@ -26,7 +19,7 @@
 .pp-back:hover { color: var(--olive); }
 
 .pp-content {
-  padding: clamp(3rem, 8vw, 7rem) var(--gutter);
+  padding: clamp(7.5rem, 12vw, 9.5rem) var(--gutter) clamp(3rem, 8vw, 7rem);
   max-width: 740px;
   margin: 0 auto;
 }

@@ -4,28 +4,46 @@ import { auth as authApi } from '../api/client';
 const AdminContext = createContext(null);
 
 export function AdminProvider({ children }) {
-  const [admin, setAdmin]   = useState(null);   // { username }
-  const [checking, setChecking] = useState(true); // initial token check
+  const [admin, setAdmin] = useState(null);
+  const [checking, setChecking] = useState(() => Boolean(authApi.getToken()));
 
-  // Verify stored token on mount
   useEffect(() => {
+    let cancelled = false;
     const token = authApi.getToken();
-    if (!token) { setChecking(false); return; }
+
+    if (!token) return undefined;
+
     authApi.me()
-      .then(setAdmin)
-      .catch(() => authApi.logout())
-      .finally(() => setChecking(false));
+      .then((user) => {
+        if (!cancelled) {
+          setAdmin(user);
+        }
+      })
+      .catch(() => {
+        authApi.logout();
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setChecking(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const login = useCallback(async (username, password) => {
     const { token, username: user } = await authApi.login(username, password);
     authApi.saveToken(token);
     setAdmin({ username: user });
+    setChecking(false);
   }, []);
 
   const logout = useCallback(() => {
     authApi.logout();
     setAdmin(null);
+    setChecking(false);
   }, []);
 
   return (
@@ -36,7 +54,11 @@ export function AdminProvider({ children }) {
 }
 
 export function useAdmin() {
-  const ctx = useContext(AdminContext);
-  if (!ctx) throw new Error('useAdmin must be used inside AdminProvider');
-  return ctx;
+  const context = useContext(AdminContext);
+
+  if (!context) {
+    throw new Error('useAdmin must be used inside AdminProvider.');
+  }
+
+  return context;
 }

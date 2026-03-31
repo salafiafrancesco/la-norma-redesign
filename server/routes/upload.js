@@ -1,61 +1,78 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { join, dirname, extname, basename } from 'path';
-import { fileURLToPath } from 'url';
+import { basename, extname, join } from 'path';
 import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'fs';
 import requireAuth from '../middleware/auth.js';
+import { UPLOADS_DIR } from '../config.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const UPLOADS_DIR = join(__dirname, '..', 'uploads');
+const router = Router();
+const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
 
-if (!existsSync(UPLOADS_DIR)) mkdirSync(UPLOADS_DIR, { recursive: true });
+if (!existsSync(UPLOADS_DIR)) {
+  mkdirSync(UPLOADS_DIR, { recursive: true });
+}
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
-  filename: (_req, file, cb) => {
-    const ext  = extname(file.originalname).toLowerCase();
-    const name = `${Date.now()}-${Math.floor(Math.random() * 1e6)}${ext}`;
-    cb(null, name);
+  destination: (_req, _file, callback) => callback(null, UPLOADS_DIR),
+  filename: (_req, file, callback) => {
+    const extension = extname(file.originalname).toLowerCase();
+    callback(null, `${Date.now()}-${Math.floor(Math.random() * 1e6)}${extension}`);
   },
 });
 
 const upload = multer({
   storage,
   limits: { fileSize: 8 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => {
-    const allowed = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
-    if (allowed.includes(extname(file.originalname).toLowerCase())) cb(null, true);
-    else cb(new Error('Only image files are allowed (jpg, png, webp, gif)'));
+  fileFilter: (_req, file, callback) => {
+    const extension = extname(file.originalname).toLowerCase();
+    if (!ALLOWED_EXTENSIONS.has(extension)) {
+      callback(new Error('Only JPG, PNG, WEBP, and GIF files are allowed.'));
+      return;
+    }
+
+    callback(null, true);
   },
 });
 
-const router = Router();
-
-// POST /api/upload  — upload image (admin)
 router.post('/', requireAuth, upload.single('image'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No image file provided' });
-  res.json({ url: `/uploads/${req.file.filename}`, filename: req.file.filename, size: req.file.size });
+  if (!req.file) {
+    return res.status(400).json({ error: 'No image file was provided.' });
+  }
+
+  return res.json({
+    url: `/uploads/${req.file.filename}`,
+    filename: req.file.filename,
+    size: req.file.size,
+  });
 });
 
-// GET /api/upload  — list files (admin)
 router.get('/', requireAuth, (_req, res) => {
   const files = readdirSync(UPLOADS_DIR)
-    .filter(f => /\.(jpg|jpeg|png|webp|gif)$/i.test(f))
-    .map(f => {
-      const st = statSync(join(UPLOADS_DIR, f));
-      return { filename: f, url: `/uploads/${f}`, size: st.size, created: st.mtime };
+    .filter((filename) => ALLOWED_EXTENSIONS.has(extname(filename).toLowerCase()))
+    .map((filename) => {
+      const stats = statSync(join(UPLOADS_DIR, filename));
+      return {
+        filename,
+        url: `/uploads/${filename}`,
+        size: stats.size,
+        created: stats.mtime,
+      };
     })
-    .sort((a, b) => new Date(b.created) - new Date(a.created));
+    .sort((left, right) => new Date(right.created) - new Date(left.created));
+
   res.json(files);
 });
 
-// DELETE /api/upload/:filename  — delete file (admin)
 router.delete('/:filename', requireAuth, (req, res) => {
   const filename = basename(req.params.filename);
-  const filepath = join(UPLOADS_DIR, filename);
-  if (!existsSync(filepath)) return res.status(404).json({ error: 'File not found' });
-  unlinkSync(filepath);
-  res.json({ message: 'File deleted' });
+  const filePath = join(UPLOADS_DIR, filename);
+
+  if (!existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found.' });
+  }
+
+  unlinkSync(filePath);
+  return res.json({ message: 'Image deleted.' });
 });
 
 export default router;

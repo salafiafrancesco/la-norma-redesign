@@ -1,102 +1,197 @@
 import { Router } from 'express';
-import db, { save, getNextId } from '../db/database.js';
 import requireAuth from '../middleware/auth.js';
+import db, { getNextId, save } from '../db/database.js';
+import {
+  isValidEmail,
+  normalizeInteger,
+  normalizeOptionalText,
+  normalizeText,
+} from '../lib/validation.js';
 
 const router = Router();
+const RSVP_STATUSES = new Set(['pending', 'confirmed', 'cancelled']);
 
-// POST /api/rsvp  — submit booking (public)
+function findClass(classId) {
+  return db.data.cooking_classes.find((entry) => entry.id === Number(classId));
+}
+
+function shouldHoldInventory(record) {
+  if (!record.class_id) return false;
+  if (typeof record.inventory_applied === 'boolean') return record.inventory_applied;
+  return record.status !== 'cancelled';
+}
+
+function reserveSeats(record) {
+  if (!record.class_id) return;
+
+  const selectedClass = findClass(record.class_id);
+  if (!selectedClass || !selectedClass.active) {
+    throw new Error('Selected class is no longer available.');
+  }
+
+  if (selectedClass.spots_left < record.guests) {
+    throw new Error(`Only ${selectedClass.spots_left} spot(s) remain for this class.`);
+  }
+
+  selectedClass.spots_left -= record.guests;
+  record.inventory_applied = true;
+}
+
+function releaseSeats(record) {
+  if (!record.class_id || !shouldHoldInventory(record)) return;
+
+  const selectedClass = findClass(record.class_id);
+  if (selectedClass) {
+    selectedClass.spots_left = Math.min(
+      selectedClass.max_spots,
+      selectedClass.spots_left + record.guests,
+    );
+  }
+
+  record.inventory_applied = false;
+}
+
 router.post('/', (req, res) => {
-  const { class_id, first_name, last_name, email, phone, guests, notes } = req.body;
+  const firstName = normalizeText(req.body.first_name);
+  const lastName = normalizeText(req.body.last_name);
+  const email = normalizeText(req.body.email, { lowercase: true });
+  const phone = normalizeOptionalText(req.body.phone);
+  const notes = normalizeOptionalText(req.body.notes);
+  const guests = normalizeInteger(req.body.guests, { min: 1, max: 8, fallback: 1 });
+  const classId = req.body.class_id ? Number(req.body.class_id) : null;
 
-  if (!first_name || !last_name || !email) {
-    return res.status(400).json({ error: 'first_name, last_name, and email are required' });
+  if (!firstName || !lastName || !email) {
+    return res.status(400).json({ error: 'First name, last name, and email are required.' });
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ error: 'Invalid email address' });
+
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: 'Please provide a valid email address.' });
   }
 
-  const guestsCount = parseInt(guests, 10) || 1;
-  let classDate  = null;
-  let classTheme = null;
+  let classDate = '';
+  let classTheme = '';
 
-  if (class_id) {
-    const cls = db.data.cooking_classes.find(c => c.id === Number(class_id) && c.active);
-    if (!cls) return res.status(404).json({ error: 'Class not found or no longer available' });
-    if (cls.spots_left < guestsCount) {
-      return res.status(409).json({ error: `Only ${cls.spots_left} spot(s) remaining` });
+  if (classId) {
+    const selectedClass = findClass(classId);
+    if (!selectedClass || !selectedClass.active) {
+      return res.status(404).json({ error: 'Selected class is no longer available.' });
     }
-    classDate  = cls.date;
-    classTheme = cls.theme;
-    // Decrement spots
-    cls.spots_left -= guestsCount;
+
+    classDate = selectedClass.date;
+    classTheme = selectedClass.theme;
   }
 
-  const record = {
-    id:          getNextId('rsvp'),
-    class_id:    class_id ? Number(class_id) : null,
-    class_date:  classDate,
+  const nextRecord = {
+    id: getNextId('rsvp'),
+    class_id: classId,
+    class_date: classDate,
     class_theme: classTheme,
-    first_name,
-    last_name,
+    first_name: firstName,
+    last_name: lastName,
     email,
-    phone:       phone || null,
-    guests:      guestsCount,
-    notes:       notes || null,
-    status:      'pending',
-    created_at:  new Date().toISOString(),
+    phone: phone || null,
+    guests,
+    notes: notes || null,
+    status: 'pending',
+    inventory_applied: false,
+    created_at: new Date().toISOString(),
   };
 
-  db.data.rsvp.push(record);
-  save();
+  try {
+    if (classId) {
+      reserveSeats(nextRecord);
+    }
 
-  res.status(201).json({
-    id:          record.id,
-    message:     'Reservation received. We will confirm within 24 hours.',
-    class_date:  classDate,
+    db.data.rsvp.push(nextRecord);
+    save();
+  } catch (error) {
+    return res.status(409).json({ error: error.message });
+  }
+
+  return res.status(201).json({
+    id: nextRecord.id,
+    message: 'Reservation received. We will confirm availability within 24 hours.',
+    class_date: classDate,
     class_theme: classTheme,
   });
 });
 
-// GET /api/rsvp  — list all (admin)
 router.get('/', requireAuth, (req, res) => {
-  const { status, class_id } = req.query;
-  let list = [...db.data.rsvp];
+  const status = req.query.status ? normalizeText(req.query.status) : '';
+  const classId = req.query.class_id ? Number(req.query.class_id) : null;
 
-  if (status)   list = list.filter(r => r.status === status);
-  if (class_id) list = list.filter(r => r.class_id === Number(class_id));
+  let records = [...db.data.rsvp];
 
-  list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  res.json(list);
+  if (status) {
+    records = records.filter((entry) => entry.status === status);
+  }
+
+  if (classId) {
+    records = records.filter((entry) => entry.class_id === classId);
+  }
+
+  records.sort((left, right) => new Date(right.created_at) - new Date(left.created_at));
+  res.json(records);
 });
 
-// GET /api/rsvp/:id  — single (admin)
 router.get('/:id', requireAuth, (req, res) => {
-  const rsvp = db.data.rsvp.find(r => r.id === Number(req.params.id));
-  if (!rsvp) return res.status(404).json({ error: 'RSVP not found' });
-  res.json(rsvp);
+  const recordId = Number(req.params.id);
+  const record = db.data.rsvp.find((entry) => entry.id === recordId);
+
+  if (!record) {
+    return res.status(404).json({ error: 'RSVP not found.' });
+  }
+
+  res.json(record);
 });
 
-// PUT /api/rsvp/:id  — update status (admin)
 router.put('/:id', requireAuth, (req, res) => {
-  const { status } = req.body;
-  const allowed = ['pending', 'confirmed', 'cancelled'];
-  if (!allowed.includes(status)) return res.status(400).json({ error: `Status must be one of: ${allowed.join(', ')}` });
+  const nextStatus = normalizeText(req.body.status);
+  if (!RSVP_STATUSES.has(nextStatus)) {
+    return res.status(400).json({ error: 'Status must be pending, confirmed, or cancelled.' });
+  }
 
-  const rsvp = db.data.rsvp.find(r => r.id === Number(req.params.id));
-  if (!rsvp) return res.status(404).json({ error: 'RSVP not found' });
+  const recordId = Number(req.params.id);
+  const record = db.data.rsvp.find((entry) => entry.id === recordId);
 
-  rsvp.status = status;
-  save();
-  res.json(rsvp);
+  if (!record) {
+    return res.status(404).json({ error: 'RSVP not found.' });
+  }
+
+  try {
+    const wasHoldingInventory = shouldHoldInventory(record);
+    const shouldHoldNext = nextStatus !== 'cancelled' && Boolean(record.class_id);
+
+    if (wasHoldingInventory && !shouldHoldNext) {
+      releaseSeats(record);
+    }
+
+    if (!wasHoldingInventory && shouldHoldNext) {
+      reserveSeats(record);
+    }
+
+    record.status = nextStatus;
+    save();
+    return res.json(record);
+  } catch (error) {
+    return res.status(409).json({ error: error.message });
+  }
 });
 
-// DELETE /api/rsvp/:id  — delete (admin)
 router.delete('/:id', requireAuth, (req, res) => {
-  const idx = db.data.rsvp.findIndex(r => r.id === Number(req.params.id));
-  if (idx === -1) return res.status(404).json({ error: 'RSVP not found' });
-  db.data.rsvp.splice(idx, 1);
+  const recordId = Number(req.params.id);
+  const index = db.data.rsvp.findIndex((entry) => entry.id === recordId);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'RSVP not found.' });
+  }
+
+  const record = db.data.rsvp[index];
+  releaseSeats(record);
+  db.data.rsvp.splice(index, 1);
   save();
-  res.json({ message: 'RSVP deleted' });
+
+  res.json({ message: 'RSVP deleted.' });
 });
 
 export default router;

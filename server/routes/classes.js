@@ -1,84 +1,153 @@
 import { Router } from 'express';
-import db, { save, getNextId } from '../db/database.js';
 import requireAuth from '../middleware/auth.js';
+import db, { getNextId, save } from '../db/database.js';
+import {
+  isPlainObject,
+  normalizeBoolean,
+  normalizeInteger,
+  normalizeIsoDate,
+  normalizeNumber,
+  normalizeOptionalText,
+  normalizeText,
+} from '../lib/validation.js';
 
 const router = Router();
 
-const today = () => new Date().toISOString().split('T')[0];
+function todayIso() {
+  return new Date().toISOString().split('T')[0];
+}
 
-// GET /api/classes  — active upcoming classes (public)
+function normalizeClassPayload(payload, { partial = false } = {}) {
+  if (!isPlainObject(payload)) return { error: 'Body must be a plain object.' };
+
+  const date = payload.date !== undefined ? normalizeIsoDate(payload.date) : '';
+  const theme = payload.theme !== undefined ? normalizeText(payload.theme) : '';
+
+  if (!partial && !date) return { error: 'A valid date is required.' };
+  if (!partial && !theme) return { error: 'Theme is required.' };
+  if (payload.date !== undefined && !date) return { error: 'Date must use YYYY-MM-DD format.' };
+  if (payload.theme !== undefined && !theme) return { error: 'Theme is required.' };
+
+  const maxSpots = payload.max_spots !== undefined
+    ? normalizeInteger(payload.max_spots, { min: 1, max: 24, fallback: 8 })
+    : undefined;
+
+  const spotsLeft = payload.spots_left !== undefined
+    ? normalizeInteger(payload.spots_left, {
+      min: 0,
+      max: maxSpots ?? 24,
+      fallback: maxSpots ?? 8,
+    })
+    : undefined;
+
+  if (maxSpots !== undefined && spotsLeft !== undefined && spotsLeft > maxSpots) {
+    return { error: 'Spots left cannot exceed max spots.' };
+  }
+
+  return {
+    value: {
+      ...(payload.date !== undefined || !partial ? { date } : {}),
+      ...(payload.time !== undefined || !partial ? { time: normalizeText(payload.time, { fallback: '10:00 AM - 1:30 PM' }) } : {}),
+      ...(payload.theme !== undefined || !partial ? { theme } : {}),
+      ...(payload.short_theme !== undefined || !partial ? { short_theme: normalizeText(payload.short_theme, { fallback: theme || normalizeText(payload.theme) }) } : {}),
+      ...(payload.description !== undefined || !partial ? { description: normalizeOptionalText(payload.description) } : {}),
+      ...(payload.difficulty !== undefined || !partial ? { difficulty: normalizeText(payload.difficulty, { fallback: 'All levels' }) } : {}),
+      ...(payload.price !== undefined || !partial ? { price: normalizeNumber(payload.price, { min: 0, max: 500, fallback: 95 }) } : {}),
+      ...(maxSpots !== undefined || !partial ? { max_spots: maxSpots ?? 8 } : {}),
+      ...(spotsLeft !== undefined || !partial ? { spots_left: spotsLeft ?? maxSpots ?? 8 } : {}),
+      ...(payload.active !== undefined || !partial ? { active: normalizeBoolean(payload.active, true) } : {}),
+      ...(payload.image_url !== undefined || !partial ? { image_url: normalizeOptionalText(payload.image_url) || null } : {}),
+    },
+  };
+}
+
 router.get('/', (_req, res) => {
-  const list = db.data.cooking_classes
-    .filter(c => c.active && c.date >= today())
-    .sort((a, b) => a.date.localeCompare(b.date));
-  res.json(list);
+  const upcomingClasses = db.data.cooking_classes
+    .filter((entry) => entry.active && entry.date >= todayIso())
+    .sort((left, right) => left.date.localeCompare(right.date));
+
+  res.json(upcomingClasses);
 });
 
-// GET /api/classes/all  — all (admin)
 router.get('/all', requireAuth, (_req, res) => {
-  const list = [...db.data.cooking_classes].sort((a, b) => b.date.localeCompare(a.date));
-  res.json(list);
+  const allClasses = [...db.data.cooking_classes].sort((left, right) =>
+    right.date.localeCompare(left.date),
+  );
+
+  res.json(allClasses);
 });
 
-// GET /api/classes/:id
 router.get('/:id', (req, res) => {
-  const cls = db.data.cooking_classes.find(c => c.id === Number(req.params.id));
-  if (!cls) return res.status(404).json({ error: 'Class not found' });
-  res.json(cls);
+  const classId = Number(req.params.id);
+  const entry = db.data.cooking_classes.find((item) => item.id === classId);
+
+  if (!entry) {
+    return res.status(404).json({ error: 'Cooking class not found.' });
+  }
+
+  res.json(entry);
 });
 
-// POST /api/classes  — create (admin)
 router.post('/', requireAuth, (req, res) => {
-  const { date, time, theme, short_theme, description, difficulty, price, max_spots, spots_left, active, image_url } = req.body;
-  if (!date || !theme) return res.status(400).json({ error: 'date and theme are required' });
+  const parsed = normalizeClassPayload(req.body);
+  if (parsed.error) {
+    return res.status(400).json({ error: parsed.error });
+  }
 
-  const cls = {
-    id:          getNextId('cooking_classes'),
-    date,
-    time:        time        ?? '10:00 AM \u2013 1:30 PM',
-    theme,
-    short_theme: short_theme ?? theme,
-    description: description ?? '',
-    difficulty:  difficulty  ?? 'All levels',
-    price:       Number(price ?? 95),
-    max_spots:   Number(max_spots ?? 8),
-    spots_left:  Number(spots_left ?? max_spots ?? 8),
-    active:      active !== false,
-    image_url:   image_url   ?? null,
-    created_at:  new Date().toISOString(),
-    updated_at:  new Date().toISOString(),
+  const now = new Date().toISOString();
+  const nextEntry = {
+    id: getNextId('cooking_classes'),
+    ...parsed.value,
+    created_at: now,
+    updated_at: now,
   };
 
-  db.data.cooking_classes.push(cls);
+  db.data.cooking_classes.push(nextEntry);
   save();
-  res.status(201).json(cls);
+  res.status(201).json(nextEntry);
 });
 
-// PUT /api/classes/:id  — update (admin)
 router.put('/:id', requireAuth, (req, res) => {
-  const idx = db.data.cooking_classes.findIndex(c => c.id === Number(req.params.id));
-  if (idx === -1) return res.status(404).json({ error: 'Class not found' });
+  const classId = Number(req.params.id);
+  const index = db.data.cooking_classes.findIndex((item) => item.id === classId);
 
-  const old = db.data.cooking_classes[idx];
-  const updated = { ...old, ...req.body, id: old.id, updated_at: new Date().toISOString() };
-  // Coerce types
-  updated.price     = Number(updated.price);
-  updated.max_spots = Number(updated.max_spots);
-  updated.spots_left = Number(updated.spots_left);
-  updated.active    = Boolean(updated.active);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Cooking class not found.' });
+  }
 
-  db.data.cooking_classes[idx] = updated;
+  const parsed = normalizeClassPayload(req.body, { partial: true });
+  if (parsed.error) {
+    return res.status(400).json({ error: parsed.error });
+  }
+
+  const current = db.data.cooking_classes[index];
+  const nextEntry = {
+    ...current,
+    ...parsed.value,
+    id: current.id,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (nextEntry.spots_left > nextEntry.max_spots) {
+    return res.status(400).json({ error: 'Spots left cannot exceed max spots.' });
+  }
+
+  db.data.cooking_classes[index] = nextEntry;
   save();
-  res.json(updated);
+  res.json(nextEntry);
 });
 
-// DELETE /api/classes/:id  — delete (admin)
 router.delete('/:id', requireAuth, (req, res) => {
-  const idx = db.data.cooking_classes.findIndex(c => c.id === Number(req.params.id));
-  if (idx === -1) return res.status(404).json({ error: 'Class not found' });
-  db.data.cooking_classes.splice(idx, 1);
+  const classId = Number(req.params.id);
+  const index = db.data.cooking_classes.findIndex((item) => item.id === classId);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Cooking class not found.' });
+  }
+
+  db.data.cooking_classes.splice(index, 1);
   save();
-  res.json({ message: 'Class deleted' });
+  res.json({ message: 'Cooking class deleted.' });
 });
 
 export default router;
