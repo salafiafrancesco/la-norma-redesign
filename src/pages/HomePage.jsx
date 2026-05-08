@@ -1,5 +1,6 @@
 import Navbar from '../components/Navbar/Navbar';
 import Hero from '../components/Hero/Hero';
+import CateringPromo from '../components/CateringPromo/CateringPromo';
 import JournalPreview from '../components/JournalPreview/JournalPreview';
 import MenuHighlights from '../components/MenuHighlights/MenuHighlights';
 import ReservationBanner from '../components/ReservationBanner/ReservationBanner';
@@ -46,6 +47,7 @@ export default function HomePage() {
         <Hero />
         <ReservationBanner />
         <Experiences />
+        <CateringPromo />
         <MenuHighlights limitPerCategory={3} showHeaderActions showFooterNote={false} />
         <Story />
         <Testimonials />

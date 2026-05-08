@@ -33,6 +33,10 @@ export default function Footer() {
       label: 'Private events',
       href: resolveHref(PAGE_KEYS.privateEvents),
     },
+    {
+      label: 'Catering',
+      href: resolveHref(PAGE_KEYS.catering),
+    },
   ];
 
   const handleNavClick = (event, href) => {

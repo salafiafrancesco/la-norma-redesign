@@ -11,6 +11,7 @@ import {
 
 import authRoutes from './routes/auth.js';
 import blogRoutes from './routes/blog.js';
+import cateringRoutes from './routes/catering.js';
 import classRoutes from './routes/classes.js';
 import contentRoutes from './routes/content.js';
 import eventRoutes from './routes/events.js';
@@ -102,6 +103,7 @@ app.use('/api', apiLimiter);
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/blog', blogRoutes);
+app.use('/api/catering', bookingSubmissionLimiter, cateringRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/rsvp', bookingSubmissionLimiter, rsvpRoutes);

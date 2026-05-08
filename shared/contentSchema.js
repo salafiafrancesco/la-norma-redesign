@@ -132,6 +132,14 @@ export const CONTENT_SECTIONS = [
     ],
   },
   {
+    key: 'catering',
+    label: 'Catering Page',
+    icon: 'Catering',
+    editor: 'json',
+    description: 'Full content for the /catering page — hero, intro, gallery, CTA, contact block, and SEO.',
+    hint: 'Object with hero_title, hero_subtitle, hero_image_url, intro_p1, intro_p2, perfect_for: [{icon, label}], style_includes: [string], gallery: [{url, alt}], cta_heading, cta_text, cta_button_label, contact_phone, contact_email, contact_website, seo_title, seo_description, seo_og_image_url',
+  },
+  {
     key: 'footer',
     label: 'Footer',
     icon: 'Footer',

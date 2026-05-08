@@ -1,3 +1,4 @@
+import { cateringDefaults } from '../../shared/cateringDefaults.js';
 import { siteDefaults } from '../../shared/siteDefaults.js';
 
 function createEntry(value) {
@@ -83,6 +84,25 @@ const DEFAULT_CONTENT = {
     eyebrow: siteDefaults.orderOnline.eyebrow,
     headline: siteDefaults.orderOnline.headline,
     sub: siteDefaults.orderOnline.sub,
+  },
+  catering: {
+    hero_title: cateringDefaults.hero_title,
+    hero_subtitle: cateringDefaults.hero_subtitle,
+    hero_image_url: cateringDefaults.hero_image_url,
+    intro_p1: cateringDefaults.intro_p1,
+    intro_p2: cateringDefaults.intro_p2,
+    perfect_for: cateringDefaults.perfect_for,
+    style_includes: cateringDefaults.style_includes,
+    gallery: cateringDefaults.gallery,
+    cta_heading: cateringDefaults.cta_heading,
+    cta_text: cateringDefaults.cta_text,
+    cta_button_label: cateringDefaults.cta_button_label,
+    contact_phone: cateringDefaults.contact_phone,
+    contact_email: cateringDefaults.contact_email,
+    contact_website: cateringDefaults.contact_website,
+    seo_title: cateringDefaults.seo_title,
+    seo_description: cateringDefaults.seo_description,
+    seo_og_image_url: cateringDefaults.seo_og_image_url,
   },
   footer: {
     tagline: siteDefaults.footer.tagline,

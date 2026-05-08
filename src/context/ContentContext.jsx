@@ -62,6 +62,7 @@ function getFooterPageKey(item = {}) {
   if (signals.includes('wine tasting') || signals.includes('wine tastings')) return PAGE_KEYS.wineTastings;
   if (signals.includes('live music')) return PAGE_KEYS.liveMusic;
   if (signals.includes('private event') || signals.includes('private events')) return PAGE_KEYS.privateEvents;
+  if (signals.includes('catering')) return PAGE_KEYS.catering;
 
   return null;
 }
@@ -84,6 +85,7 @@ const SYSTEM_FOOTER_LINKS = [
   { label: 'Cooking Classes', href: buildPageHref(PAGE_KEYS.cookingClasses) },
   { label: 'Wine Tastings', href: buildPageHref(PAGE_KEYS.wineTastings) },
   { label: 'Private Events', href: buildPageHref(PAGE_KEYS.privateEvents) },
+  { label: 'Catering', href: buildPageHref(PAGE_KEYS.catering) },
   { label: 'Journal', href: buildPageHref(PAGE_KEYS.blog) },
   { label: 'FAQ', href: buildPageHref(PAGE_KEYS.faq) },
   { label: 'Contact', href: buildPageHref(PAGE_KEYS.contact) },
@@ -101,6 +103,7 @@ function transform(api = {}) {
   const reservationBannerData = api.reservation_banner || {};
   const orderOnlineData = api.order_online || {};
   const testimonialsData = api.testimonials || {};
+  const cateringData = api.catering || {};
   const footerData = api.footer || {};
 
   const links = {
@@ -234,6 +237,30 @@ function transform(api = {}) {
     sub: orderOnlineData.sub ?? defaults.orderOnline.sub,
   };
 
+  const cateringContent = {
+    heroTitle: cateringData.hero_title ?? defaults.catering.hero_title,
+    heroSubtitle: cateringData.hero_subtitle ?? defaults.catering.hero_subtitle,
+    heroImageUrl: resolveUrl(cateringData.hero_image_url ?? defaults.catering.hero_image_url),
+    introP1: cateringData.intro_p1 ?? defaults.catering.intro_p1,
+    introP2: cateringData.intro_p2 ?? defaults.catering.intro_p2,
+    perfectFor: cateringData.perfect_for ?? defaults.catering.perfect_for,
+    styleIncludes: cateringData.style_includes ?? defaults.catering.style_includes,
+    gallery: (cateringData.gallery ?? defaults.catering.gallery).map((item) =>
+      typeof item === 'string'
+        ? { url: resolveUrl(item), alt: 'La Norma catering' }
+        : { url: resolveUrl(item.url), alt: item.alt || 'La Norma catering' },
+    ),
+    ctaHeading: cateringData.cta_heading ?? defaults.catering.cta_heading,
+    ctaText: cateringData.cta_text ?? defaults.catering.cta_text,
+    ctaButtonLabel: cateringData.cta_button_label ?? defaults.catering.cta_button_label,
+    contactPhone: cateringData.contact_phone ?? defaults.catering.contact_phone,
+    contactEmail: cateringData.contact_email ?? defaults.catering.contact_email,
+    contactWebsite: cateringData.contact_website ?? defaults.catering.contact_website,
+    seoTitle: cateringData.seo_title ?? defaults.catering.seo_title,
+    seoDescription: cateringData.seo_description ?? defaults.catering.seo_description,
+    seoOgImageUrl: resolveUrl(cateringData.seo_og_image_url ?? defaults.catering.seo_og_image_url),
+  };
+
   const footer = {
     tagline: footerData.tagline ?? defaults.footer.tagline,
   };
@@ -268,6 +295,7 @@ function transform(api = {}) {
     testimonials: testimonialItems,
     reservationBanner,
     orderOnline,
+    catering: cateringContent,
     footer,
     footerNav,
   };

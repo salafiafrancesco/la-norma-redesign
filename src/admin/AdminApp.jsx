@@ -10,6 +10,7 @@ import ClassesManager from './pages/ClassesManager';
 import RSVPList from './pages/RSVPList';
 import ImagesPage from './pages/ImagesPage';
 import EventsManager from './pages/EventsManager';
+import CateringManager from './pages/CateringManager';
 import InquiriesManager from './pages/InquiriesManager';
 
 function AdminContent() {
@@ -35,6 +36,7 @@ function AdminContent() {
     rsvp:       <RSVPList />,
     images:     <ImagesPage />,
     events:     <EventsManager />,
+    catering:   <CateringManager />,
     inquiries:  <InquiriesManager />,
   };
 

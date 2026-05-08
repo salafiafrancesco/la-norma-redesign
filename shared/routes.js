@@ -10,6 +10,7 @@ export const PAGE_KEYS = {
   wineTastings: 'wine-tastings',
   liveMusic: 'live-music',
   privateEvents: 'private-events',
+  catering: 'catering',
   privacyPolicy: 'privacy-policy',
   notFound: 'not-found',
 };
@@ -25,6 +26,7 @@ export const PAGE_PATHS = {
   [PAGE_KEYS.wineTastings]: '/wine-tastings',
   [PAGE_KEYS.liveMusic]: '/live-music',
   [PAGE_KEYS.privateEvents]: '/private-events',
+  [PAGE_KEYS.catering]: '/catering',
   [PAGE_KEYS.privacyPolicy]: '/privacy-policy',
 };
 
@@ -41,6 +43,7 @@ const PAGE_ALIASES = {
   [PAGE_KEYS.wineTastings]: ['/wine-tasting', '/wine-testing', '/wine', '/tastings'],
   [PAGE_KEYS.liveMusic]: ['/music', '/live', '/live-music-nights'],
   [PAGE_KEYS.privateEvents]: ['/private-event', '/events', '/eventi-privati'],
+  [PAGE_KEYS.catering]: ['/catering-services', '/catering-menu'],
   [PAGE_KEYS.privacyPolicy]: ['/privacy'],
 };
 

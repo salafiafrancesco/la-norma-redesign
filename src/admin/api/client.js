@@ -301,6 +301,12 @@ export const events = {
   delete: (id) => request('DELETE', `/events/${id}`),
 };
 
+export const cateringRequests = {
+  list: (params = {}) => requestCachedList('/catering/requests', params),
+  update: (id, data) => request('PUT', `/catering/requests/${id}`, data),
+  delete: (id) => request('DELETE', `/catering/requests/${id}`),
+};
+
 export const inquiries = {
   list: (params = {}) => {
     return requestCachedList('/inquiries', params);

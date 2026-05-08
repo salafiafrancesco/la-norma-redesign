@@ -55,6 +55,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.lanormarestaurant.com/catering</loc>
+    <lastmod>2026-05-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.lanormarestaurant.com/journal</loc>
     <lastmod>2026-03-31</lastmod>
     <changefreq>weekly</changefreq>

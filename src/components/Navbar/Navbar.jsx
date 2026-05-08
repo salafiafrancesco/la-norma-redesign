@@ -11,6 +11,7 @@ const IMMERSIVE_PAGES = new Set([
   PAGE_KEYS.wineTastings,
   PAGE_KEYS.liveMusic,
   PAGE_KEYS.privateEvents,
+  PAGE_KEYS.catering,
 ]);
 
 const NAV_LINKS = [
@@ -19,6 +20,7 @@ const NAV_LINKS = [
   { label: 'Cooking Classes', pageKey: PAGE_KEYS.cookingClasses },
   { label: 'Wine Tasting', pageKey: PAGE_KEYS.wineTastings },
   { label: 'Live Music', pageKey: PAGE_KEYS.liveMusic },
+  { label: 'Catering', pageKey: PAGE_KEYS.catering },
 ];
 
 const SECONDARY_LINKS = [

@@ -115,10 +115,57 @@ async function ensureBlogPosts() {
   console.log('[init] Blog posts seeded.');
 }
 
+async function ensureCateringRequestsTable() {
+  // Check if the table exists by attempting a count query.
+  const { error } = await supabase
+    .from('catering_requests')
+    .select('*', { count: 'exact', head: true });
+
+  // If the table does not exist the query returns a 404-style error.
+  // In that case we attempt to create it via raw SQL (requires service role).
+  if (error && /relation.*does not exist|undefined/i.test(error.message)) {
+    console.log('[init] catering_requests table missing — attempting to create via SQL…');
+    const { error: sqlError } = await supabase.rpc('exec_sql', {
+      query: `
+        CREATE TABLE IF NOT EXISTS catering_requests (
+          id BIGSERIAL PRIMARY KEY,
+          name TEXT NOT NULL,
+          email TEXT NOT NULL,
+          phone TEXT DEFAULT '',
+          event_date DATE,
+          event_type TEXT,
+          guests INTEGER,
+          message TEXT DEFAULT '',
+          status TEXT DEFAULT 'new',
+          created_at TIMESTAMPTZ DEFAULT now(),
+          updated_at TIMESTAMPTZ DEFAULT now()
+        );
+
+        ALTER TABLE catering_requests ENABLE ROW LEVEL SECURITY;
+
+        CREATE POLICY "Service role full access on catering_requests"
+          ON catering_requests
+          FOR ALL
+          USING (true)
+          WITH CHECK (true);
+      `,
+    });
+
+    if (sqlError) {
+      // If the RPC doesn't exist, the table must be created via the Supabase dashboard or migration.
+      console.warn('[init] Could not auto-create catering_requests table:', sqlError.message);
+      console.warn('[init] Please create the table via Supabase dashboard or apply the migration.');
+    } else {
+      console.log('[init] catering_requests table created.');
+    }
+  }
+}
+
 export async function ensureInitialized() {
   await ensureAdminUser();
   await ensureSiteContent();
   await ensureCookingClasses();
   await ensureEvents();
   await ensureBlogPosts();
+  await ensureCateringRequestsTable();
 }

@@ -4,6 +4,7 @@ import { NavigationProvider, useNavigation } from './context/NavigationContext';
 import AboutPage from './pages/AboutPage';
 import BlogArticlePage from './pages/BlogArticlePage';
 import BlogPage from './pages/BlogPage';
+import CateringPage from './pages/CateringPage';
 import ContactPage from './pages/ContactPage';
 import HomePage from './pages/HomePage';
 import CookingClassesPage from './pages/CookingClassesPage';
@@ -100,6 +101,7 @@ function AppContent() {
   if (page === PAGE_KEYS.wineTastings) return <WineTastingsPage />;
   if (page === PAGE_KEYS.liveMusic) return <LiveMusicPage />;
   if (page === PAGE_KEYS.privateEvents) return <PrivateEventsPage />;
+  if (page === PAGE_KEYS.catering) return <CateringPage />;
 
   return <NotFound />;
 }

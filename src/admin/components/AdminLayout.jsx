@@ -7,6 +7,7 @@ const NAV = [
   { key: 'classes',   icon: '\u2605', label: 'Cooking Classes', group: 'Experiences' },
   { key: 'rsvp',      icon: '\u2713', label: 'Bookings' },
   { key: 'events',    icon: '\u266B', label: 'Events' },
+  { key: 'catering',  icon: '\u2615', label: 'Catering' },
   { key: 'inquiries', icon: '\u2709', label: 'Inquiries' },
   { key: 'images',    icon: '\u25A3', label: 'Images', group: 'Assets' },
 ];
@@ -18,6 +19,7 @@ const PAGE_TITLES = {
   classes: 'Cooking Classes',
   rsvp: 'RSVPs & Bookings',
   events: 'Events',
+  catering: 'Catering',
   inquiries: 'Inquiries',
   images: 'Image Library',
 };
