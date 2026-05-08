@@ -121,10 +121,6 @@ app.get(['/health', '/api/health'], (_req, res) => {
   });
 });
 
-app.use('/api/:path(*)', (_req, res) => {
-  res.status(404).json({ error: 'API endpoint not found.' });
-});
-
 app.use((error, _req, res, next) => {
   void next;
   if (error?.type === 'entity.parse.failed') {
