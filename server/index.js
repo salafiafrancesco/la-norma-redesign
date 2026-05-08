@@ -64,7 +64,6 @@ const corsMiddleware = cors({
   credentials: true,
 });
 
-app.options('*', corsMiddleware);
 app.use(corsMiddleware);
 app.use(express.json({ limit: '4mb' }));
 
@@ -122,7 +121,7 @@ app.get(['/health', '/api/health'], (_req, res) => {
   });
 });
 
-app.use('/api/*', (_req, res) => {
+app.use('/api/:path(*)', (_req, res) => {
   res.status(404).json({ error: 'API endpoint not found.' });
 });
 
