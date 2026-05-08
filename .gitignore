@@ -16,6 +16,11 @@ dist-ssr
 .env
 .env.local
 .env.production
+server/.env
+
+# Database & uploads (generated at runtime, must not be committed)
+server/data/db.json
+server/uploads/
 
 # Editor directories and files
 .vscode/*

@@ -26,7 +26,16 @@ ensureInitialized();
 
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
-  contentSecurityPolicy: false,
+  contentSecurityPolicy: IS_PRODUCTION ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+      connectSrc: ["'self'", 'https:'],
+    },
+  } : false,
 }));
 
 const corsMiddleware = cors({
@@ -116,9 +125,13 @@ app.use((error, _req, res, next) => {
   }
 
   console.error('[express error]', error);
-  return res.status(error.status || 500).json({
-    error: error.message || 'Internal server error.',
-  });
+
+  const status = error.status || 500;
+  const message = IS_PRODUCTION && status === 500
+    ? 'Internal server error.'
+    : (error.message || 'Internal server error.');
+
+  return res.status(status).json({ error: message });
 });
 
 app.listen(PORT, () => {

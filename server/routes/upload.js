@@ -5,6 +5,21 @@ import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'fs';
 import requireAuth from '../middleware/auth.js';
 import { UPLOADS_DIR } from '../config.js';
 
+function handleMulterError(error, _req, res, next) {
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: 'File is too large. Maximum size is 8 MB.' });
+    }
+    return res.status(400).json({ error: `Upload error: ${error.message}` });
+  }
+
+  if (error) {
+    return res.status(400).json({ error: error.message || 'Upload failed.' });
+  }
+
+  return next();
+}
+
 const router = Router();
 const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
 
@@ -34,7 +49,7 @@ const upload = multer({
   },
 });
 
-router.post('/', requireAuth, upload.single('image'), (req, res) => {
+router.post('/', requireAuth, upload.single('image'), handleMulterError, (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No image file was provided.' });
   }
@@ -47,20 +62,30 @@ router.post('/', requireAuth, upload.single('image'), (req, res) => {
 });
 
 router.get('/', requireAuth, (_req, res) => {
-  const files = readdirSync(UPLOADS_DIR)
-    .filter((filename) => ALLOWED_EXTENSIONS.has(extname(filename).toLowerCase()))
-    .map((filename) => {
-      const stats = statSync(join(UPLOADS_DIR, filename));
-      return {
-        filename,
-        url: `/uploads/${filename}`,
-        size: stats.size,
-        created: stats.mtime,
-      };
-    })
-    .sort((left, right) => new Date(right.created) - new Date(left.created));
+  try {
+    const files = readdirSync(UPLOADS_DIR)
+      .filter((filename) => ALLOWED_EXTENSIONS.has(extname(filename).toLowerCase()))
+      .map((filename) => {
+        try {
+          const stats = statSync(join(UPLOADS_DIR, filename));
+          return {
+            filename,
+            url: `/uploads/${filename}`,
+            size: stats.size,
+            created: stats.mtime,
+          };
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean)
+      .sort((left, right) => new Date(right.created) - new Date(left.created));
 
-  res.json(files);
+    res.json(files);
+  } catch (error) {
+    console.error('[upload] Failed to list files:', error.message);
+    res.status(500).json({ error: 'Unable to list uploaded files.' });
+  }
 });
 
 router.delete('/:filename', requireAuth, (req, res) => {
@@ -71,8 +96,13 @@ router.delete('/:filename', requireAuth, (req, res) => {
     return res.status(404).json({ error: 'File not found.' });
   }
 
-  unlinkSync(filePath);
-  return res.json({ message: 'Image deleted.' });
+  try {
+    unlinkSync(filePath);
+    return res.json({ message: 'Image deleted.' });
+  } catch (error) {
+    console.error('[upload] Failed to delete file:', error.message);
+    return res.status(500).json({ error: 'Unable to delete the file.' });
+  }
 });
 
 export default router;

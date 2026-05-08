@@ -1,14 +1,14 @@
 import { useAdmin } from '../context/AdminContext';
 
 const NAV = [
-  { key: 'dashboard', icon: 'DB', label: 'Dashboard' },
-  { key: 'content', icon: 'CMS', label: 'Site Content', group: 'Content' },
-  { key: 'blog', icon: 'JRN', label: 'Journal' },
-  { key: 'classes', icon: 'CLS', label: 'Cooking Classes' },
-  { key: 'rsvp', icon: 'RSVP', label: 'Bookings' },
-  { key: 'events', icon: 'EVT', label: 'Events', group: 'Experiences' },
-  { key: 'inquiries', icon: 'INQ', label: 'Inquiries' },
-  { key: 'images', icon: 'IMG', label: 'Images', group: 'Assets' },
+  { key: 'dashboard', icon: '\u25A6', label: 'Dashboard' },
+  { key: 'content',   icon: '\u270E', label: 'Site Content', group: 'Content' },
+  { key: 'blog',      icon: '\u2756', label: 'Journal' },
+  { key: 'classes',   icon: '\u2605', label: 'Cooking Classes', group: 'Experiences' },
+  { key: 'rsvp',      icon: '\u2713', label: 'Bookings' },
+  { key: 'events',    icon: '\u266B', label: 'Events' },
+  { key: 'inquiries', icon: '\u2709', label: 'Inquiries' },
+  { key: 'images',    icon: '\u25A3', label: 'Images', group: 'Assets' },
 ];
 
 const PAGE_TITLES = {
@@ -24,13 +24,21 @@ const PAGE_TITLES = {
 
 export default function AdminLayout({ page, setPage, children }) {
   const { admin, logout } = useAdmin();
+  const initial = admin?.username?.charAt(0) || 'A';
 
   return (
     <div className="adm-shell">
       <aside className="adm-sidebar">
         <div className="adm-sidebar__brand">
-          <div className="adm-sidebar__brand-name">La Norma</div>
-          <div className="adm-sidebar__brand-tag">Operations Console</div>
+          <div className="adm-sidebar__dots" aria-hidden="true">
+            <span className="adm-sidebar__dot adm-sidebar__dot--red" />
+            <span className="adm-sidebar__dot adm-sidebar__dot--yellow" />
+            <span className="adm-sidebar__dot adm-sidebar__dot--green" />
+          </div>
+          <div className="adm-sidebar__brand-text">
+            <div className="adm-sidebar__brand-name">La Norma</div>
+            <div className="adm-sidebar__brand-tag">Admin Console</div>
+          </div>
         </div>
 
         <nav aria-label="Admin navigation">
@@ -54,10 +62,13 @@ export default function AdminLayout({ page, setPage, children }) {
         </nav>
 
         <div className="adm-sidebar__footer">
-          <strong>{admin?.username}</strong>
-          <button className="adm-logout-btn" type="button" onClick={logout}>
-            Sign out
-          </button>
+          <div className="adm-sidebar__avatar">{initial}</div>
+          <div className="adm-sidebar__user-info">
+            <div className="adm-sidebar__user-name">{admin?.username}</div>
+            <button className="adm-logout-btn" type="button" onClick={logout}>
+              Sign out
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -69,9 +80,9 @@ export default function AdminLayout({ page, setPage, children }) {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ fontSize: '0.8125rem', color: 'var(--adm-muted)', textDecoration: 'none' }}
+            className="adm-topbar__link"
           >
-            View public site
+            View site &rarr;
           </a>
         </div>
 

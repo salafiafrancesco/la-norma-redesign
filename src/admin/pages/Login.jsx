@@ -29,7 +29,7 @@ export default function Login() {
           <div className="adm-login-logo__tag">Ristorante & Pizzeria</div>
         </div>
 
-        <div className="adm-login-title">Admin Access</div>
+        <div className="adm-login-title">Sign in to continue</div>
 
         {error && <div className="adm-alert adm-alert--error">{error}</div>}
 
@@ -41,6 +41,7 @@ export default function Login() {
               className="adm-input"
               type="text"
               autoComplete="username"
+              placeholder="Enter username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -54,6 +55,7 @@ export default function Login() {
               className="adm-input"
               type="password"
               autoComplete="current-password"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -63,10 +65,10 @@ export default function Login() {
           <button
             type="submit"
             className="adm-btn adm-btn--primary adm-btn--full"
-            style={{ marginTop: '0.5rem' }}
+            style={{ marginTop: '0.35rem', padding: '0.6rem' }}
             disabled={loading}
           >
-            {loading ? 'Signing in…' : 'Sign in'}
+            {loading ? 'Signing in\u2026' : 'Sign In'}
           </button>
         </form>
       </div>

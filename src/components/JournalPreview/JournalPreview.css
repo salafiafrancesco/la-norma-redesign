@@ -57,4 +57,9 @@
   .journal-preview__header .btn {
     width: 100%;
   }
+
+  .journal-preview__heading {
+    max-width: none;
+    font-size: clamp(1.8rem, 5vw, 2.4rem);
+  }
 }

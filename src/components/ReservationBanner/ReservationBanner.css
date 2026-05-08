@@ -64,6 +64,17 @@
 .reservation-banner__window {
   background: rgba(248, 243, 235, 0.08);
   color: rgba(248, 243, 235, 0.74);
+  cursor: default;
+  transition:
+    background var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.reservation-banner__window:hover {
+  background: rgba(196, 151, 58, 0.16);
+  border-color: rgba(196, 151, 58, 0.35);
+  color: var(--gold-light);
 }
 
 .reservation-banner__panel-label {
@@ -122,11 +133,14 @@
 .reservation-banner__panel {
   display: grid;
   gap: 1rem;
-  padding: 1.6rem;
+  padding: clamp(1.35rem, 2.5vw, 1.8rem);
   border-radius: 1.7rem;
   border: 1px solid rgba(248, 243, 235, 0.12);
-  background: rgba(248, 243, 235, 0.08);
-  backdrop-filter: blur(14px);
+  background:
+    linear-gradient(180deg, rgba(248, 243, 235, 0.1), rgba(248, 243, 235, 0.04)),
+    rgba(248, 243, 235, 0.05);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 64px rgba(8, 12, 11, 0.2);
 }
 
 .reservation-banner__panel-heading {
@@ -158,6 +172,24 @@
 @media (max-width: 900px) {
   .reservation-banner__inner {
     grid-template-columns: 1fr;
+  }
+
+  .reservation-banner__copy {
+    text-align: center;
+    align-items: center;
+  }
+
+  .reservation-banner__heading {
+    max-width: none;
+  }
+
+  .reservation-banner__benefits {
+    text-align: left;
+    max-width: 28rem;
+  }
+
+  .reservation-banner__hours {
+    justify-content: center;
   }
 }
 

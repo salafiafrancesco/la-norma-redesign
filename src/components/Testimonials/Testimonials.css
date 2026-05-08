@@ -45,7 +45,7 @@
 /* Carousel */
 .testimonials__carousel {
   position: relative;
-  min-height: 288px;
+  min-height: 300px;
   margin-bottom: clamp(0.85rem, 2vw, 1.35rem);
   z-index: 1;
 }
@@ -54,7 +54,7 @@
   position: absolute;
   inset: 0;
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(18px) scale(0.98);
   transition:
     opacity var(--dur-slow) var(--ease),
     transform var(--dur-slow) var(--ease);
@@ -62,17 +62,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 1.2rem;
-  border-radius: 1.45rem;
-  border: 1px solid rgba(26, 33, 32, 0.08);
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 24px 60px rgba(19, 28, 24, 0.08);
+  gap: 1.2rem;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border-radius: 1.65rem;
+  border: 1px solid rgba(26, 33, 32, 0.06);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 28px 72px rgba(19, 28, 24, 0.1);
 }
 
 .testimonial--active {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
   pointer-events: all;
   position: relative;
 }
@@ -86,33 +86,33 @@
 }
 
 .stars svg {
-  width: 13px;
-  height: 13px;
+  width: 15px;
+  height: 15px;
 }
 
 /* Large decorative quote mark */
 .testimonial__text {
   font-family: var(--ff-accent);
-  font-size: clamp(1rem, 1.6vw, 1.28rem);
+  font-size: clamp(1.08rem, 1.8vw, 1.38rem);
   font-style: italic;
   font-weight: 300;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--charcoal);
   max-width: 680px;
   position: relative;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.012em;
 }
 
 .testimonial__text::before {
   content: '\201C';
   position: absolute;
-  top: -0.4em;
+  top: -0.55em;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--ff-display);
-  font-size: 4.75rem;
+  font-size: 6.5rem;
   line-height: 1;
-  color: var(--linen);
+  color: rgba(196, 151, 58, 0.1);
   z-index: -1;
   pointer-events: none;
   font-style: normal;

@@ -60,10 +60,14 @@ router.post('/', (req, res) => {
     updated_at: now,
   };
 
-  db.data.inquiries.push(inquiry);
-  save();
-
-  res.status(201).json({ ok: true, id: inquiry.id });
+  try {
+    db.data.inquiries.push(inquiry);
+    save();
+    res.status(201).json({ ok: true, id: inquiry.id });
+  } catch (error) {
+    console.error('[inquiries/create]', error.message);
+    res.status(500).json({ error: 'Unable to submit the inquiry.' });
+  }
 });
 
 router.get('/', requireAuth, (req, res) => {
@@ -123,9 +127,14 @@ router.put('/:id', requireAuth, (req, res) => {
     updated_at: new Date().toISOString(),
   };
 
-  db.data.inquiries[index] = nextEntry;
-  save();
-  res.json(nextEntry);
+  try {
+    db.data.inquiries[index] = nextEntry;
+    save();
+    res.json(nextEntry);
+  } catch (error) {
+    console.error('[inquiries/update]', error.message);
+    res.status(500).json({ error: 'Unable to update the inquiry.' });
+  }
 });
 
 router.delete('/:id', requireAuth, (req, res) => {
@@ -136,9 +145,14 @@ router.delete('/:id', requireAuth, (req, res) => {
     return res.status(404).json({ error: 'Inquiry not found.' });
   }
 
-  db.data.inquiries.splice(index, 1);
-  save();
-  res.json({ ok: true });
+  try {
+    db.data.inquiries.splice(index, 1);
+    save();
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[inquiries/delete]', error.message);
+    res.status(500).json({ error: 'Unable to delete the inquiry.' });
+  }
 });
 
 export default router;

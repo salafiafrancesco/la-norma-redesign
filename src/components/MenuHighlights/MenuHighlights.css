@@ -140,8 +140,7 @@
 .menu-item__row {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--sp-md);
+  gap: 0;
   margin-bottom: 5px;
 }
 
@@ -154,7 +153,20 @@
   letter-spacing: 0.005em;
 }
 
+/* Dotted leader between name and price */
+.menu-item__row::after {
+  content: '';
+  order: 1;
+  flex: 1;
+  border-bottom: 1px dotted rgba(248,243,235,0.16);
+  min-width: 1rem;
+  margin-inline: 0.65rem;
+  position: relative;
+  top: -0.2em;
+}
+
 .menu-item__price {
+  order: 2;
   font-family: var(--ff-accent);
   font-size: 1rem;
   font-weight: 400;
@@ -165,13 +177,14 @@
 }
 
 .menu-item__desc {
-  font-size: 0.8125rem;
-  color: rgba(248,243,235,0.45);
-  line-height: 1.65;
+  font-size: 0.84rem;
+  color: rgba(248,243,235,0.48);
+  line-height: 1.7;
   font-style: italic;
   font-family: var(--ff-accent);
   font-weight: 300;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.015em;
+  margin-top: 2px;
 }
 
 /* ---- Footer ---- */

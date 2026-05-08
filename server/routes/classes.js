@@ -102,9 +102,14 @@ router.post('/', requireAuth, (req, res) => {
     updated_at: now,
   };
 
-  db.data.cooking_classes.push(nextEntry);
-  save();
-  res.status(201).json(nextEntry);
+  try {
+    db.data.cooking_classes.push(nextEntry);
+    save();
+    res.status(201).json(nextEntry);
+  } catch (error) {
+    console.error('[classes/create]', error.message);
+    res.status(500).json({ error: 'Unable to create the cooking class.' });
+  }
 });
 
 router.put('/:id', requireAuth, (req, res) => {
@@ -132,9 +137,14 @@ router.put('/:id', requireAuth, (req, res) => {
     return res.status(400).json({ error: 'Spots left cannot exceed max spots.' });
   }
 
-  db.data.cooking_classes[index] = nextEntry;
-  save();
-  res.json(nextEntry);
+  try {
+    db.data.cooking_classes[index] = nextEntry;
+    save();
+    res.json(nextEntry);
+  } catch (error) {
+    console.error('[classes/update]', error.message);
+    res.status(500).json({ error: 'Unable to update the cooking class.' });
+  }
 });
 
 router.delete('/:id', requireAuth, (req, res) => {
@@ -145,9 +155,14 @@ router.delete('/:id', requireAuth, (req, res) => {
     return res.status(404).json({ error: 'Cooking class not found.' });
   }
 
-  db.data.cooking_classes.splice(index, 1);
-  save();
-  res.json({ message: 'Cooking class deleted.' });
+  try {
+    db.data.cooking_classes.splice(index, 1);
+    save();
+    res.json({ message: 'Cooking class deleted.' });
+  } catch (error) {
+    console.error('[classes/delete]', error.message);
+    res.status(500).json({ error: 'Unable to delete the cooking class.' });
+  }
 });
 
 export default router;

@@ -25,3 +25,5 @@ services:
         sync: false                # Set manually in Render dashboard
       - key: CORS_ORIGIN
         sync: false                # Set to your Vercel frontend URL
+      - key: UPLOADS_DIR
+        value: /opt/render/project/src/server/uploads

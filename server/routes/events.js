@@ -112,9 +112,14 @@ router.post('/', requireAuth, (req, res) => {
     updated_at: now,
   };
 
-  db.data.events.push(nextEntry);
-  save();
-  res.status(201).json(nextEntry);
+  try {
+    db.data.events.push(nextEntry);
+    save();
+    res.status(201).json(nextEntry);
+  } catch (error) {
+    console.error('[events/create]', error.message);
+    res.status(500).json({ error: 'Unable to create the event.' });
+  }
 });
 
 router.put('/:id', requireAuth, (req, res) => {
@@ -142,9 +147,14 @@ router.put('/:id', requireAuth, (req, res) => {
     return res.status(400).json({ error: 'Spots left cannot exceed max spots.' });
   }
 
-  db.data.events[index] = nextEntry;
-  save();
-  res.json(nextEntry);
+  try {
+    db.data.events[index] = nextEntry;
+    save();
+    res.json(nextEntry);
+  } catch (error) {
+    console.error('[events/update]', error.message);
+    res.status(500).json({ error: 'Unable to update the event.' });
+  }
 });
 
 router.delete('/:id', requireAuth, (req, res) => {
@@ -155,9 +165,14 @@ router.delete('/:id', requireAuth, (req, res) => {
     return res.status(404).json({ error: 'Event not found.' });
   }
 
-  db.data.events.splice(index, 1);
-  save();
-  res.json({ message: 'Event deleted.' });
+  try {
+    db.data.events.splice(index, 1);
+    save();
+    res.json({ message: 'Event deleted.' });
+  } catch (error) {
+    console.error('[events/delete]', error.message);
+    res.status(500).json({ error: 'Unable to delete the event.' });
+  }
 });
 
 export default router;

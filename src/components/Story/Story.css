@@ -31,10 +31,13 @@
 .story__lead {
   max-width: 34rem;
   font-family: var(--ff-accent);
-  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  font-size: clamp(1.3rem, 2.2vw, 1.8rem);
   font-style: italic;
   color: var(--terracotta);
-  line-height: 1.45;
+  line-height: 1.5;
+  position: relative;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--gold);
 }
 
 .story__body {
@@ -87,6 +90,7 @@
 .story__note-card {
   padding: 1.35rem;
   background: linear-gradient(180deg, rgba(196, 151, 58, 0.1), rgba(255, 255, 255, 0.92));
+  border-top: 2px solid var(--gold-light);
 }
 
 .story__quote-card-label {
@@ -110,14 +114,45 @@
   .story__grid {
     grid-template-columns: 1fr;
   }
+
+  .story__visual {
+    order: -1;
+  }
+
+  .story__image-frame {
+    aspect-ratio: 16 / 9;
+    max-height: 340px;
+  }
+
+  .story__content {
+    text-align: center;
+    align-items: center;
+  }
+
+  .story__lead {
+    border-left: none;
+    padding-left: 0;
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 1rem;
+    text-align: center;
+  }
+
+  .story__heading {
+    max-width: none;
+  }
 }
 
 @media (max-width: 640px) {
   .story__actions {
     flex-direction: column;
+    width: 100%;
   }
 
   .story__actions .btn {
     width: 100%;
+  }
+
+  .story__image-frame {
+    max-height: 260px;
   }
 }

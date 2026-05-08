@@ -186,11 +186,17 @@ ul, ol { list-style: none; }
 .section-label::before {
   content: '';
   display: inline-block;
-  width: 32px;
+  width: 36px;
   height: 1px;
   background: currentColor;
   opacity: 0.55;
   flex-shrink: 0;
+}
+
+@media (max-width: 980px) {
+  .section-label {
+    justify-content: center;
+  }
 }
 
 /* Screen reader only */
@@ -211,9 +217,9 @@ ul, ol { list-style: none; }
    ============================================================ */
 .fade-up {
   opacity: 0;
-  transform: translateY(32px);
-  transition: opacity var(--dur-slow) var(--ease-out),
-              transform var(--dur-slow) var(--ease-out);
+  transform: translateY(28px);
+  transition: opacity 0.75s var(--ease-out),
+              transform 0.75s var(--ease-out);
 }
 
 .fade-up.visible {
@@ -253,8 +259,15 @@ ul, ol { list-style: none; }
   position: relative;
 }
 
-.btn:hover  { transform: translateY(-1px); }
+.btn:hover  { transform: translateY(-2px); }
 .btn:active { transform: translateY(0); }
+
+@media (max-width: 640px) {
+  .btn {
+    padding: 1rem 1.5rem;
+    font-size: 0.74rem;
+  }
+}
 
 /* Primary — terracotta */
 .btn--primary {
@@ -265,7 +278,12 @@ ul, ol { list-style: none; }
 .btn--primary:hover {
   background: var(--terracotta-dk);
   border-color: var(--terracotta-dk);
-  box-shadow: 0 8px 32px rgba(184,92,56,0.30);
+  box-shadow: 0 10px 36px rgba(184,92,56,0.35);
+}
+
+/* Subtle glow for primary buttons on dark backgrounds */
+.btn--primary:active {
+  box-shadow: 0 4px 16px rgba(184,92,56,0.25);
 }
 
 /* Outline on dark bg */

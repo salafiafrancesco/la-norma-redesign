@@ -13,9 +13,9 @@
 }
 
 .journal-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(196, 151, 58, 0.28);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-5px);
+  border-color: rgba(196, 151, 58, 0.32);
+  box-shadow: 0 16px 48px rgba(196, 151, 58, 0.1), var(--shadow-md);
 }
 
 .journal-card__media {
@@ -95,12 +95,18 @@
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--charcoal);
+  color: var(--terracotta);
+  transition: gap var(--dur-fast) var(--ease);
+}
+
+.journal-card__cta:hover {
+  gap: 0.65rem;
 }
 
 .journal-card__cta::after {
-  content: '->';
-  font-size: 0.9rem;
+  content: '\2192';
+  font-size: 1rem;
+  transition: transform var(--dur-fast) var(--ease);
 }
 
 .journal-card--featured {

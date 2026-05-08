@@ -117,13 +117,18 @@ router.post('/', requireAuth, (req, res) => {
     updated_at: now,
   });
 
-  if (nextEntry.featured) {
-    clearFeaturedFlag(nextEntry.id);
-  }
+  try {
+    if (nextEntry.featured) {
+      clearFeaturedFlag(nextEntry.id);
+    }
 
-  db.data.blog_posts.push(nextEntry);
-  save();
-  return res.status(201).json(nextEntry);
+    db.data.blog_posts.push(nextEntry);
+    save();
+    return res.status(201).json(nextEntry);
+  } catch (error) {
+    console.error('[blog/create]', error.message);
+    return res.status(500).json({ error: 'Unable to create the blog post.' });
+  }
 });
 
 router.put('/:id', requireAuth, (req, res) => {
@@ -155,13 +160,18 @@ router.put('/:id', requireAuth, (req, res) => {
     updated_at: new Date().toISOString(),
   });
 
-  if (nextEntry.featured) {
-    clearFeaturedFlag(nextEntry.id);
-  }
+  try {
+    if (nextEntry.featured) {
+      clearFeaturedFlag(nextEntry.id);
+    }
 
-  db.data.blog_posts[index] = nextEntry;
-  save();
-  return res.json(nextEntry);
+    db.data.blog_posts[index] = nextEntry;
+    save();
+    return res.json(nextEntry);
+  } catch (error) {
+    console.error('[blog/update]', error.message);
+    return res.status(500).json({ error: 'Unable to update the blog post.' });
+  }
 });
 
 router.delete('/:id', requireAuth, (req, res) => {
@@ -172,9 +182,14 @@ router.delete('/:id', requireAuth, (req, res) => {
     return res.status(404).json({ error: 'Blog post not found.' });
   }
 
-  db.data.blog_posts.splice(index, 1);
-  save();
-  return res.json({ message: 'Blog post deleted.' });
+  try {
+    db.data.blog_posts.splice(index, 1);
+    save();
+    return res.json({ message: 'Blog post deleted.' });
+  } catch (error) {
+    console.error('[blog/delete]', error.message);
+    return res.status(500).json({ error: 'Unable to delete the blog post.' });
+  }
 });
 
 export default router;

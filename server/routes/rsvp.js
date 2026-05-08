@@ -29,11 +29,13 @@ function reserveSeats(record) {
     throw new Error('Selected class is no longer available.');
   }
 
-  if (selectedClass.spots_left < record.guests) {
+  const guests = Math.max(1, Number(record.guests) || 1);
+
+  if (selectedClass.spots_left < guests) {
     throw new Error(`Only ${selectedClass.spots_left} spot(s) remain for this class.`);
   }
 
-  selectedClass.spots_left -= record.guests;
+  selectedClass.spots_left = Math.max(0, selectedClass.spots_left - guests);
   record.inventory_applied = true;
 }
 
@@ -42,9 +44,10 @@ function releaseSeats(record) {
 
   const selectedClass = findClass(record.class_id);
   if (selectedClass) {
+    const guests = Math.max(1, Number(record.guests) || 1);
     selectedClass.spots_left = Math.min(
       selectedClass.max_spots,
-      selectedClass.spots_left + record.guests,
+      Math.max(0, selectedClass.spots_left) + guests,
     );
   }
 
@@ -186,12 +189,16 @@ router.delete('/:id', requireAuth, (req, res) => {
     return res.status(404).json({ error: 'RSVP not found.' });
   }
 
-  const record = db.data.rsvp[index];
-  releaseSeats(record);
-  db.data.rsvp.splice(index, 1);
-  save();
-
-  res.json({ message: 'RSVP deleted.' });
+  try {
+    const record = db.data.rsvp[index];
+    releaseSeats(record);
+    db.data.rsvp.splice(index, 1);
+    save();
+    return res.json({ message: 'RSVP deleted.' });
+  } catch (error) {
+    console.error('[rsvp/delete]', error.message);
+    return res.status(500).json({ error: 'Unable to delete the RSVP.' });
+  }
 });
 
 export default router;

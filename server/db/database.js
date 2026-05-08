@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname } from 'path';
+import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'fs';
+import { dirname, join } from 'path';
 import { DB_PATH } from '../config.js';
 import { isPlainObject } from '../lib/validation.js';
 
@@ -78,7 +78,21 @@ const db = { data: loadDb() };
 
 export function save() {
   const payload = JSON.stringify(db.data, null, 2);
-  writeFileSync(DB_PATH, payload, 'utf8');
+  const tmpPath = join(dirname(DB_PATH), `.db_${Date.now()}.tmp`);
+
+  try {
+    writeFileSync(tmpPath, payload, 'utf8');
+    renameSync(tmpPath, DB_PATH);
+  } catch (error) {
+    console.error('[db] Failed to save database:', error.message);
+
+    // Clean up temp file if rename failed
+    try {
+      if (existsSync(tmpPath)) unlinkSync(tmpPath);
+    } catch { /* ignore cleanup errors */ }
+
+    throw error;
+  }
 }
 
 export function getNextId(collectionName) {

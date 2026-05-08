@@ -78,12 +78,17 @@ router.put('/:section', requireAuth, (req, res) => {
     db.data.site_content[req.params.section] = {};
   }
 
-  Object.entries(req.body).forEach(([key, value]) => {
-    db.data.site_content[req.params.section][key] = storeValue(value);
-  });
+  try {
+    Object.entries(req.body).forEach(([key, value]) => {
+      db.data.site_content[req.params.section][key] = storeValue(value);
+    });
 
-  save();
-  res.json(buildSection(db.data.site_content[req.params.section]));
+    save();
+    res.json(buildSection(db.data.site_content[req.params.section]));
+  } catch (error) {
+    console.error('[content/update]', error.message);
+    res.status(500).json({ error: 'Unable to save content changes.' });
+  }
 });
 
 export default router;
