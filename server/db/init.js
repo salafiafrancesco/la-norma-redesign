@@ -115,6 +115,68 @@ async function ensureBlogPosts() {
   console.log('[init] Blog posts seeded.');
 }
 
+async function ensureExperienceEvents() {
+  const { count } = await supabase
+    .from('experience_events')
+    .select('*', { count: 'exact', head: true });
+
+  if (count > 0) return;
+
+  // Seed from existing generators — convert to new schema
+  const classRecords = generateUpcomingClassRecords(8).map((r) => ({
+    type: 'cooking_class',
+    title: r.theme,
+    description: r.description || '',
+    date: r.date,
+    start_time: '10:00 AM',
+    end_time: '1:30 PM',
+    price_cents: (r.price || 95) * 100,
+    currency: 'USD',
+    capacity: r.max_spots || 8,
+    seats_booked: (r.max_spots || 8) - (r.spots_left ?? r.max_spots ?? 8),
+    difficulty: r.difficulty || 'All levels',
+    image_url: r.image_url || '',
+    status: 'published',
+  }));
+
+  const wineRecords = generateUpcomingWineTastingRecords(8).map((r) => ({
+    type: 'wine_tasting',
+    title: r.title,
+    description: r.description || '',
+    date: r.date,
+    start_time: '6:00 PM',
+    end_time: '8:00 PM',
+    price_cents: (r.price || 65) * 100,
+    currency: 'USD',
+    capacity: r.max_spots || 14,
+    seats_booked: (r.max_spots || 14) - (r.spots_left ?? r.max_spots ?? 14),
+    difficulty: '',
+    image_url: r.image_url || '',
+    status: 'published',
+  }));
+
+  const musicRecords = generateUpcomingLiveMusicRecords(6).map((r) => ({
+    type: 'live_music',
+    title: r.title,
+    description: r.description || '',
+    date: r.date,
+    start_time: r.time.split(' - ')[0] || '7:00 PM',
+    end_time: r.time.split(' - ')[1] || '9:30 PM',
+    price_cents: 0,
+    currency: 'USD',
+    capacity: 0,
+    seats_booked: 0,
+    difficulty: '',
+    image_url: r.image_url || '',
+    status: 'published',
+  }));
+
+  const all = [...classRecords, ...wineRecords, ...musicRecords];
+  const { error } = await supabase.from('experience_events').insert(all);
+  if (error) throw new Error(`[init] Experience events: ${error.message}`);
+  console.log(`[init] Experience events seeded (${all.length} records).`);
+}
+
 async function ensureCateringRequestsTable() {
   // Check if the table exists by attempting a count query.
   const { error } = await supabase
@@ -167,5 +229,6 @@ export async function ensureInitialized() {
   await ensureCookingClasses();
   await ensureEvents();
   await ensureBlogPosts();
+  await ensureExperienceEvents();
   await ensureCateringRequestsTable();
 }

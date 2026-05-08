@@ -11,10 +11,12 @@ import {
 
 import authRoutes from './routes/auth.js';
 import blogRoutes from './routes/blog.js';
+import bookingRoutes from './routes/bookings.js';
 import cateringRoutes from './routes/catering.js';
 import classRoutes from './routes/classes.js';
 import contentRoutes from './routes/content.js';
 import eventRoutes from './routes/events.js';
+import experienceEventRoutes from './routes/experienceEvents.js';
 import inquiryRoutes from './routes/inquiries.js';
 import rsvpRoutes from './routes/rsvp.js';
 import uploadRoutes from './routes/upload.js';
@@ -103,9 +105,11 @@ app.use('/api', apiLimiter);
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/blog', blogRoutes);
+app.use('/api/bookings', bookingSubmissionLimiter, bookingRoutes);
 app.use('/api/catering', bookingSubmissionLimiter, cateringRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/classes', classRoutes);
+app.use('/api/experience-events', experienceEventRoutes);
 app.use('/api/rsvp', bookingSubmissionLimiter, rsvpRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/events', eventRoutes);

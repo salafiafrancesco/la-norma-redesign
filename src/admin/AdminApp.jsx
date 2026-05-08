@@ -11,6 +11,7 @@ import RSVPList from './pages/RSVPList';
 import ImagesPage from './pages/ImagesPage';
 import EventsManager from './pages/EventsManager';
 import CateringManager from './pages/CateringManager';
+import ExperiencesManager from './pages/ExperiencesManager';
 import InquiriesManager from './pages/InquiriesManager';
 
 function AdminContent() {
@@ -36,6 +37,7 @@ function AdminContent() {
     rsvp:       <RSVPList />,
     images:     <ImagesPage />,
     events:     <EventsManager />,
+    experiences: <ExperiencesManager />,
     catering:   <CateringManager />,
     inquiries:  <InquiriesManager />,
   };

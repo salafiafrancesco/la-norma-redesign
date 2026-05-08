@@ -301,6 +301,25 @@ export const events = {
   delete: (id) => request('DELETE', `/events/${id}`),
 };
 
+export const experienceEvents = {
+  list: async (params = {}) => (
+    await listCollectionWithMeta({ adminPath: '/experience-events/admin/all', publicPath: '/experience-events', params })
+  ).items,
+  listWithMeta: (params = {}) => listCollectionWithMeta({ adminPath: '/experience-events/admin/all', publicPath: '/experience-events', params }),
+  get: (id) => request('GET', `/experience-events/${id}`),
+  create: (data) => request('POST', '/experience-events', data),
+  update: (id, data) => request('PUT', `/experience-events/${id}`, data),
+  delete: (id) => request('DELETE', `/experience-events/${id}`),
+};
+
+export const bookings = {
+  list: (params = {}) => requestCachedList('/bookings', params),
+  get: (id) => request('GET', `/bookings/${id}`),
+  getByToken: (token) => request('GET', `/bookings/token/${token}`),
+  update: (id, data) => request('PUT', `/bookings/${id}`, data),
+  delete: (id) => request('DELETE', `/bookings/${id}`),
+};
+
 export const cateringRequests = {
   list: (params = {}) => requestCachedList('/catering/requests', params),
   update: (id, data) => request('PUT', `/catering/requests/${id}`, data),

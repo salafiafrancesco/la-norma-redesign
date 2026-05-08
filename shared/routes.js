@@ -11,6 +11,9 @@ export const PAGE_KEYS = {
   liveMusic: 'live-music',
   privateEvents: 'private-events',
   catering: 'catering',
+  bookingSuccess: 'booking-success',
+  bookingCancelled: 'booking-cancelled',
+  bookingDetail: 'booking-detail',
   privacyPolicy: 'privacy-policy',
   notFound: 'not-found',
 };
@@ -27,6 +30,8 @@ export const PAGE_PATHS = {
   [PAGE_KEYS.liveMusic]: '/live-music',
   [PAGE_KEYS.privateEvents]: '/private-events',
   [PAGE_KEYS.catering]: '/catering',
+  [PAGE_KEYS.bookingSuccess]: '/booking/success',
+  [PAGE_KEYS.bookingCancelled]: '/booking/cancelled',
   [PAGE_KEYS.privacyPolicy]: '/privacy-policy',
 };
 
@@ -48,6 +53,7 @@ const PAGE_ALIASES = {
 };
 
 const BLOG_PATH_PREFIX = `${PAGE_PATHS[PAGE_KEYS.blog]}/`;
+const BOOKING_PATH_PREFIX = '/booking/';
 
 function getBaseOrigin() {
   return typeof window !== 'undefined' ? window.location.origin : FALLBACK_ORIGIN;
@@ -88,6 +94,13 @@ export function getPageFromPathname(pathname = '/') {
     return PAGE_KEYS.blogArticle;
   }
 
+  if (normalized.startsWith(BOOKING_PATH_PREFIX) && normalized.length > BOOKING_PATH_PREFIX.length) {
+    const segment = normalized.slice(BOOKING_PATH_PREFIX.length).split('/')[0];
+    if (segment === 'success') return PAGE_KEYS.bookingSuccess;
+    if (segment === 'cancelled') return PAGE_KEYS.bookingCancelled;
+    return PAGE_KEYS.bookingDetail;
+  }
+
   const match = Object.entries(PAGE_PATHS).find(([, path]) => path === normalized);
   if (match) return match[0];
 
@@ -122,6 +135,14 @@ export function buildBlogArticleHref(slug = '', anchor = '') {
   const safeSlug = String(slug ?? '').trim().replace(/^\/+|\/+$/g, '');
   const path = safeSlug ? `${PAGE_PATHS[PAGE_KEYS.blog]}/${safeSlug}` : PAGE_PATHS[PAGE_KEYS.blog];
   return anchor ? `${path}#${anchor}` : path;
+}
+
+export function getBookingTokenFromPathname(pathname = '/') {
+  const normalized = normalizePathname(pathname);
+  if (!normalized.startsWith(BOOKING_PATH_PREFIX)) return '';
+  const segment = normalized.slice(BOOKING_PATH_PREFIX.length).split('/')[0];
+  if (segment === 'success' || segment === 'cancelled') return '';
+  return segment;
 }
 
 export function resolveNavigationTarget(href = '') {
