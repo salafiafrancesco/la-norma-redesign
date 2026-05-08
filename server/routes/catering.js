@@ -29,6 +29,8 @@ router.post('/requests', async (req, res) => {
     ? normalizeInteger(req.body.guests, { min: 1, max: 5000, fallback: null })
     : null;
   const message = normalizeOptionalText(req.body.message);
+  const locationType = normalizeOptionalText(req.body.location_type);
+  const budgetRange = normalizeOptionalText(req.body.budget_range);
 
   if (!name || !email) {
     return res.status(400).json({ error: 'Name and email are required.' });
@@ -51,6 +53,8 @@ router.post('/requests', async (req, res) => {
         event_type: eventType || null,
         guests,
         message,
+        location_type: locationType || null,
+        budget_range: budgetRange || null,
         status: 'new',
       })
       .select()

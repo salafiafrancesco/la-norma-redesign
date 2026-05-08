@@ -237,28 +237,51 @@ function transform(api = {}) {
     sub: orderOnlineData.sub ?? defaults.orderOnline.sub,
   };
 
+  const d = defaults.catering;
   const cateringContent = {
-    heroTitle: cateringData.hero_title ?? defaults.catering.hero_title,
-    heroSubtitle: cateringData.hero_subtitle ?? defaults.catering.hero_subtitle,
-    heroImageUrl: resolveUrl(cateringData.hero_image_url ?? defaults.catering.hero_image_url),
-    introP1: cateringData.intro_p1 ?? defaults.catering.intro_p1,
-    introP2: cateringData.intro_p2 ?? defaults.catering.intro_p2,
-    perfectFor: cateringData.perfect_for ?? defaults.catering.perfect_for,
-    styleIncludes: cateringData.style_includes ?? defaults.catering.style_includes,
-    gallery: (cateringData.gallery ?? defaults.catering.gallery).map((item) =>
-      typeof item === 'string'
-        ? { url: resolveUrl(item), alt: 'La Norma catering' }
-        : { url: resolveUrl(item.url), alt: item.alt || 'La Norma catering' },
-    ),
-    ctaHeading: cateringData.cta_heading ?? defaults.catering.cta_heading,
-    ctaText: cateringData.cta_text ?? defaults.catering.cta_text,
-    ctaButtonLabel: cateringData.cta_button_label ?? defaults.catering.cta_button_label,
-    contactPhone: cateringData.contact_phone ?? defaults.catering.contact_phone,
-    contactEmail: cateringData.contact_email ?? defaults.catering.contact_email,
-    contactWebsite: cateringData.contact_website ?? defaults.catering.contact_website,
-    seoTitle: cateringData.seo_title ?? defaults.catering.seo_title,
-    seoDescription: cateringData.seo_description ?? defaults.catering.seo_description,
-    seoOgImageUrl: resolveUrl(cateringData.seo_og_image_url ?? defaults.catering.seo_og_image_url),
+    // Hero
+    heroEyebrow: cateringData.hero_eyebrow ?? d.hero_eyebrow,
+    heroTitle: cateringData.hero_title ?? d.hero_title,
+    heroSubtitle: cateringData.hero_subtitle ?? d.hero_subtitle,
+    heroImageUrl: resolveUrl(cateringData.hero_image_url ?? d.hero_image_url),
+    heroStats: cateringData.hero_stats ?? d.hero_stats,
+    // Statement
+    statementEyebrow: cateringData.statement_eyebrow ?? d.statement_eyebrow,
+    statementHeading: cateringData.statement_heading ?? d.statement_heading,
+    statementBody: cateringData.statement_body ?? d.statement_body,
+    statementImageUrl: resolveUrl(cateringData.statement_image_url ?? d.statement_image_url),
+    statementHighlights: cateringData.statement_highlights ?? d.statement_highlights,
+    // Yacht
+    yachtEyebrow: cateringData.yacht_eyebrow ?? d.yacht_eyebrow,
+    yachtHeading: cateringData.yacht_heading ?? d.yacht_heading,
+    yachtBody: cateringData.yacht_body ?? d.yacht_body,
+    yachtImageUrl: resolveUrl(cateringData.yacht_image_url ?? d.yacht_image_url),
+    yachtSidePanel: cateringData.yacht_side_panel ?? d.yacht_side_panel,
+    yachtCtaLabel: cateringData.yacht_cta_label ?? d.yacht_cta_label,
+    // Menu gallery
+    menuGalleryHeading: cateringData.menu_gallery_heading ?? d.menu_gallery_heading,
+    menuGallerySubheading: cateringData.menu_gallery_subheading ?? d.menu_gallery_subheading,
+    // Process
+    processHeading: cateringData.process_heading ?? d.process_heading,
+    // Portfolio
+    portfolioHeading: cateringData.portfolio_heading ?? d.portfolio_heading,
+    portfolioSubheading: cateringData.portfolio_subheading ?? d.portfolio_subheading,
+    // Testimonials
+    testimonialsHeading: cateringData.testimonials_heading ?? d.testimonials_heading,
+    // FAQ
+    faqHeading: cateringData.faq_heading ?? d.faq_heading,
+    // CTA
+    ctaEyebrow: cateringData.cta_eyebrow ?? d.cta_eyebrow,
+    ctaHeading: cateringData.cta_heading ?? d.cta_heading,
+    ctaSub: cateringData.cta_sub ?? d.cta_sub,
+    // Contact
+    contactPhone: cateringData.contact_phone ?? d.contact_phone,
+    contactEmail: cateringData.contact_email ?? d.contact_email,
+    contactWebsite: cateringData.contact_website ?? d.contact_website,
+    // SEO
+    seoTitle: cateringData.seo_title ?? d.seo_title,
+    seoDescription: cateringData.seo_description ?? d.seo_description,
+    seoOgImageUrl: resolveUrl(cateringData.seo_og_image_url ?? d.seo_og_image_url),
   };
 
   const footer = {

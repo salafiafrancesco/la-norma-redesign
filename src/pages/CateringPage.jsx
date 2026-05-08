@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import API_BASE from '../config/api';
 import Navbar from '../components/Navbar/Navbar';
 import Footer from '../components/Footer/Footer';
@@ -7,279 +7,309 @@ import { useNavigation } from '../context/NavigationContext';
 import { usePageMetadata } from '../hooks/usePageMetadata';
 import { useInView } from '../hooks/useInView';
 import { PAGE_KEYS } from '../../shared/routes.js';
-import { CATERING_EVENT_TYPES } from '../../shared/cateringDefaults.js';
+import {
+  CATERING_EVENT_TYPES,
+  CATERING_LOCATION_TYPES,
+  CATERING_BUDGET_RANGES,
+} from '../../shared/cateringDefaults.js';
 import './CateringPage.css';
-
-/* ------------------------------------------------------------------ */
-/* SVG Icons — inline to match the project's SVG-custom pattern       */
-/* ------------------------------------------------------------------ */
-const ICONS = {
-  yacht: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 20h20" />
-      <path d="M21 17H3l2.5-9.5L12 4l6.5 3.5L21 17Z" />
-      <path d="M12 4v13" />
-    </svg>
-  ),
-  people: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  ),
-  briefcase: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-    </svg>
-  ),
-  wine: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 22h8" />
-      <path d="M12 15v7" />
-      <path d="M5.2 9h13.6c.5 0 .9-.4.8-.9L18 2H6l-1.6 6.1c-.1.5.3.9.8.9Z" />
-      <path d="M5.2 9a6.8 6.8 0 0 0 13.6 0" />
-    </svg>
-  ),
-  champagne: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 22h8" />
-      <path d="M12 15v7" />
-      <path d="M7 2h10l-1 9a5 5 0 0 1-8 0L7 2Z" />
-      <path d="M17 5l3-1" />
-      <path d="M20 8l2 1" />
-    </svg>
-  ),
-  phone: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.37 1.6.65 2.35a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.75.28 1.54.52 2.35.65A2 2 0 0 1 22 16.92Z" />
-    </svg>
-  ),
-  mail: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-    </svg>
-  ),
-  globe: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M2 12h20" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
-    </svg>
-  ),
-  check: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  ),
-};
-
-function getIcon(key) {
-  return ICONS[key] || ICONS.champagne;
-}
 
 function scrollToId(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function isValidEmail(value) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+function isValidEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
-/* ------------------------------------------------------------------ */
-/* Component                                                          */
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
+/* CateringPage                                                       */
+/* ================================================================== */
 export default function CateringPage() {
-  const catering = useSection('catering');
+  const c = useSection('catering');
   const restaurant = useSection('restaurant');
   const { navigate } = useNavigation();
+  const fieldUid = useId();
 
-  const [introRef, introVisible] = useInView();
-  const [perfectRef, perfectVisible] = useInView();
-  const [styleRef, styleVisible] = useInView();
-  const [galleryRef, galleryVisible] = useInView();
-  const [ctaRef, ctaVisible] = useInView();
-  const [formRef, formVisible] = useInView();
+  // Dynamic content from API
+  const [tiers, setTiers] = useState([]);
+  const [signatures, setSignatures] = useState([]);
+  const [gallery, setGallery] = useState([]);
+  const [processSteps, setProcessSteps] = useState([]);
+  const [portfolio, setPortfolio] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
+  const [faqs, setFaqs] = useState([]);
+  const [contentLoaded, setContentLoaded] = useState(false);
 
+  // Lightbox
   const [lightboxIndex, setLightboxIndex] = useState(-1);
 
-  // Form state
-  const fieldUid = useId();
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    event_date: '',
-    event_type: '',
-    guests: '',
-    message: '',
-  });
+  // Form
+  const [form, setForm] = useState({ name: '', email: '', phone: '', event_date: '', event_type: '', guests: '', message: '', location_type: '', budget_range: '' });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  // InView refs
+  const [stmtRef, stmtVis] = useInView();
+  const [tiersRef, tiersVis] = useInView();
+  const [yachtRef, yachtVis] = useInView();
+  const [sigRef, sigVis] = useInView();
+  const [galRef, galVis] = useInView();
+  const [procRef, procVis] = useInView();
+  const [portRef, portVis] = useInView();
+  const [testRef, testVis] = useInView();
+  const [faqRef, faqVis] = useInView();
+  const [ctaRef, ctaVis] = useInView();
+
   usePageMetadata({
-    title: catering.seoTitle || 'Catering — Private Events & Yacht Parties',
-    description: catering.seoDescription,
-    image: catering.seoOgImageUrl || catering.heroImageUrl,
-    structuredData: [
-      {
-        '@context': 'https://schema.org',
-        '@type': 'FoodService',
-        name: `${restaurant.name} Catering`,
-        description: catering.seoDescription,
-        url: window.location.href,
-        telephone: catering.contactPhone,
-        provider: {
-          '@type': 'Restaurant',
-          name: restaurant.name,
-        },
-      },
-    ],
+    title: c.seoTitle || 'Catering — Yacht Parties & Private Events',
+    description: c.seoDescription,
+    image: c.seoOgImageUrl || c.heroImageUrl,
+    structuredData: [{
+      '@context': 'https://schema.org',
+      '@type': 'FoodService',
+      name: `${restaurant.name} Catering`,
+      description: c.seoDescription,
+      url: window.location.href,
+      telephone: c.contactPhone,
+      areaServed: { '@type': 'Place', name: 'Sarasota County, FL' },
+      provider: { '@type': 'Restaurant', name: restaurant.name },
+    }],
   });
 
-  // Lightbox keyboard handling
+  // Fetch all catering content collections
+  useEffect(() => {
+    fetch(`${API_BASE}/api/catering-content/all`)
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((data) => {
+        setTiers(data.tiers || []);
+        setSignatures(data.signatures || []);
+        setGallery(data.gallery || []);
+        setProcessSteps(data.process || []);
+        setPortfolio(data.portfolio || []);
+        setTestimonials(data.testimonials || []);
+        setFaqs(data.faqs || []);
+        setContentLoaded(true);
+      })
+      .catch(() => setContentLoaded(true));
+  }, []);
+
+  // Lightbox keyboard
   useEffect(() => {
     if (lightboxIndex < 0) return undefined;
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setLightboxIndex(-1);
-      if (event.key === 'ArrowRight') setLightboxIndex((i) => Math.min(i + 1, catering.gallery.length - 1));
-      if (event.key === 'ArrowLeft') setLightboxIndex((i) => Math.max(i - 1, 0));
+    const handler = (e) => {
+      if (e.key === 'Escape') setLightboxIndex(-1);
+      if (e.key === 'ArrowRight') setLightboxIndex((i) => Math.min(i + 1, gallery.length - 1));
+      if (e.key === 'ArrowLeft') setLightboxIndex((i) => Math.max(i - 1, 0));
     };
-
     document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handler);
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', handler); };
+  }, [lightboxIndex, gallery.length]);
 
-    return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [lightboxIndex, catering.gallery.length]);
-
-  const setField = (key, value) => {
-    setForm((current) => ({ ...current, [key]: value }));
-    if (errors[key]) {
-      setErrors((current) => {
-        const next = { ...current };
-        delete next[key];
-        return next;
-      });
-    }
+  const setField = (k, v) => {
+    setForm((f) => ({ ...f, [k]: v }));
+    if (errors[k]) setErrors((e) => { const n = { ...e }; delete n[k]; return n; });
   };
 
-  const validate = () => {
-    const nextErrors = {};
-    if (!form.name.trim()) nextErrors.name = 'Name is required.';
-    if (!form.email.trim()) nextErrors.email = 'Email is required.';
-    else if (!isValidEmail(form.email.trim())) nextErrors.email = 'Please enter a valid email.';
-    return nextErrors;
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const nextErrors = validate();
-    setErrors(nextErrors);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const errs = {};
+    if (!form.name.trim()) errs.name = 'Name is required.';
+    if (!form.email.trim()) errs.email = 'Email is required.';
+    else if (!isValidEmail(form.email.trim())) errs.email = 'Please enter a valid email.';
+    setErrors(errs);
     setSubmitError('');
-
-    if (Object.keys(nextErrors).length > 0) return;
+    if (Object.keys(errs).length > 0) return;
 
     setSubmitting(true);
     try {
-      const payload = {
-        name: form.name.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim() || undefined,
-        event_date: form.event_date || undefined,
-        event_type: form.event_type || undefined,
-        guests: form.guests ? Number(form.guests) : undefined,
-        message: form.message.trim() || undefined,
-      };
-
-      const response = await fetch(`${API_BASE}/api/catering/requests`, {
+      const res = await fetch(`${API_BASE}/api/catering/requests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim() || undefined,
+          event_date: form.event_date || undefined,
+          event_type: form.event_type || undefined,
+          guests: form.guests ? Number(form.guests) : undefined,
+          message: form.message.trim() || undefined,
+          location_type: form.location_type || undefined,
+          budget_range: form.budget_range || undefined,
+        }),
       });
-
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || 'Unable to submit your request.');
-
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Unable to submit.');
       setSubmitted(true);
-    } catch (error) {
-      setSubmitError(error.message);
-    } finally {
-      setSubmitting(false);
-    }
+    } catch (err) { setSubmitError(err.message); }
+    finally { setSubmitting(false); }
   };
 
-  const heroStyle = catering.heroImageUrl
-    ? { backgroundImage: `url(${catering.heroImageUrl})` }
-    : {
-        background:
-          'linear-gradient(135deg, rgba(39, 61, 47, 0.25), rgba(26, 33, 32, 0.4)), url("https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1800&q=80")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      };
+  // Tiers carousel ref for mobile scroll
+  const tiersScrollRef = useRef(null);
 
   return (
-    <div className="catering-page">
+    <div className="cat-page">
       <Navbar />
 
-      {/* ---- Hero ---- */}
-      <header className="catering-hero">
-        <div className="catering-hero__bg" style={heroStyle} role="img" aria-label="La Norma catering presentation" />
-        <div className="catering-hero__overlay" />
-
-        <div className="catering-hero__content container">
-          <p className="catering-hero__eyebrow">La Norma Ristorante & Pizzeria</p>
-          <h1 className="catering-hero__heading">{catering.heroTitle}</h1>
-          <p className="catering-hero__sub">{catering.heroSubtitle}</p>
-
-          <div className="catering-hero__actions">
-            <button type="button" className="btn btn--primary" onClick={() => scrollToId('catering-request')}>
-              {catering.ctaButtonLabel}
-            </button>
-            <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.menu)}>
-              View Our Menu
-            </button>
+      {/* ============================================================ */}
+      {/* 1. HERO                                                      */}
+      {/* ============================================================ */}
+      <header className="cat-hero">
+        <div className="cat-hero__bg" style={{ backgroundImage: `url(${c.heroImageUrl})` }} role="img" aria-label="La Norma catering presentation" />
+        <div className="cat-hero__overlay" />
+        <div className="cat-hero__content container">
+          <p className="cat-hero__eyebrow">{c.heroEyebrow}</p>
+          <h1 className="cat-hero__heading">{c.heroTitle}</h1>
+          <p className="cat-hero__sub">{c.heroSubtitle}</p>
+          <div className="cat-hero__actions">
+            <button type="button" className="btn btn--primary" onClick={() => scrollToId('catering-request')}>Request a Quote</button>
+            <button type="button" className="btn btn--outline-light" onClick={() => scrollToId('menu-gallery')}>View Sample Menu</button>
           </div>
+          {c.heroStats?.length > 0 && (
+            <div className="cat-hero__stats">
+              {c.heroStats.map((s) => (
+                <div key={s.label} className="cat-hero__stat">
+                  <span className="cat-hero__stat-value">{s.value}</span>
+                  <span className="cat-hero__stat-label">{s.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
       <main id="main-content">
-        {/* ---- Intro ---- */}
-        <section className="catering-section" id="catering-intro">
+
+        {/* ============================================================ */}
+        {/* 2. STATEMENT — Our Approach                                  */}
+        {/* ============================================================ */}
+        <section className="cat-section cat-section--alt" id="approach">
           <div className="container">
-            <div className={`catering-intro fade-up${introVisible ? ' visible' : ''}`} ref={introRef}>
-              <p className="catering-section__label">Our Catering</p>
-              <p>{catering.introP1}</p>
-              <p>{catering.introP2}</p>
+            <div className={`cat-statement fade-up${stmtVis ? ' visible' : ''}`} ref={stmtRef}>
+              <div className="cat-statement__media">
+                <img src={c.statementImageUrl} alt="Signature dish by La Norma" loading="lazy" />
+              </div>
+              <div className="cat-statement__copy">
+                <p className="cat-section__eyebrow">{c.statementEyebrow}</p>
+                <h2 className="cat-section__heading">{c.statementHeading}</h2>
+                {c.statementBody.split('\n').filter(Boolean).map((p, i) => (
+                  <p key={i} className="cat-statement__body">{p}</p>
+                ))}
+                {c.statementHighlights?.length > 0 && (
+                  <ul className="cat-statement__highlights">
+                    {c.statementHighlights.map((h) => <li key={h}>{h}</li>)}
+                  </ul>
+                )}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ---- Perfect For ---- */}
-        {catering.perfectFor?.length > 0 && (
-          <section className="catering-section" id="perfect-for">
+        {/* ============================================================ */}
+        {/* 3. SERVICE TIERS                                             */}
+        {/* ============================================================ */}
+        {tiers.length > 0 && (
+          <section className="cat-section" id="services">
             <div className="container">
-              <div className={`fade-up${perfectVisible ? ' visible' : ''}`} ref={perfectRef}>
-                <p className="catering-section__label">Perfect For</p>
-                <h2 className="catering-section__heading">Every occasion deserves Italian elegance</h2>
+              <div className={`fade-up${tiersVis ? ' visible' : ''}`} ref={tiersRef}>
+                <p className="cat-section__eyebrow">How we cater</p>
+                <h2 className="cat-section__heading">Choose the format that fits your occasion</h2>
               </div>
+              <div className="cat-tiers" ref={tiersScrollRef}>
+                {tiers.map((tier, i) => (
+                  <article key={tier.id} className={`cat-tier fade-up delay-${i + 1}${tiersVis ? ' visible' : ''}`}>
+                    <div className="cat-tier__media">
+                      {tier.image_url && <img src={tier.image_url} alt={tier.title} loading="lazy" />}
+                      {tier.badge_label && <span className="cat-tier__badge">{tier.badge_label}</span>}
+                    </div>
+                    <div className="cat-tier__body">
+                      <h3 className="cat-tier__title">{tier.title}</h3>
+                      <p className="cat-tier__range">{tier.range_label}</p>
+                      <p className="cat-tier__desc">{tier.body}</p>
+                      <p className="cat-tier__ideal"><strong>Ideal for:</strong> {tier.ideal_for}</p>
+                      <button type="button" className="cat-tier__cta" onClick={() => { setField('event_type', tier.title); scrollToId('catering-request'); }}>
+                        {tier.cta_label}
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
-              <div className="catering-perfect-grid">
-                {catering.perfectFor.map((item, index) => (
-                  <div
-                    key={item.label}
-                    className={`catering-perfect-card fade-up delay-${(index % 5) + 1}${perfectVisible ? ' visible' : ''}`}
-                  >
-                    <div className="catering-perfect-card__icon">{getIcon(item.icon)}</div>
-                    <p className="catering-perfect-card__label">{item.label}</p>
+        {/* ============================================================ */}
+        {/* 4. YACHT PARTIES                                             */}
+        {/* ============================================================ */}
+        <section className="cat-section cat-yacht" id="yacht">
+          <div className="cat-yacht__bg" style={{ backgroundImage: `url(${c.yachtImageUrl})` }} role="img" aria-label="Yacht catering on Sarasota Bay" />
+          <div className="cat-yacht__overlay" />
+          <div className="cat-yacht__content container">
+            <div className={`cat-yacht__grid fade-up${yachtVis ? ' visible' : ''}`} ref={yachtRef}>
+              <div className="cat-yacht__copy">
+                <p className="cat-section__eyebrow" style={{ color: 'var(--gold-light, #E0C97F)' }}>{c.yachtEyebrow}</p>
+                <h2 className="cat-section__heading" style={{ color: 'var(--cream)' }}>{c.yachtHeading}</h2>
+                {c.yachtBody.split('\n').filter(Boolean).map((p, i) => (
+                  <p key={i} className="cat-yacht__body">{p}</p>
+                ))}
+                <button type="button" className="btn btn--primary" onClick={() => { setField('event_type', 'Yacht Party'); scrollToId('catering-request'); }}>
+                  {c.yachtCtaLabel}
+                </button>
+              </div>
+              <aside className="cat-yacht__panel">
+                <p className="cat-yacht__panel-label">What we handle</p>
+                <ul className="cat-yacht__panel-list">
+                  {c.yachtSidePanel.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================================ */}
+        {/* 5. SIGNATURE OFFERINGS                                       */}
+        {/* ============================================================ */}
+        {signatures.length > 0 && (
+          <section className="cat-section cat-section--alt" id="offerings">
+            <div className="container">
+              <div className={`fade-up${sigVis ? ' visible' : ''}`} ref={sigRef}>
+                <p className="cat-section__eyebrow">What we serve</p>
+                <h2 className="cat-section__heading">Signature offerings</h2>
+              </div>
+              <div className="cat-offerings">
+                {signatures.map((item, i) => (
+                  <article key={item.id} className={`cat-offering fade-up delay-${(i % 3) + 1}${sigVis ? ' visible' : ''}`}>
+                    {item.image_url && <img src={item.image_url} alt={item.title} loading="lazy" className="cat-offering__img" />}
+                    <h3 className="cat-offering__title">{item.title}</h3>
+                    <p className="cat-offering__desc">{item.description}</p>
+                  </article>
+                ))}
+              </div>
+              <p className="cat-offerings__note">Allergies, themes, or specific Sicilian regions? Our chef builds custom menus on request.</p>
+            </div>
+          </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* 6. MENU GALLERY                                              */}
+        {/* ============================================================ */}
+        {gallery.length > 0 && (
+          <section className="cat-section" id="menu-gallery">
+            <div className="container">
+              <div className={`fade-up${galVis ? ' visible' : ''}`} ref={galRef}>
+                <p className="cat-section__eyebrow">Gallery</p>
+                <h2 className="cat-section__heading">{c.menuGalleryHeading}</h2>
+                <p className="cat-gallery__sub">{c.menuGallerySubheading}</p>
+              </div>
+              <div className={`cat-gallery fade-up delay-1${galVis ? ' visible' : ''}`}>
+                {gallery.map((img, i) => (
+                  <div key={img.id} className="cat-gallery__item" onClick={() => setLightboxIndex(i)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && setLightboxIndex(i)} aria-label={`View ${img.dish_name || 'dish'}`}>
+                    <img src={img.image_url} alt={img.alt_text || img.dish_name || 'La Norma catering dish'} loading="lazy" />
+                    {img.dish_name && <span className="cat-gallery__caption">{img.dish_name}</span>}
                   </div>
                 ))}
               </div>
@@ -287,19 +317,22 @@ export default function CateringPage() {
           </section>
         )}
 
-        {/* ---- Our Style Includes ---- */}
-        {catering.styleIncludes?.length > 0 && (
-          <section className="catering-section" id="our-style">
+        {/* ============================================================ */}
+        {/* 7. PROCESS TIMELINE                                          */}
+        {/* ============================================================ */}
+        {processSteps.length > 0 && (
+          <section className="cat-section cat-section--dark" id="process">
             <div className="container">
-              <div className={`fade-up${styleVisible ? ' visible' : ''}`} ref={styleRef}>
-                <p className="catering-section__label">Our Style Includes</p>
-                <h2 className="catering-section__heading">A curated Italian catering experience</h2>
+              <div className={`fade-up${procVis ? ' visible' : ''}`} ref={procRef}>
+                <p className="cat-section__eyebrow" style={{ color: 'var(--gold-light, #E0C97F)' }}>{c.processHeading}</p>
+                <h2 className="cat-section__heading" style={{ color: 'var(--cream)' }}>From first call to final course</h2>
               </div>
-
-              <div className={`catering-style-list fade-up delay-1${styleVisible ? ' visible' : ''}`}>
-                {catering.styleIncludes.map((text) => (
-                  <div key={text} className="catering-style-item">
-                    <p>{text}</p>
+              <div className={`cat-process fade-up delay-1${procVis ? ' visible' : ''}`}>
+                {processSteps.map((step) => (
+                  <div key={step.id} className="cat-process__step">
+                    <span className="cat-process__num">{String(step.step_number).padStart(2, '0')}</span>
+                    <h3 className="cat-process__title">{step.title}</h3>
+                    <p className="cat-process__desc">{step.description}</p>
                   </div>
                 ))}
               </div>
@@ -307,246 +340,210 @@ export default function CateringPage() {
           </section>
         )}
 
-        {/* ---- Gallery ---- */}
-        {catering.gallery?.length > 0 && (
-          <section className="catering-section" id="catering-gallery">
+        {/* ============================================================ */}
+        {/* 8. PORTFOLIO                                                 */}
+        {/* ============================================================ */}
+        {portfolio.length > 0 && (
+          <section className="cat-section" id="portfolio">
             <div className="container">
-              <div className={`fade-up${galleryVisible ? ' visible' : ''}`} ref={galleryRef}>
-                <p className="catering-section__label">Gallery</p>
-                <h2 className="catering-section__heading">A glimpse of what we do</h2>
+              <div className={`fade-up${portVis ? ' visible' : ''}`} ref={portRef}>
+                <p className="cat-section__eyebrow">{c.portfolioHeading}</p>
+                <h2 className="cat-section__heading">{c.portfolioSubheading}</h2>
               </div>
-
-              <div className={`catering-gallery-grid fade-up delay-1${galleryVisible ? ' visible' : ''}`}>
-                {catering.gallery.map((image, index) => (
-                  <div
-                    key={image.url}
-                    className="catering-gallery-item"
-                    onClick={() => setLightboxIndex(index)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`View ${image.alt}`}
-                    onKeyDown={(e) => e.key === 'Enter' && setLightboxIndex(index)}
-                  >
-                    <img src={image.url} alt={image.alt} loading="lazy" />
-                  </div>
+              <div className="cat-portfolio">
+                {portfolio.map((ev, i) => (
+                  <article key={ev.id} className={`cat-portfolio__card fade-up delay-${(i % 2) + 1}${portVis ? ' visible' : ''}`}>
+                    <div className="cat-portfolio__media">
+                      <img src={ev.image_url} alt={ev.title} loading="lazy" />
+                      {ev.tag && <span className="cat-portfolio__tag">{ev.tag}</span>}
+                    </div>
+                    <div className="cat-portfolio__info">
+                      <h3>{ev.title}</h3>
+                      {ev.headcount && <p>{ev.headcount}</p>}
+                    </div>
+                  </article>
                 ))}
               </div>
             </div>
           </section>
         )}
 
-        {/* ---- CTA ---- */}
-        <section className="catering-section catering-cta" id="catering-cta">
+        {/* ============================================================ */}
+        {/* 9. TESTIMONIALS                                              */}
+        {/* ============================================================ */}
+        {testimonials.length > 0 && (
+          <section className="cat-section cat-section--alt" id="testimonials">
+            <div className="container">
+              <div className={`fade-up${testVis ? ' visible' : ''}`} ref={testRef}>
+                <p className="cat-section__eyebrow">Client feedback</p>
+                <h2 className="cat-section__heading">{c.testimonialsHeading}</h2>
+              </div>
+              <div className={`cat-testimonials fade-up delay-1${testVis ? ' visible' : ''}`}>
+                {testimonials.map((t) => (
+                  <blockquote key={t.id} className="cat-testimonial">
+                    <p className="cat-testimonial__quote">&ldquo;{t.quote}&rdquo;</p>
+                    <footer className="cat-testimonial__footer">
+                      <strong>{t.author_name}</strong>
+                      {t.author_role && <span>{t.author_role}</span>}
+                    </footer>
+                  </blockquote>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* 10. FAQ                                                      */}
+        {/* ============================================================ */}
+        {faqs.length > 0 && (
+          <section className="cat-section" id="faq">
+            <div className="container">
+              <div className={`fade-up${faqVis ? ' visible' : ''}`} ref={faqRef}>
+                <p className="cat-section__eyebrow">Questions</p>
+                <h2 className="cat-section__heading">{c.faqHeading}</h2>
+              </div>
+              <div className="cat-faq">
+                {faqs.map((f) => (
+                  <details key={f.id} className="cat-faq__item">
+                    <summary>{f.question}</summary>
+                    <p>{f.answer}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* 11. CTA + FORM                                               */}
+        {/* ============================================================ */}
+        <section className="cat-section cat-section--dark cat-cta-section" id="catering-request">
           <div className="container">
-            <div className={`fade-up${ctaVisible ? ' visible' : ''}`} ref={ctaRef}>
-              <p className="catering-section__label" style={{ color: 'var(--gold-light, #E0C97F)' }}>Catering</p>
-              <h2 className="catering-section__heading">{catering.ctaHeading}</h2>
-              <p className="catering-cta__text">{catering.ctaText}</p>
-              <button type="button" className="btn btn--primary" onClick={() => scrollToId('catering-request')}>
-                {catering.ctaButtonLabel}
-              </button>
+            <div className={`cat-cta-header fade-up${ctaVis ? ' visible' : ''}`} ref={ctaRef}>
+              <p className="cat-section__eyebrow" style={{ color: 'var(--gold-light, #E0C97F)' }}>{c.ctaEyebrow}</p>
+              <h2 className="cat-section__heading" style={{ color: 'var(--cream)' }}>{c.ctaHeading}</h2>
+              <p className="cat-cta-header__sub">{c.ctaSub}</p>
             </div>
           </div>
         </section>
 
-        {/* ---- Contact Block ---- */}
-        <section className="catering-section" id="catering-contact">
+        <section className="cat-section cat-form-section">
           <div className="container">
-            <div className="catering-contact">
-              <div className="catering-contact__item">
-                {ICONS.phone}
-                <a href={`tel:${catering.contactPhone}`}>{catering.contactPhone}</a>
-              </div>
-              <div className="catering-contact__item">
-                {ICONS.mail}
-                <a href={`mailto:${catering.contactEmail}`}>{catering.contactEmail}</a>
-              </div>
-              <div className="catering-contact__item">
-                {ICONS.globe}
-                <span>{catering.contactWebsite}</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ---- Request Form ---- */}
-        <section className="catering-section catering-form-section" id="catering-request">
-          <div className="container">
-            <div className={`fade-up${formVisible ? ' visible' : ''}`} ref={formRef}>
-              <p className="catering-section__label">Request a Quote</p>
-              <h2 className="catering-section__heading">Tell us about your event</h2>
-            </div>
-
-            <div className="catering-form-layout">
-              <div className="catering-form-shell">
+            <div className="cat-form-layout">
+              <div className="cat-form-shell">
                 {submitted ? (
-                  <div className="catering-form-success" role="status" aria-live="polite">
-                    <div className="catering-form-success__icon">{ICONS.check}</div>
+                  <div className="cat-form-success" role="status" aria-live="polite">
+                    <div className="cat-form-success__icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
                     <h3>Request Received</h3>
-                    <p>
-                      Thank you for your interest in La Norma catering. Our team will review your request and
-                      get back to you within 24 hours.
-                    </p>
+                    <p>Thank you for your interest. Our team will review your event details and respond within one business day with menu ideas and a transparent estimate.</p>
                   </div>
                 ) : (
                   <>
-                    <h3>Request Catering</h3>
-                    <p>Fill out the form below and our events team will be in touch shortly.</p>
-
+                    <h3 className="cat-form-shell__title">Request a Quote</h3>
+                    <p className="cat-form-shell__sub">Tell us about your event and we&rsquo;ll get back to you within 24 hours.</p>
                     <form onSubmit={handleSubmit} noValidate>
-                      {submitError && (
-                        <div className="catering-field__error" role="alert" style={{ marginBottom: '1rem' }}>
-                          {submitError}
-                        </div>
-                      )}
-
-                      <div className="catering-form-grid">
-                        {/* Name */}
-                        <div className={`catering-field${errors.name ? ' catering-field--error' : ''}`}>
+                      {submitError && <div className="cat-form-error" role="alert">{submitError}</div>}
+                      <div className="cat-form-grid">
+                        <div className={`cat-field${errors.name ? ' cat-field--error' : ''}`}>
                           <label htmlFor={`${fieldUid}-name`}>Name <span>*</span></label>
-                          <input
-                            id={`${fieldUid}-name`}
-                            type="text"
-                            value={form.name}
-                            onChange={(e) => setField('name', e.target.value)}
-                            placeholder="Your full name"
-                            autoComplete="name"
-                            aria-invalid={Boolean(errors.name)}
-                          />
-                          {errors.name && <p className="catering-field__error" role="alert">{errors.name}</p>}
+                          <input id={`${fieldUid}-name`} type="text" value={form.name} onChange={(e) => setField('name', e.target.value)} placeholder="Your full name" autoComplete="name" aria-invalid={Boolean(errors.name)} />
+                          {errors.name && <p className="cat-field__error" role="alert">{errors.name}</p>}
                         </div>
-
-                        {/* Email */}
-                        <div className={`catering-field${errors.email ? ' catering-field--error' : ''}`}>
+                        <div className={`cat-field${errors.email ? ' cat-field--error' : ''}`}>
                           <label htmlFor={`${fieldUid}-email`}>Email <span>*</span></label>
-                          <input
-                            id={`${fieldUid}-email`}
-                            type="email"
-                            value={form.email}
-                            onChange={(e) => setField('email', e.target.value)}
-                            placeholder="you@example.com"
-                            autoComplete="email"
-                            aria-invalid={Boolean(errors.email)}
-                          />
-                          {errors.email && <p className="catering-field__error" role="alert">{errors.email}</p>}
+                          <input id={`${fieldUid}-email`} type="email" value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="you@example.com" autoComplete="email" aria-invalid={Boolean(errors.email)} />
+                          {errors.email && <p className="cat-field__error" role="alert">{errors.email}</p>}
                         </div>
-
-                        {/* Phone */}
-                        <div className="catering-field">
+                        <div className="cat-field">
                           <label htmlFor={`${fieldUid}-phone`}>Phone</label>
-                          <input
-                            id={`${fieldUid}-phone`}
-                            type="tel"
-                            value={form.phone}
-                            onChange={(e) => setField('phone', e.target.value)}
-                            placeholder="(941) 000 0000"
-                            autoComplete="tel"
-                          />
+                          <input id={`${fieldUid}-phone`} type="tel" value={form.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="(941) 000 0000" autoComplete="tel" />
                         </div>
-
-                        {/* Event Date */}
-                        <div className="catering-field">
+                        <div className="cat-field">
                           <label htmlFor={`${fieldUid}-date`}>Event Date</label>
-                          <input
-                            id={`${fieldUid}-date`}
-                            type="date"
-                            value={form.event_date}
-                            onChange={(e) => setField('event_date', e.target.value)}
-                            min={new Date().toISOString().split('T')[0]}
-                          />
+                          <input id={`${fieldUid}-date`} type="date" value={form.event_date} onChange={(e) => setField('event_date', e.target.value)} min={new Date().toISOString().split('T')[0]} />
                         </div>
-
-                        {/* Event Type */}
-                        <div className="catering-field">
+                        <div className="cat-field">
                           <label htmlFor={`${fieldUid}-type`}>Event Type</label>
-                          <select
-                            id={`${fieldUid}-type`}
-                            value={form.event_type}
-                            onChange={(e) => setField('event_type', e.target.value)}
-                          >
+                          <select id={`${fieldUid}-type`} value={form.event_type} onChange={(e) => setField('event_type', e.target.value)}>
                             <option value="">Select type...</option>
-                            {CATERING_EVENT_TYPES.map((type) => (
-                              <option key={type} value={type}>{type}</option>
-                            ))}
+                            {CATERING_EVENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                           </select>
                         </div>
-
-                        {/* Number of Guests */}
-                        <div className="catering-field">
+                        <div className="cat-field">
                           <label htmlFor={`${fieldUid}-guests`}>Number of Guests</label>
-                          <input
-                            id={`${fieldUid}-guests`}
-                            type="number"
-                            min="1"
-                            max="5000"
-                            value={form.guests}
-                            onChange={(e) => setField('guests', e.target.value)}
-                            placeholder="Estimated headcount"
-                          />
+                          <input id={`${fieldUid}-guests`} type="number" min="1" max="5000" value={form.guests} onChange={(e) => setField('guests', e.target.value)} placeholder="Estimated headcount" />
                         </div>
-
-                        {/* Message */}
-                        <div className="catering-field catering-field--full">
+                        <div className="cat-field">
+                          <label htmlFor={`${fieldUid}-location`}>Location Type</label>
+                          <select id={`${fieldUid}-location`} value={form.location_type} onChange={(e) => setField('location_type', e.target.value)}>
+                            <option value="">Select location...</option>
+                            {CATERING_LOCATION_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                        </div>
+                        <div className="cat-field">
+                          <label htmlFor={`${fieldUid}-budget`}>Budget Range</label>
+                          <select id={`${fieldUid}-budget`} value={form.budget_range} onChange={(e) => setField('budget_range', e.target.value)}>
+                            <option value="">Select range...</option>
+                            {CATERING_BUDGET_RANGES.map((t) => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                        </div>
+                        <div className="cat-field cat-field--full">
                           <label htmlFor={`${fieldUid}-message`}>Message</label>
-                          <textarea
-                            id={`${fieldUid}-message`}
-                            value={form.message}
-                            onChange={(e) => setField('message', e.target.value)}
-                            placeholder="Tell us about your event, dietary requirements, or any specific requests..."
-                          />
+                          <textarea id={`${fieldUid}-message`} value={form.message} onChange={(e) => setField('message', e.target.value)} placeholder="Tell us about your event — dietary requirements, theme, specific requests..." />
                         </div>
                       </div>
-
-                      <div className="catering-form-actions">
-                        <button type="submit" className="btn btn--primary" disabled={submitting}>
-                          {submitting ? 'Sending...' : 'Send Request'}
-                        </button>
+                      <div className="cat-form-actions">
+                        <button type="submit" className="btn btn--primary" disabled={submitting}>{submitting ? 'Sending...' : 'Send Request'}</button>
                       </div>
                     </form>
                   </>
                 )}
               </div>
 
-              {/* Sidebar */}
-              <aside className="catering-form-aside">
-                <div className="catering-aside-card">
-                  <p className="catering-aside-card__label">What happens next</p>
-                  <ul className="catering-aside-card__list">
+              <aside className="cat-form-aside">
+                <div className="cat-aside-card">
+                  <p className="cat-aside-card__label">What happens next</p>
+                  <ul className="cat-aside-card__list">
                     <li>We review your request within 24 hours</li>
                     <li>A team member calls to discuss your vision</li>
                     <li>We send a custom menu and presentation plan</li>
                     <li>Final details confirmed one week before</li>
                   </ul>
                 </div>
-
-                <div className="catering-aside-card">
-                  <p className="catering-aside-card__label">Our promise</p>
-                  <ul className="catering-aside-card__list">
+                <div className="cat-aside-card">
+                  <p className="cat-aside-card__label">Our promise</p>
+                  <ul className="cat-aside-card__list">
                     <li>Fresh, handcrafted Italian specialties</li>
                     <li>Stunning visual presentation</li>
                     <li>Professional, attentive service</li>
                     <li>Fully customizable menus</li>
                   </ul>
                 </div>
+                <div className="cat-aside-card">
+                  <p className="cat-aside-card__label">Contact</p>
+                  <ul className="cat-aside-card__list" style={{ listStyle: 'none' }}>
+                    <li><a href={`tel:${c.contactPhone}`}>{c.contactPhone}</a></li>
+                    <li><a href={`mailto:${c.contactEmail}`}>{c.contactEmail}</a></li>
+                    <li>{c.contactWebsite}</li>
+                  </ul>
+                </div>
               </aside>
             </div>
           </div>
         </section>
+
       </main>
 
       <Footer />
 
-      {/* ---- Lightbox ---- */}
-      {lightboxIndex >= 0 && catering.gallery[lightboxIndex] && (
-        <div className="catering-lightbox" onClick={() => setLightboxIndex(-1)} role="dialog" aria-label="Image lightbox">
-          <button className="catering-lightbox__close" onClick={() => setLightboxIndex(-1)} aria-label="Close lightbox">
-            &times;
-          </button>
-          <img
-            src={catering.gallery[lightboxIndex].url}
-            alt={catering.gallery[lightboxIndex].alt}
-            onClick={(e) => e.stopPropagation()}
-          />
+      {/* Lightbox */}
+      {lightboxIndex >= 0 && gallery[lightboxIndex] && (
+        <div className="cat-lightbox" onClick={() => setLightboxIndex(-1)} role="dialog" aria-label="Image lightbox">
+          <button className="cat-lightbox__close" onClick={() => setLightboxIndex(-1)} aria-label="Close">&times;</button>
+          <img src={gallery[lightboxIndex].image_url} alt={gallery[lightboxIndex].alt_text || gallery[lightboxIndex].dish_name || 'Catering dish'} onClick={(e) => e.stopPropagation()} />
         </div>
       )}
     </div>

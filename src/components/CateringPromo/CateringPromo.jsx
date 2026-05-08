@@ -33,12 +33,12 @@ export default function CateringPromo() {
               Sicilian elegance, delivered to your occasion.
             </h2>
             <p className="catering-promo__body">
-              {catering.introP1}
+              {(catering.statementBody || '').split('\n')[0]}
             </p>
 
             <div className="catering-promo__tags">
-              {(catering.perfectFor || []).slice(0, 4).map((item) => (
-                <span key={item.label} className="catering-promo__tag">{item.label}</span>
+              {(catering.heroStats || []).slice(0, 3).map((stat) => (
+                <span key={stat.label} className="catering-promo__tag">{stat.value} {stat.label}</span>
               ))}
             </div>
 
