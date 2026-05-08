@@ -1,20 +1,5 @@
-import { dirname, join, resolve } from 'path';
-import { fileURLToPath } from 'url';
-
-const serverDir = dirname(fileURLToPath(import.meta.url));
-
 export const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 export const PORT = Number(process.env.PORT || 3001);
-
-export const DATA_DIR = resolve(
-  process.env.DATA_DIR || join(serverDir, 'data'),
-);
-export const DB_PATH = resolve(
-  process.env.DB_PATH || join(DATA_DIR, 'db.json'),
-);
-export const UPLOADS_DIR = resolve(
-  process.env.UPLOADS_DIR || join(serverDir, 'uploads'),
-);
 
 export const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'lanorma2025';
@@ -50,11 +35,6 @@ const LOCAL_DEV_ORIGINS = [
   'http://localhost:5178',
   'http://localhost:5179',
   'http://localhost:5180',
-  'http://localhost:5181',
-  'http://localhost:5182',
-  'http://localhost:5183',
-  'http://localhost:5184',
-  'http://localhost:5185',
 ];
 
 const envOrigins = [

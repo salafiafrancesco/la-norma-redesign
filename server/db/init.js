@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import db, { getNextId, save } from './database.js';
+import supabase from './supabase.js';
 import {
   generateUpcomingClassRecords,
   generateUpcomingLiveMusicRecords,
@@ -11,131 +11,114 @@ import {
 } from '../config.js';
 import { DEFAULT_BLOG_POSTS } from '../../shared/blogDefaults.js';
 import { normalizeBlogPost } from '../lib/blog.js';
-import { mergeSiteContentDefaults } from '../lib/siteContent.js';
-import { isPlainObject } from '../lib/validation.js';
+import { CONTENT_SECTION_KEYS } from '../../shared/contentSchema.js';
+import { getDefaultContentForSection } from '../lib/siteContent.js';
 
-function ensureAdminUser() {
-  if (!Array.isArray(db.data.admin_users)) db.data.admin_users = [];
-  if (db.data.admin_users.length > 0) return;
+function storeValue(value) {
+  const isJson = typeof value === 'object' && value !== null;
+  return {
+    value: isJson ? JSON.stringify(value) : String(value ?? ''),
+    type: isJson ? 'json' : 'text',
+  };
+}
 
-  db.data.admin_users.push({
-    id: 1,
+async function ensureAdminUser() {
+  const { count } = await supabase
+    .from('admin_users')
+    .select('*', { count: 'exact', head: true });
+
+  if (count > 0) return;
+
+  const { error } = await supabase.from('admin_users').insert({
     username: ADMIN_USERNAME,
     password_hash: bcrypt.hashSync(ADMIN_PASSWORD, 10),
   });
 
+  if (error) throw new Error(`[init] Admin user: ${error.message}`);
   console.log(`[init] Admin user "${ADMIN_USERNAME}" created.`);
 }
 
-function ensureSiteContent() {
-  if (!isPlainObject(db.data.site_content)) db.data.site_content = {};
-  mergeSiteContentDefaults(db.data.site_content);
+async function ensureSiteContent() {
+  const { count } = await supabase
+    .from('site_content')
+    .select('*', { count: 'exact', head: true });
+
+  if (count > 0) return;
+
+  const rows = [];
+  for (const sectionKey of CONTENT_SECTION_KEYS) {
+    const defaults = getDefaultContentForSection(sectionKey);
+    if (!defaults) continue;
+    for (const [key, value] of Object.entries(defaults)) {
+      const stored = storeValue(value);
+      rows.push({ section: sectionKey, key, ...stored });
+    }
+  }
+
+  if (rows.length > 0) {
+    const { error } = await supabase.from('site_content').insert(rows);
+    if (error) throw new Error(`[init] Site content: ${error.message}`);
+    console.log('[init] Site content seeded.');
+  }
 }
 
-function ensureCookingClasses() {
-  if (!Array.isArray(db.data.cooking_classes)) db.data.cooking_classes = [];
-  if (db.data.cooking_classes.length > 0) return;
+async function ensureCookingClasses() {
+  const { count } = await supabase
+    .from('cooking_classes')
+    .select('*', { count: 'exact', head: true });
 
-  const now = new Date().toISOString();
+  if (count > 0) return;
 
-  generateUpcomingClassRecords().forEach((entry) => {
-    db.data.cooking_classes.push({
-      id: getNextId('cooking_classes'),
-      ...entry,
-      created_at: now,
-      updated_at: now,
-    });
-  });
-
+  const records = generateUpcomingClassRecords();
+  const { error } = await supabase.from('cooking_classes').insert(records);
+  if (error) throw new Error(`[init] Cooking classes: ${error.message}`);
   console.log('[init] Cooking classes seeded.');
 }
 
-function ensureEvents() {
-  if (!Array.isArray(db.data.events)) db.data.events = [];
-  if (db.data.events.length > 0) return;
+async function ensureEvents() {
+  const { count } = await supabase
+    .from('events')
+    .select('*', { count: 'exact', head: true });
 
-  const now = new Date().toISOString();
-  const upcomingEvents = [
+  if (count > 0) return;
+
+  const records = [
     ...generateUpcomingWineTastingRecords(),
     ...generateUpcomingLiveMusicRecords(),
   ];
-
-  upcomingEvents.forEach((entry) => {
-    db.data.events.push({
-      id: getNextId('events'),
-      ...entry,
-      created_at: now,
-      updated_at: now,
-    });
-  });
-
+  const { error } = await supabase.from('events').insert(records);
+  if (error) throw new Error(`[init] Events: ${error.message}`);
   console.log('[init] Events seeded.');
 }
 
-function ensureBlogPosts() {
-  if (!Array.isArray(db.data.blog_posts)) db.data.blog_posts = [];
-  if (db.data.blog_posts.length > 0) {
-    db.data.blog_posts = db.data.blog_posts.map((entry) => normalizeBlogPost(entry));
-    return;
-  }
+async function ensureBlogPosts() {
+  const { count } = await supabase
+    .from('blog_posts')
+    .select('*', { count: 'exact', head: true });
+
+  if (count > 0) return;
 
   const now = new Date().toISOString();
-
-  DEFAULT_BLOG_POSTS.forEach((entry) => {
-    db.data.blog_posts.push(
-      normalizeBlogPost({
-        ...entry,
-        id: getNextId('blog_posts'),
-        created_at: entry.created_at || now,
-        updated_at: entry.updated_at || now,
-      }),
-    );
+  const posts = DEFAULT_BLOG_POSTS.map((entry) => {
+    const normalized = normalizeBlogPost({
+      ...entry,
+      created_at: entry.created_at || now,
+      updated_at: entry.updated_at || now,
+    });
+    // Remove 'id' so Supabase auto-generates it
+    const { id: _id, ...rest } = normalized;
+    return rest;
   });
 
+  const { error } = await supabase.from('blog_posts').insert(posts);
+  if (error) throw new Error(`[init] Blog posts: ${error.message}`);
   console.log('[init] Blog posts seeded.');
 }
 
-function normalizeRsvpCollection() {
-  if (!Array.isArray(db.data.rsvp)) db.data.rsvp = [];
-
-  db.data.rsvp = db.data.rsvp.map((entry) => ({
-    ...entry,
-    status: entry.status || 'pending',
-    guests: Number(entry.guests) || 1,
-    inventory_applied:
-      typeof entry.inventory_applied === 'boolean'
-        ? entry.inventory_applied
-        : Boolean(entry.class_id) && entry.status !== 'cancelled',
-  }));
-}
-
-function normalizeInquiryCollection() {
-  if (!Array.isArray(db.data.inquiries)) db.data.inquiries = [];
-
-  db.data.inquiries = db.data.inquiries.map((entry) => {
-    const guestCount = Number(entry.guest_count ?? entry.guests);
-    const guestLabel = entry.guest_label || (typeof entry.guests === 'string' ? entry.guests : '');
-
-    return {
-      ...entry,
-      guests: guestLabel || String(Number.isFinite(guestCount) && guestCount > 0 ? guestCount : 1),
-      guest_count: Number.isFinite(guestCount) && guestCount > 0 ? guestCount : null,
-      guest_label: guestLabel,
-      occasion: entry.occasion || '',
-      event_id: entry.event_id ? Number(entry.event_id) : null,
-      status: entry.status || 'new',
-      updated_at: entry.updated_at || entry.created_at || new Date().toISOString(),
-    };
-  });
-}
-
-export function ensureInitialized() {
-  ensureAdminUser();
-  ensureSiteContent();
-  ensureCookingClasses();
-  ensureEvents();
-  ensureBlogPosts();
-  normalizeRsvpCollection();
-  normalizeInquiryCollection();
-  save();
+export async function ensureInitialized() {
+  await ensureAdminUser();
+  await ensureSiteContent();
+  await ensureCookingClasses();
+  await ensureEvents();
+  await ensureBlogPosts();
 }

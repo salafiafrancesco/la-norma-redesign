@@ -1,6 +1,7 @@
 {
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/admin/:path*", "destination": "/index.html" },
-    { "source": "/((?!api|uploads|assets|favicon\\.svg|robots\\.txt|sitemap\\.xml).*)", "destination": "/index.html" }
+    { "source": "/((?!api|assets|favicon\\.svg|robots\\.txt|sitemap\\.xml).*)", "destination": "/index.html" }
   ]
 }

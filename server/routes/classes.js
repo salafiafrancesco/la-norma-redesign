@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import requireAuth from '../middleware/auth.js';
-import db, { getNextId, save } from '../db/database.js';
+import supabase from '../db/supabase.js';
 import {
   isPlainObject,
   normalizeBoolean,
@@ -31,13 +31,8 @@ function normalizeClassPayload(payload, { partial = false } = {}) {
   const maxSpots = payload.max_spots !== undefined
     ? normalizeInteger(payload.max_spots, { min: 1, max: 24, fallback: 8 })
     : undefined;
-
   const spotsLeft = payload.spots_left !== undefined
-    ? normalizeInteger(payload.spots_left, {
-      min: 0,
-      max: maxSpots ?? 24,
-      fallback: maxSpots ?? 8,
-    })
+    ? normalizeInteger(payload.spots_left, { min: 0, max: maxSpots ?? 24, fallback: maxSpots ?? 8 })
     : undefined;
 
   if (maxSpots !== undefined && spotsLeft !== undefined && spotsLeft > maxSpots) {
@@ -61,106 +56,113 @@ function normalizeClassPayload(payload, { partial = false } = {}) {
   };
 }
 
-router.get('/', (_req, res) => {
-  const upcomingClasses = db.data.cooking_classes
-    .filter((entry) => entry.active && entry.date >= todayIso())
-    .sort((left, right) => left.date.localeCompare(right.date));
-
-  res.json(upcomingClasses);
-});
-
-router.get('/all', requireAuth, (_req, res) => {
-  const allClasses = [...db.data.cooking_classes].sort((left, right) =>
-    right.date.localeCompare(left.date),
-  );
-
-  res.json(allClasses);
-});
-
-router.get('/:id', (req, res) => {
-  const classId = Number(req.params.id);
-  const entry = db.data.cooking_classes.find((item) => item.id === classId);
-
-  if (!entry) {
-    return res.status(404).json({ error: 'Cooking class not found.' });
-  }
-
-  res.json(entry);
-});
-
-router.post('/', requireAuth, (req, res) => {
-  const parsed = normalizeClassPayload(req.body);
-  if (parsed.error) {
-    return res.status(400).json({ error: parsed.error });
-  }
-
-  const now = new Date().toISOString();
-  const nextEntry = {
-    id: getNextId('cooking_classes'),
-    ...parsed.value,
-    created_at: now,
-    updated_at: now,
-  };
-
+router.get('/', async (_req, res) => {
   try {
-    db.data.cooking_classes.push(nextEntry);
-    save();
-    res.status(201).json(nextEntry);
+    const { data, error } = await supabase
+      .from('cooking_classes')
+      .select('*')
+      .eq('active', true)
+      .gte('date', todayIso())
+      .order('date', { ascending: true });
+
+    if (error) throw error;
+    res.json(data || []);
   } catch (error) {
-    console.error('[classes/create]', error.message);
+    console.error('[classes/list]', error);
+    res.status(500).json({ error: 'Unable to load classes.' });
+  }
+});
+
+router.get('/all', requireAuth, async (_req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('cooking_classes')
+      .select('*')
+      .order('date', { ascending: false });
+
+    if (error) throw error;
+    res.json(data || []);
+  } catch (error) {
+    console.error('[classes/listAll]', error);
+    res.status(500).json({ error: 'Unable to load classes.' });
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('cooking_classes')
+      .select('*')
+      .eq('id', Number(req.params.id))
+      .single();
+
+    if (error || !data) return res.status(404).json({ error: 'Cooking class not found.' });
+    res.json(data);
+  } catch (error) {
+    console.error('[classes/get]', error);
+    res.status(500).json({ error: 'Unable to load class.' });
+  }
+});
+
+router.post('/', requireAuth, async (req, res) => {
+  try {
+    const parsed = normalizeClassPayload(req.body);
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+
+    const { data, error } = await supabase
+      .from('cooking_classes')
+      .insert(parsed.value)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('[classes/create]', error);
     res.status(500).json({ error: 'Unable to create the cooking class.' });
   }
 });
 
-router.put('/:id', requireAuth, (req, res) => {
-  const classId = Number(req.params.id);
-  const index = db.data.cooking_classes.findIndex((item) => item.id === classId);
-
-  if (index === -1) {
-    return res.status(404).json({ error: 'Cooking class not found.' });
-  }
-
-  const parsed = normalizeClassPayload(req.body, { partial: true });
-  if (parsed.error) {
-    return res.status(400).json({ error: parsed.error });
-  }
-
-  const current = db.data.cooking_classes[index];
-  const nextEntry = {
-    ...current,
-    ...parsed.value,
-    id: current.id,
-    updated_at: new Date().toISOString(),
-  };
-
-  if (nextEntry.spots_left > nextEntry.max_spots) {
-    return res.status(400).json({ error: 'Spots left cannot exceed max spots.' });
-  }
-
+router.put('/:id', requireAuth, async (req, res) => {
   try {
-    db.data.cooking_classes[index] = nextEntry;
-    save();
-    res.json(nextEntry);
+    const classId = Number(req.params.id);
+    const parsed = normalizeClassPayload(req.body, { partial: true });
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+
+    const updateData = { ...parsed.value, updated_at: new Date().toISOString() };
+
+    const { data, error } = await supabase
+      .from('cooking_classes')
+      .update(updateData)
+      .eq('id', classId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Cooking class not found.' });
+
+    if (data.spots_left > data.max_spots) {
+      return res.status(400).json({ error: 'Spots left cannot exceed max spots.' });
+    }
+
+    res.json(data);
   } catch (error) {
-    console.error('[classes/update]', error.message);
+    console.error('[classes/update]', error);
     res.status(500).json({ error: 'Unable to update the cooking class.' });
   }
 });
 
-router.delete('/:id', requireAuth, (req, res) => {
-  const classId = Number(req.params.id);
-  const index = db.data.cooking_classes.findIndex((item) => item.id === classId);
-
-  if (index === -1) {
-    return res.status(404).json({ error: 'Cooking class not found.' });
-  }
-
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
-    db.data.cooking_classes.splice(index, 1);
-    save();
+    const { error } = await supabase
+      .from('cooking_classes')
+      .delete()
+      .eq('id', Number(req.params.id));
+
+    if (error) throw error;
     res.json({ message: 'Cooking class deleted.' });
   } catch (error) {
-    console.error('[classes/delete]', error.message);
+    console.error('[classes/delete]', error);
     res.status(500).json({ error: 'Unable to delete the cooking class.' });
   }
 });

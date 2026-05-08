@@ -1,14 +1,13 @@
 import { Router } from 'express';
 import requireAuth from '../middleware/auth.js';
-import db, { save } from '../db/database.js';
+import supabase from '../db/supabase.js';
 import {
   CONTENT_SECTION_MAP,
   CONTENT_SECTION_KEYS,
 } from '../../shared/contentSchema.js';
 import {
-  buildAllSections,
-  buildSection,
-  mergeSiteContentDefaults,
+  buildAllSectionsFromRows,
+  buildSectionFromRows,
 } from '../lib/siteContent.js';
 import { isPlainObject } from '../lib/validation.js';
 
@@ -19,10 +18,10 @@ function getSectionConfig(sectionKey) {
 }
 
 function storeValue(value) {
-  const isJsonValue = typeof value === 'object' && value !== null;
+  const isJson = typeof value === 'object' && value !== null;
   return {
-    value: isJsonValue ? JSON.stringify(value) : String(value ?? ''),
-    type: isJsonValue ? 'json' : 'text',
+    value: isJson ? JSON.stringify(value) : String(value ?? ''),
+    type: isJson ? 'json' : 'text',
   };
 }
 
@@ -38,32 +37,49 @@ function validatePayload(sectionConfig, payload) {
   return '';
 }
 
-router.get('/', (_req, res) => {
-  if (!isPlainObject(db.data.site_content)) db.data.site_content = {};
-  mergeSiteContentDefaults(db.data.site_content);
+router.get('/', async (_req, res) => {
+  try {
+    const { data: rows, error } = await supabase
+      .from('site_content')
+      .select('*');
 
-  const allSections = buildAllSections(db.data.site_content);
-  const ordered = Object.fromEntries(
-    CONTENT_SECTION_KEYS.map((key) => [key, allSections[key] ?? {}]),
-  );
+    if (error) throw error;
 
-  res.json(ordered);
+    const allSections = buildAllSectionsFromRows(rows || []);
+    const ordered = Object.fromEntries(
+      CONTENT_SECTION_KEYS.map((key) => [key, allSections[key] ?? {}]),
+    );
+
+    res.json(ordered);
+  } catch (error) {
+    console.error('[content/getAll]', error);
+    res.status(500).json({ error: 'Unable to load content.' });
+  }
 });
 
-router.get('/:section', (req, res) => {
+router.get('/:section', async (req, res) => {
   const sectionConfig = getSectionConfig(req.params.section);
   if (!sectionConfig) {
     return res.status(404).json({ error: 'Content section not found.' });
   }
 
-  if (!isPlainObject(db.data.site_content)) db.data.site_content = {};
-  mergeSiteContentDefaults(db.data.site_content);
+  try {
+    const { data: rows, error } = await supabase
+      .from('site_content')
+      .select('*')
+      .eq('section', req.params.section);
 
-  res.json(buildSection(db.data.site_content[req.params.section] ?? {}));
+    if (error) throw error;
+    res.json(buildSectionFromRows(req.params.section, rows || []));
+  } catch (error) {
+    console.error('[content/getSection]', error);
+    res.status(500).json({ error: 'Unable to load content section.' });
+  }
 });
 
-router.put('/:section', requireAuth, (req, res) => {
-  const sectionConfig = getSectionConfig(req.params.section);
+router.put('/:section', requireAuth, async (req, res) => {
+  const sectionKey = req.params.section;
+  const sectionConfig = getSectionConfig(sectionKey);
   if (!sectionConfig) {
     return res.status(404).json({ error: 'Content section not found.' });
   }
@@ -73,20 +89,29 @@ router.put('/:section', requireAuth, (req, res) => {
     return res.status(400).json({ error: validationError });
   }
 
-  if (!isPlainObject(db.data.site_content)) db.data.site_content = {};
-  if (!isPlainObject(db.data.site_content[req.params.section])) {
-    db.data.site_content[req.params.section] = {};
-  }
-
   try {
-    Object.entries(req.body).forEach(([key, value]) => {
-      db.data.site_content[req.params.section][key] = storeValue(value);
-    });
+    // Upsert each key-value pair
+    const rows = Object.entries(req.body).map(([key, value]) => ({
+      section: sectionKey,
+      key,
+      ...storeValue(value),
+    }));
 
-    save();
-    res.json(buildSection(db.data.site_content[req.params.section]));
+    const { error: upsertError } = await supabase
+      .from('site_content')
+      .upsert(rows, { onConflict: 'section,key' });
+
+    if (upsertError) throw upsertError;
+
+    // Return updated section
+    const { data: updatedRows } = await supabase
+      .from('site_content')
+      .select('*')
+      .eq('section', sectionKey);
+
+    res.json(buildSectionFromRows(sectionKey, updatedRows || []));
   } catch (error) {
-    console.error('[content/update]', error.message);
+    console.error('[content/update]', error);
     res.status(500).json({ error: 'Unable to save content changes.' });
   }
 });

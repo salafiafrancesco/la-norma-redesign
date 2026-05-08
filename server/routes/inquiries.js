@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import requireAuth from '../middleware/auth.js';
-import db, { getNextId, save } from '../db/database.js';
+import supabase from '../db/supabase.js';
 import {
   cleanObject,
   isPlainObject,
@@ -12,11 +12,10 @@ import {
 } from '../lib/validation.js';
 
 const router = Router();
-
 const INQUIRY_TYPES = new Set(['wine_tasting', 'live_music', 'private_event']);
 const INQUIRY_STATUSES = new Set(['new', 'read', 'replied']);
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const type = normalizeText(req.body.type);
   const firstName = normalizeText(req.body.first_name);
   const lastName = normalizeText(req.body.last_name);
@@ -29,89 +28,83 @@ router.post('/', (req, res) => {
   if (!INQUIRY_TYPES.has(type)) {
     return res.status(400).json({ error: 'Inquiry type is invalid.' });
   }
-
   if (!firstName || !lastName || !email) {
     return res.status(400).json({ error: 'First name, last name, and email are required.' });
   }
-
   if (!isValidEmail(email)) {
     return res.status(400).json({ error: 'Please provide a valid email address.' });
   }
 
   const guestSelection = normalizeGuestSelection(req.body.guests, req.body.guest_label);
-  const now = new Date().toISOString();
-
-  const inquiry = {
-    id: getNextId('inquiries'),
-    type,
-    first_name: firstName,
-    last_name: lastName,
-    email,
-    phone,
-    date,
-    guests: guestSelection.display,
-    guest_count: guestSelection.count,
-    guest_label: guestSelection.label,
-    event_id: req.body.event_id ? Number(req.body.event_id) : null,
-    occasion,
-    message,
-    status: 'new',
-    created_at: now,
-    updated_at: now,
-  };
 
   try {
-    db.data.inquiries.push(inquiry);
-    save();
-    res.status(201).json({ ok: true, id: inquiry.id });
+    const { data, error } = await supabase
+      .from('inquiries')
+      .insert({
+        type,
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        phone,
+        date,
+        guests: guestSelection.display,
+        guest_count: guestSelection.count,
+        guest_label: guestSelection.label,
+        event_id: req.body.event_id ? Number(req.body.event_id) : null,
+        occasion,
+        message,
+        status: 'new',
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json({ ok: true, id: data.id });
   } catch (error) {
-    console.error('[inquiries/create]', error.message);
+    console.error('[inquiries/create]', error);
     res.status(500).json({ error: 'Unable to submit the inquiry.' });
   }
 });
 
-router.get('/', requireAuth, (req, res) => {
-  const type = req.query.type ? normalizeText(req.query.type) : '';
-  const status = req.query.status ? normalizeText(req.query.status) : '';
+router.get('/', requireAuth, async (req, res) => {
+  try {
+    let query = supabase.from('inquiries').select('*');
 
-  let inquiries = [...db.data.inquiries];
+    const type = req.query.type ? normalizeText(req.query.type) : '';
+    if (type) query = query.eq('type', type);
 
-  if (type) {
-    inquiries = inquiries.filter((entry) => entry.type === type);
+    const status = req.query.status ? normalizeText(req.query.status) : '';
+    if (status) query = query.eq('status', status);
+
+    query = query.order('created_at', { ascending: false });
+    const { data, error } = await query;
+    if (error) throw error;
+    res.json(data || []);
+  } catch (error) {
+    console.error('[inquiries/list]', error);
+    res.status(500).json({ error: 'Unable to load inquiries.' });
   }
-
-  if (status) {
-    inquiries = inquiries.filter((entry) => entry.status === status);
-  }
-
-  inquiries.sort((left, right) => right.created_at.localeCompare(left.created_at));
-  res.json(inquiries);
 });
 
-router.put('/:id', requireAuth, (req, res) => {
+router.put('/:id', requireAuth, async (req, res) => {
   if (!isPlainObject(req.body)) {
     return res.status(400).json({ error: 'Body must be a plain object.' });
   }
 
-  const inquiryId = Number(req.params.id);
-  const index = db.data.inquiries.findIndex((entry) => entry.id === inquiryId);
+  try {
+    const inquiryId = Number(req.params.id);
+    const { data: current } = await supabase.from('inquiries').select('*').eq('id', inquiryId).single();
+    if (!current) return res.status(404).json({ error: 'Inquiry not found.' });
 
-  if (index === -1) {
-    return res.status(404).json({ error: 'Inquiry not found.' });
-  }
+    if (req.body.status && !INQUIRY_STATUSES.has(normalizeText(req.body.status))) {
+      return res.status(400).json({ error: 'Status must be new, read, or replied.' });
+    }
 
-  if (req.body.status && !INQUIRY_STATUSES.has(normalizeText(req.body.status))) {
-    return res.status(400).json({ error: 'Status must be new, read, or replied.' });
-  }
+    const guestSelection = req.body.guests !== undefined || req.body.guest_label !== undefined
+      ? normalizeGuestSelection(req.body.guests ?? current.guests, req.body.guest_label ?? current.guest_label)
+      : null;
 
-  const current = db.data.inquiries[index];
-  const guestSelection = req.body.guests !== undefined || req.body.guest_label !== undefined
-    ? normalizeGuestSelection(req.body.guests ?? current.guests, req.body.guest_label ?? current.guest_label)
-    : null;
-
-  const nextEntry = {
-    ...current,
-    ...cleanObject({
+    const updateData = cleanObject({
       status: req.body.status ? normalizeText(req.body.status) : undefined,
       phone: req.body.phone !== undefined ? normalizeOptionalText(req.body.phone) : undefined,
       date: req.body.date !== undefined ? normalizeIsoDate(req.body.date) : undefined,
@@ -121,36 +114,31 @@ router.put('/:id', requireAuth, (req, res) => {
       guests: guestSelection?.display,
       guest_count: guestSelection?.count,
       guest_label: guestSelection?.label,
-    }),
-    id: current.id,
-    created_at: current.created_at,
-    updated_at: new Date().toISOString(),
-  };
+      updated_at: new Date().toISOString(),
+    });
 
-  try {
-    db.data.inquiries[index] = nextEntry;
-    save();
-    res.json(nextEntry);
+    const { data: updated, error } = await supabase
+      .from('inquiries')
+      .update(updateData)
+      .eq('id', inquiryId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(updated);
   } catch (error) {
-    console.error('[inquiries/update]', error.message);
+    console.error('[inquiries/update]', error);
     res.status(500).json({ error: 'Unable to update the inquiry.' });
   }
 });
 
-router.delete('/:id', requireAuth, (req, res) => {
-  const inquiryId = Number(req.params.id);
-  const index = db.data.inquiries.findIndex((entry) => entry.id === inquiryId);
-
-  if (index === -1) {
-    return res.status(404).json({ error: 'Inquiry not found.' });
-  }
-
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
-    db.data.inquiries.splice(index, 1);
-    save();
+    const { error } = await supabase.from('inquiries').delete().eq('id', Number(req.params.id));
+    if (error) throw error;
     res.json({ ok: true });
   } catch (error) {
-    console.error('[inquiries/delete]', error.message);
+    console.error('[inquiries/delete]', error);
     res.status(500).json({ error: 'Unable to delete the inquiry.' });
   }
 });

@@ -8,7 +8,6 @@ import {
   ALLOWED_ORIGINS,
   IS_PRODUCTION,
   PORT,
-  UPLOADS_DIR,
 } from './config.js';
 
 import authRoutes from './routes/auth.js';
@@ -20,9 +19,26 @@ import inquiryRoutes from './routes/inquiries.js';
 import rsvpRoutes from './routes/rsvp.js';
 import uploadRoutes from './routes/upload.js';
 
-const app = express();
+export const app = express();
 
-ensureInitialized();
+// Run init once (idempotent — seeds only if tables are empty)
+let initDone = false;
+async function runInit() {
+  if (initDone) return;
+  await ensureInitialized();
+  initDone = true;
+}
+
+// Middleware that ensures DB is seeded before first request
+app.use(async (_req, _res, next) => {
+  try {
+    await runInit();
+    next();
+  } catch (error) {
+    console.error('[init]', error);
+    next(error);
+  }
+});
 
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
@@ -44,7 +60,6 @@ const corsMiddleware = cors({
       callback(null, true);
       return;
     }
-
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
@@ -74,7 +89,6 @@ function bookingSubmissionLimiter(req, res, next) {
   if (req.method === 'POST') {
     return bookingLimiter(req, res, next);
   }
-
   return next();
 }
 
@@ -87,7 +101,6 @@ const authLimiter = rateLimit({
 });
 
 app.use('/api', apiLimiter);
-app.use('/uploads', express.static(UPLOADS_DIR, { maxAge: '7d', etag: true }));
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/blog', blogRoutes);
@@ -119,24 +132,24 @@ app.use((error, _req, res, next) => {
   if (error?.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'Invalid JSON body.' });
   }
-
   if (error?.message?.startsWith('CORS:')) {
     return res.status(403).json({ error: 'Origin not allowed.' });
   }
-
   console.error('[express error]', error);
-
   const status = error.status || 500;
   const message = IS_PRODUCTION && status === 500
     ? 'Internal server error.'
     : (error.message || 'Internal server error.');
-
   return res.status(status).json({ error: message });
 });
 
-app.listen(PORT, () => {
-  if (!IS_PRODUCTION) {
-    console.log(`La Norma API -> http://localhost:${PORT}`);
-    console.log(`Health check -> http://localhost:${PORT}/api/health`);
-  }
-});
+// Only listen when run directly (not when imported by Vercel)
+const isDirectRun = !process.env.VERCEL;
+if (isDirectRun) {
+  app.listen(PORT, () => {
+    if (!IS_PRODUCTION) {
+      console.log(`La Norma API -> http://localhost:${PORT}`);
+      console.log(`Health check -> http://localhost:${PORT}/api/health`);
+    }
+  });
+}

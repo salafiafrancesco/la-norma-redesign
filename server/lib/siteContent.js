@@ -1,94 +1,114 @@
 import { siteDefaults } from '../../shared/siteDefaults.js';
 
-function createEntry(value, type = typeof value === 'object' && value !== null ? 'json' : 'text') {
+function createEntry(value) {
+  const isJson = typeof value === 'object' && value !== null;
   return {
-    value: type === 'json' ? JSON.stringify(value) : String(value ?? ''),
-    type,
+    value: isJson ? JSON.stringify(value) : String(value ?? ''),
+    type: isJson ? 'json' : 'text',
   };
 }
 
+const DEFAULT_CONTENT = {
+  restaurant: {
+    name: siteDefaults.restaurant.name,
+    tagline: siteDefaults.restaurant.tagline,
+    description: siteDefaults.restaurant.description,
+    address: siteDefaults.restaurant.address,
+    city: siteDefaults.restaurant.city,
+    state: siteDefaults.restaurant.state,
+    zip: siteDefaults.restaurant.zip,
+    phone: siteDefaults.restaurant.phone,
+    email: siteDefaults.restaurant.email,
+    hours: siteDefaults.restaurant.hours,
+    hours_note: siteDefaults.restaurant.hoursNote,
+    map_embed_url: siteDefaults.restaurant.mapEmbedUrl,
+    social_instagram: siteDefaults.restaurant.social.instagram,
+    social_facebook: siteDefaults.restaurant.social.facebook,
+    social_tripadvisor: siteDefaults.restaurant.social.tripadvisor,
+    social_yelp: siteDefaults.restaurant.social.yelp,
+  },
+  links: {
+    reserve: siteDefaults.links.reserve,
+    menu_pdf: siteDefaults.links.menuPdf,
+    order_delivery: siteDefaults.links.orderDelivery,
+    order_pickup: siteDefaults.links.orderPickup,
+    gift_cards: siteDefaults.links.giftCards,
+  },
+  hero: {
+    eyebrow: siteDefaults.hero.eyebrow,
+    headline1: siteDefaults.hero.headline[0],
+    headline2: siteDefaults.hero.headline[1],
+    subheadline: siteDefaults.hero.subheadline,
+    image_url: siteDefaults.hero.imageUrl,
+    image_alt: siteDefaults.hero.imageAlt,
+  },
+  story: {
+    label: siteDefaults.story.label,
+    quote: siteDefaults.story.quote,
+    body1: siteDefaults.story.body[0],
+    body2: siteDefaults.story.body[1],
+    stat1_value: siteDefaults.story.stat1.value,
+    stat1_label: siteDefaults.story.stat1.label,
+    stat2_value: siteDefaults.story.stat2.value,
+    stat2_label: siteDefaults.story.stat2.label,
+    stat3_value: siteDefaults.story.stat3.value,
+    stat3_label: siteDefaults.story.stat3.label,
+    image_url: siteDefaults.story.imageUrl,
+    image_alt: siteDefaults.story.imageAlt,
+  },
+  specialties: {
+    items: siteDefaults.specialties,
+  },
+  experiences: {
+    items: siteDefaults.experiences,
+  },
+  menu: {
+    label: siteDefaults.menuHighlights.label,
+    headline: siteDefaults.menuHighlights.headline,
+    note: siteDefaults.menuHighlights.note,
+    categories: siteDefaults.menuHighlights.categories,
+  },
+  testimonials: {
+    label: siteDefaults.testimonialSection.label,
+    headline: siteDefaults.testimonialSection.headline,
+    items: siteDefaults.testimonialSection.items,
+  },
+  reservation_banner: {
+    headline: siteDefaults.reservationBanner.headline,
+    sub: siteDefaults.reservationBanner.sub,
+    cta_text: siteDefaults.reservationBanner.ctaText,
+    note: siteDefaults.reservationBanner.note,
+  },
+  order_online: {
+    eyebrow: siteDefaults.orderOnline.eyebrow,
+    headline: siteDefaults.orderOnline.headline,
+    sub: siteDefaults.orderOnline.sub,
+  },
+  footer: {
+    tagline: siteDefaults.footer.tagline,
+    nav_items: siteDefaults.footer.navItems,
+  },
+};
+
+/**
+ * Returns raw default values for a section (plain JS values, not stored format).
+ */
+export function getDefaultContentForSection(sectionKey) {
+  return DEFAULT_CONTENT[sectionKey] ?? null;
+}
+
+/**
+ * Returns the full default content map with createEntry wrappers.
+ */
 export function createDefaultSiteContent() {
-  return {
-    restaurant: {
-      name: createEntry(siteDefaults.restaurant.name),
-      tagline: createEntry(siteDefaults.restaurant.tagline),
-      description: createEntry(siteDefaults.restaurant.description),
-      address: createEntry(siteDefaults.restaurant.address),
-      city: createEntry(siteDefaults.restaurant.city),
-      state: createEntry(siteDefaults.restaurant.state),
-      zip: createEntry(siteDefaults.restaurant.zip),
-      phone: createEntry(siteDefaults.restaurant.phone),
-      email: createEntry(siteDefaults.restaurant.email),
-      hours: createEntry(siteDefaults.restaurant.hours),
-      hours_note: createEntry(siteDefaults.restaurant.hoursNote),
-      map_embed_url: createEntry(siteDefaults.restaurant.mapEmbedUrl),
-      social_instagram: createEntry(siteDefaults.restaurant.social.instagram),
-      social_facebook: createEntry(siteDefaults.restaurant.social.facebook),
-      social_tripadvisor: createEntry(siteDefaults.restaurant.social.tripadvisor),
-      social_yelp: createEntry(siteDefaults.restaurant.social.yelp),
-    },
-    links: {
-      reserve: createEntry(siteDefaults.links.reserve),
-      menu_pdf: createEntry(siteDefaults.links.menuPdf),
-      order_delivery: createEntry(siteDefaults.links.orderDelivery),
-      order_pickup: createEntry(siteDefaults.links.orderPickup),
-      gift_cards: createEntry(siteDefaults.links.giftCards),
-    },
-    hero: {
-      eyebrow: createEntry(siteDefaults.hero.eyebrow),
-      headline1: createEntry(siteDefaults.hero.headline[0]),
-      headline2: createEntry(siteDefaults.hero.headline[1]),
-      subheadline: createEntry(siteDefaults.hero.subheadline),
-      image_url: createEntry(siteDefaults.hero.imageUrl),
-      image_alt: createEntry(siteDefaults.hero.imageAlt),
-    },
-    story: {
-      label: createEntry(siteDefaults.story.label),
-      quote: createEntry(siteDefaults.story.quote),
-      body1: createEntry(siteDefaults.story.body[0]),
-      body2: createEntry(siteDefaults.story.body[1]),
-      stat1_value: createEntry(siteDefaults.story.stat1.value),
-      stat1_label: createEntry(siteDefaults.story.stat1.label),
-      stat2_value: createEntry(siteDefaults.story.stat2.value),
-      stat2_label: createEntry(siteDefaults.story.stat2.label),
-      stat3_value: createEntry(siteDefaults.story.stat3.value),
-      stat3_label: createEntry(siteDefaults.story.stat3.label),
-      image_url: createEntry(siteDefaults.story.imageUrl),
-      image_alt: createEntry(siteDefaults.story.imageAlt),
-    },
-    specialties: {
-      items: createEntry(siteDefaults.specialties, 'json'),
-    },
-    experiences: {
-      items: createEntry(siteDefaults.experiences, 'json'),
-    },
-    menu: {
-      label: createEntry(siteDefaults.menuHighlights.label),
-      headline: createEntry(siteDefaults.menuHighlights.headline),
-      note: createEntry(siteDefaults.menuHighlights.note),
-      categories: createEntry(siteDefaults.menuHighlights.categories, 'json'),
-    },
-    testimonials: {
-      label: createEntry(siteDefaults.testimonialSection.label),
-      headline: createEntry(siteDefaults.testimonialSection.headline),
-      items: createEntry(siteDefaults.testimonialSection.items, 'json'),
-    },
-    reservation_banner: {
-      headline: createEntry(siteDefaults.reservationBanner.headline),
-      sub: createEntry(siteDefaults.reservationBanner.sub),
-      cta_text: createEntry(siteDefaults.reservationBanner.ctaText),
-      note: createEntry(siteDefaults.reservationBanner.note),
-    },
-    order_online: {
-      eyebrow: createEntry(siteDefaults.orderOnline.eyebrow),
-      headline: createEntry(siteDefaults.orderOnline.headline),
-      sub: createEntry(siteDefaults.orderOnline.sub),
-    },
-    footer: {
-      tagline: createEntry(siteDefaults.footer.tagline),
-      nav_items: createEntry(siteDefaults.footer.navItems, 'json'),
-    },
-  };
+  const result = {};
+  for (const [sectionKey, sectionData] of Object.entries(DEFAULT_CONTENT)) {
+    result[sectionKey] = {};
+    for (const [key, value] of Object.entries(sectionData)) {
+      result[sectionKey][key] = createEntry(value);
+    }
+  }
+  return result;
 }
 
 function parseStoredValue(raw) {
@@ -100,48 +120,63 @@ function parseStoredValue(raw) {
       return raw.value ?? null;
     }
   }
-
   return raw.value ?? '';
 }
 
+/**
+ * Convert a flat object { key: { value, type } } to parsed values.
+ */
 export function buildSection(rawSection = {}) {
   return Object.fromEntries(
     Object.entries(rawSection).map(([key, value]) => [key, parseStoredValue(value)]),
   );
 }
 
-export function buildAllSections(siteContent = {}) {
-  return Object.fromEntries(
-    Object.entries(siteContent).map(([sectionKey, sectionValue]) => [
-      sectionKey,
-      buildSection(sectionValue),
-    ]),
-  );
-}
+/**
+ * Convert Supabase rows [{section, key, value, type}] into nested { section: { key: parsed } }.
+ */
+export function buildAllSectionsFromRows(rows = []) {
+  const grouped = {};
+  for (const row of rows) {
+    if (!grouped[row.section]) grouped[row.section] = {};
+    grouped[row.section][row.key] = { value: row.value, type: row.type };
+  }
 
-export function mergeSiteContentDefaults(currentContent = {}) {
+  // Merge with defaults for any missing sections/keys
   const defaults = createDefaultSiteContent();
-
   for (const [sectionKey, sectionDefaults] of Object.entries(defaults)) {
-    if (!currentContent[sectionKey] || typeof currentContent[sectionKey] !== 'object') {
-      currentContent[sectionKey] = {};
-    }
-
+    if (!grouped[sectionKey]) grouped[sectionKey] = {};
     for (const [fieldKey, fieldValue] of Object.entries(sectionDefaults)) {
-      if (!currentContent[sectionKey][fieldKey]) {
-        currentContent[sectionKey][fieldKey] = fieldValue;
+      if (!grouped[sectionKey][fieldKey]) {
+        grouped[sectionKey][fieldKey] = fieldValue;
       }
     }
   }
 
-  return currentContent;
+  const result = {};
+  for (const [sectionKey, sectionData] of Object.entries(grouped)) {
+    result[sectionKey] = buildSection(sectionData);
+  }
+  return result;
 }
 
-export function createStoredSection(sectionData = {}) {
-  return Object.fromEntries(
-    Object.entries(sectionData).map(([key, value]) => [
-      key,
-      createEntry(value),
-    ]),
-  );
+/**
+ * Convert Supabase rows for a single section into parsed values, merged with defaults.
+ */
+export function buildSectionFromRows(sectionKey, rows = []) {
+  const rawSection = {};
+  for (const row of rows) {
+    rawSection[row.key] = { value: row.value, type: row.type };
+  }
+
+  // Merge defaults
+  const defaults = createDefaultSiteContent();
+  const sectionDefaults = defaults[sectionKey] || {};
+  for (const [fieldKey, fieldValue] of Object.entries(sectionDefaults)) {
+    if (!rawSection[fieldKey]) {
+      rawSection[fieldKey] = fieldValue;
+    }
+  }
+
+  return buildSection(rawSection);
 }
