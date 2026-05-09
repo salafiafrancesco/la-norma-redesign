@@ -194,7 +194,7 @@ export default function HomePage() {
           <div className="container">
             <div className={`fade-up${menuVis ? ' visible' : ''}`} ref={menuRef}>
               <p className="hp__eyebrow">{menuHighlights.label}</p>
-              <h2 className="hp__heading">{menuHighlights.headline}</h2>
+              <h2 className="hp__heading" style={{ whiteSpace: 'pre-line' }}>{menuHighlights.headline}</h2>
             </div>
 
             {hero.imageUrl && (
@@ -248,7 +248,7 @@ export default function HomePage() {
         <section className="hp__section" id="atmosphere">
           <div className="container">
             <div className={`hp__atmosphere fade-up${atmoVis ? ' visible' : ''}`} ref={atmoRef}>
-              <div>
+              <div className="hp__atmosphere-copy">
                 <p className="hp__eyebrow">{story.label}</p>
                 <h2 className="hp__heading">Sicilian cooking, served with patience, polish, and a sense of occasion.</h2>
                 <p className="hp__atmosphere-body">{story.body[0]}</p>
@@ -274,7 +274,7 @@ export default function HomePage() {
               <div className={`fade-up${beyondVis ? ' visible' : ''}`} ref={beyondRef}>
                 <p className="hp__eyebrow">Beyond dinner</p>
                 <h2 className="hp__heading">Four ways to extend the table.</h2>
-                <p style={{ color: 'var(--text-mid)', maxWidth: '52ch', marginBottom: '1.5rem' }}>
+                <p className="hp__beyond-sub">
                   From Friday wine evenings to yacht catering, the kitchen and dining room move with you.
                 </p>
               </div>
