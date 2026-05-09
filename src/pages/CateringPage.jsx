@@ -104,6 +104,9 @@ export default function CateringPage() {
   // FAQ open state (controlled to support aria-expanded properly)
   const [openFaq, setOpenFaq] = useState(null);
 
+  // Active tier in the HOW WE CATER showcase
+  const [activeTier, setActiveTier] = useState(1); // default to Grazing (signature)
+
   // Form
   const [form, setForm] = useState({ name: '', email: '', phone: '', event_date: '', event_type: '', guests: '', message: '', location_type: '', budget_range: '' });
   const [errors, setErrors] = useState({});
@@ -272,33 +275,114 @@ export default function CateringPage() {
         </section>
 
         {/* ============================================================ */}
-        {/* 3. SERVICE TIERS                                             */}
+        {/* 3. HOW WE CATER — interactive showcase                       */}
         {/* ============================================================ */}
-        <section className="cat-section" id="services">
+        <section className="cat-section cat-howwe" id="services">
           <div className="container">
-            <div className={`fade-up${tiersVis ? ' visible' : ''}`} ref={tiersRef}>
+            <div className={`cat-howwe__intro fade-up${tiersVis ? ' visible' : ''}`} ref={tiersRef}>
               <p className="cat-section__eyebrow">How we cater</p>
               <h2 className="cat-section__heading">Three formats, infinitely customizable.</h2>
-              <p className="cat-section__sub">Pick the format that matches the room you&rsquo;re hosting.</p>
+              <p className="cat-section__sub">
+                Pick the format that matches the room you&rsquo;re hosting.
+              </p>
             </div>
-            <div className="cat-tiers" ref={tiersScrollRef}>
-              {tiers.map((tier, i) => (
-                <article key={tier.id} className={`cat-tier fade-up delay-${i + 1}${tiersVis ? ' visible' : ''}`}>
-                  <div className="cat-tier__media">
-                    {tier.image_url && <img src={tier.image_url} alt={tier.title} loading="lazy" />}
-                    {tier.badge_label && <span className="cat-tier__badge">{tier.badge_label}</span>}
-                  </div>
-                  <div className="cat-tier__body">
-                    <h3 className="cat-tier__title">{tier.title}</h3>
-                    <p className="cat-tier__range">{tier.range_label}</p>
-                    <p className="cat-tier__desc">{tier.body}</p>
-                    <p className="cat-tier__ideal"><strong>Ideal for:</strong> {tier.ideal_for}</p>
-                    <button type="button" className="cat-tier__cta" onClick={() => goToForm(tier.title)}>
-                      Inquire about this format &rarr;
+
+            <div className={`cat-howwe__showcase fade-up delay-1${tiersVis ? ' visible' : ''}`} ref={tiersScrollRef}>
+              {/* Numbered tab strip */}
+              <div className="cat-howwe__tabs" role="tablist" aria-label="Catering formats">
+                {tiers.map((tier, i) => {
+                  const isActive = i === activeTier;
+                  const tabId = `cat-tier-tab-${i}`;
+                  const panelId = `cat-tier-panel-${i}`;
+                  return (
+                    <button
+                      key={tier.id}
+                      id={tabId}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-controls={panelId}
+                      tabIndex={isActive ? 0 : -1}
+                      className={`cat-howwe__tab${isActive ? ' is-active' : ''}`}
+                      onClick={() => setActiveTier(i)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'ArrowRight') {
+                          e.preventDefault();
+                          setActiveTier((current) => (current + 1) % tiers.length);
+                        } else if (e.key === 'ArrowLeft') {
+                          e.preventDefault();
+                          setActiveTier((current) => (current - 1 + tiers.length) % tiers.length);
+                        }
+                      }}
+                    >
+                      <span className="cat-howwe__tab-num">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="cat-howwe__tab-name">{tier.title}</span>
+                      {tier.badge_label && (
+                        <span className="cat-howwe__tab-badge">{tier.badge_label}</span>
+                      )}
                     </button>
+                  );
+                })}
+              </div>
+
+              {/* Editorial panel */}
+              {tiers.map((tier, i) => {
+                if (i !== activeTier) return null;
+                const panelId = `cat-tier-panel-${i}`;
+                const tabId = `cat-tier-tab-${i}`;
+                return (
+                  <div
+                    key={tier.id}
+                    id={panelId}
+                    role="tabpanel"
+                    aria-labelledby={tabId}
+                    className="cat-howwe__panel"
+                  >
+                    <div className="cat-howwe__media">
+                      {tier.image_url && (
+                        <img src={tier.image_url} alt={tier.title} loading="lazy" />
+                      )}
+                      <span className="cat-howwe__media-num" aria-hidden="true">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="cat-howwe__media-frame" aria-hidden="true" />
+                    </div>
+
+                    <div className="cat-howwe__copy">
+                      <span className="cat-howwe__range">{tier.range_label}</span>
+                      <h3 className="cat-howwe__title">{tier.title}</h3>
+                      <p className="cat-howwe__body">{tier.body}</p>
+
+                      <div className="cat-howwe__ideal">
+                        <span className="cat-howwe__ideal-label">Ideal for</span>
+                        <span className="cat-howwe__ideal-text">{tier.ideal_for}</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="cat-howwe__cta"
+                        onClick={() => goToForm(tier.title)}
+                      >
+                        <span>Inquire about this format</span>
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                          <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="cat-howwe__progress" aria-hidden="true">
+                      {tiers.map((_, j) => (
+                        <span
+                          key={j}
+                          className={`cat-howwe__progress-dot${j === activeTier ? ' is-active' : ''}`}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </article>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
