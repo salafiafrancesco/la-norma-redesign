@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   blog as blogApi,
   bookings as bookingsApi,
-  events as eventsApi,
+  experienceEvents as eventsApi,
   inquiries as inquiriesApi,
   homepageContent as homepageContentApi,
 } from '../api/client';

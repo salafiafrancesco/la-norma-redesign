@@ -15,7 +15,6 @@ const NAV = [
   { key: 'newsletter', icon: '\u2706', label: 'Newsletter' },
   { key: 'images',    icon: '\u25A3', label: 'Images', group: 'Assets' },
   { key: 'theme',     icon: '\u25D0', label: 'Theme & Colors' },
-  { key: 'events',    icon: '\u266B', label: 'Events (legacy)', group: 'Legacy' },
 ];
 
 const PAGE_TITLES = {
@@ -27,7 +26,6 @@ const PAGE_TITLES = {
   footer: 'Footer',
   blog: 'Journal',
   experiences: 'Experiences',
-  events: 'Events (legacy)',
   catering: 'Catering',
   inquiries: 'Inquiries',
   newsletter: 'Newsletter Subscribers',

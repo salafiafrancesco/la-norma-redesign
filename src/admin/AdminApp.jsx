@@ -7,7 +7,6 @@ import Dashboard from './pages/Dashboard';
 import ContentEditor from './pages/ContentEditor';
 import BlogManager from './pages/BlogManager';
 import ImagesPage from './pages/ImagesPage';
-import EventsManager from './pages/EventsManager';
 import CateringManager from './pages/CateringManager';
 import ExperiencesManager from './pages/ExperiencesManager';
 import HomepageManager from './pages/HomepageManager';
@@ -43,7 +42,6 @@ function AdminContent() {
     theme:      <ThemeManager />,
     blog:       <BlogManager />,
     images:     <ImagesPage />,
-    events:     <EventsManager />,
     experiences: <ExperiencesManager />,
     catering:   <CateringManager />,
     inquiries:  <InquiriesManager />,
