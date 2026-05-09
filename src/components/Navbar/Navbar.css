@@ -66,17 +66,7 @@
   width: auto;
   max-width: 100%;
   object-fit: contain;
-  /* Logo ships as dark-on-light — render it as cream on the dark navbar.
-     The brightness(0) flattens to black, then invert(1) flips to white,
-     and the warm filter chain biases it toward cream/gold for premium feel. */
-  filter:
-    brightness(0)
-    invert(1)
-    sepia(0.18)
-    saturate(420%)
-    hue-rotate(355deg)
-    brightness(1.05);
-  transition: opacity var(--dur-fast) var(--ease), filter var(--dur-base) var(--ease);
+  transition: opacity var(--dur-fast) var(--ease);
 }
 
 .navbar__logo:hover .navbar__logo-img {
