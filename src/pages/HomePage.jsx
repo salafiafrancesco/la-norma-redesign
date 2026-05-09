@@ -555,23 +555,56 @@ export default function HomePage() {
         {/* ============================================================ */}
         {/* 4. ATMOSPHERE (Story snippet)                                 */}
         {/* ============================================================ */}
-        <section className="hp__section" id="atmosphere">
+        <section className="hp__section hp__section--story" id="atmosphere">
           <div className="container">
-            <div className={`hp__atmosphere fade-up${atmoVis ? ' visible' : ''}`} ref={atmoRef}>
-              <div className="hp__atmosphere-copy">
-                <p className="hp__eyebrow">{story.label}</p>
-                <h2 className="hp__heading">Sicilian cooking, served with patience, polish, and a sense of occasion.</h2>
-                <p className="hp__atmosphere-body">{story.body[0]}</p>
-                <p className="hp__atmosphere-body">{story.body[1]}</p>
-                <button type="button" className="btn btn--outline-dark" onClick={() => navigate(PAGE_KEYS.about)}>Read our story</button>
+            <div className={`hp__story fade-up${atmoVis ? ' visible' : ''}`} ref={atmoRef}>
+              <div className="hp__story-media">
+                <div className="hp__story-media__frame">
+                  <img
+                    src={story.imageUrl}
+                    alt={story.imageAlt}
+                    className="hp__story-img"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="hp__story-est" aria-label="Established 2008">
+                  <span className="hp__story-est__label">Established</span>
+                  <span className="hp__story-est__year">2008</span>
+                </div>
               </div>
-              <div className="hp__atmosphere-media">
-                <img
-                  src={story.imageUrl}
-                  alt={story.imageAlt}
-                  className="hp__atmosphere-img"
-                  loading="lazy"
-                />
+
+              <div className="hp__story-copy">
+                <p className="hp__eyebrow">{story.label}</p>
+                <h2 className="hp__heading hp__story-heading">Sicilian cooking, served with patience, polish, and a sense of occasion.</h2>
+
+                {story.quote && (
+                  <blockquote className="hp__story-pullquote">
+                    <p>{story.quote}</p>
+                  </blockquote>
+                )}
+
+                <p className="hp__story-body hp__story-body--first">{story.body[0]}</p>
+                <p className="hp__story-body">{story.body[1]}</p>
+
+                <div className="hp__story-stats" role="list">
+                  {[story.stat1, story.stat2, story.stat3]
+                    .filter((s) => s && s.value)
+                    .map((s, i) => (
+                      <div className="hp__story-stat" role="listitem" key={s.label || i}>
+                        <span className="hp__story-stat__value">{s.value}</span>
+                        <span className="hp__story-stat__label">{s.label}</span>
+                      </div>
+                    ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="hp__story-link"
+                  onClick={() => navigate(PAGE_KEYS.about)}
+                >
+                  <span className="hp__story-link__text">Read our story</span>
+                  <span className="hp__story-link__arrow" aria-hidden="true">&rarr;</span>
+                </button>
               </div>
             </div>
           </div>
