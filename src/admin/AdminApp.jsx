@@ -6,8 +6,6 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ContentEditor from './pages/ContentEditor';
 import BlogManager from './pages/BlogManager';
-import ClassesManager from './pages/ClassesManager';
-import RSVPList from './pages/RSVPList';
 import ImagesPage from './pages/ImagesPage';
 import EventsManager from './pages/EventsManager';
 import CateringManager from './pages/CateringManager';
@@ -17,6 +15,7 @@ import InquiriesManager from './pages/InquiriesManager';
 import MenuManager from './pages/MenuManager';
 import NavigationManager from './pages/NavigationManager';
 import FooterManager from './pages/FooterManager';
+import NewsletterManager from './pages/NewsletterManager';
 import ThemeManager from './pages/ThemeManager';
 
 function AdminContent() {
@@ -43,13 +42,12 @@ function AdminContent() {
     footer:     <FooterManager />,
     theme:      <ThemeManager />,
     blog:       <BlogManager />,
-    classes:    <ClassesManager />,
-    rsvp:       <RSVPList />,
     images:     <ImagesPage />,
     events:     <EventsManager />,
     experiences: <ExperiencesManager />,
     catering:   <CateringManager />,
     inquiries:  <InquiriesManager />,
+    newsletter: <NewsletterManager />,
   };
 
   return (
