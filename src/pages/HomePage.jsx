@@ -453,13 +453,18 @@ export default function HomePage() {
                   tabIndex={0}
                   onKeyDown={(e) => { if (e.key === 'Enter') navigatePath(card.link); }}
                 >
-                  <div className="hp__beyond-card__media">
-                    {card.image_url && <img src={card.image_url} alt={card.title} loading="lazy" />}
-                  </div>
-                  <div className="hp__beyond-card__body">
+                  {card.image_url && (
+                    <img className="hp__beyond-card__bg" src={card.image_url} alt="" loading="lazy" aria-hidden="true" />
+                  )}
+                  <div className="hp__beyond-card__overlay" aria-hidden="true" />
+                  <span className="hp__beyond-card__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="hp__beyond-card__inner">
                     <h3 className="hp__beyond-card__title">{card.title}</h3>
                     <p className="hp__beyond-card__desc">{card.body}</p>
-                    <span className="hp__beyond-card__cta">{card.cta_label || 'Discover'} &rarr;</span>
+                    <span className="hp__beyond-card__cta">
+                      <span className="hp__beyond-card__cta-label">{card.cta_label || 'Discover'}</span>
+                      <span className="hp__beyond-card__cta-arrow" aria-hidden="true">&rarr;</span>
+                    </span>
                   </div>
                 </article>
               ))}
