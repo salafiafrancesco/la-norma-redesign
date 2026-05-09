@@ -15,6 +15,7 @@ const NAV = [
   { key: 'catering',  icon: '\u2615', label: 'Catering' },
   { key: 'inquiries', icon: '\u2709', label: 'Inquiries' },
   { key: 'images',    icon: '\u25A3', label: 'Images', group: 'Assets' },
+  { key: 'theme',     icon: '\u25D0', label: 'Theme & Colors' },
 ];
 
 const PAGE_TITLES = {
@@ -32,6 +33,7 @@ const PAGE_TITLES = {
   catering: 'Catering',
   inquiries: 'Inquiries',
   images: 'Image Library',
+  theme: 'Theme & Colors',
 };
 
 export default function AdminLayout({ page, setPage, children }) {

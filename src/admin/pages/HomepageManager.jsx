@@ -3,6 +3,7 @@ import {
   content as contentApi,
   homepageContent as hpApi,
 } from '../api/client';
+import ImageField from '../components/ImageField';
 
 function CollectionTab({ collection, label, columns, emptyRow }) {
   const [items, setItems] = useState([]);
@@ -78,18 +79,31 @@ function CollectionTab({ collection, label, columns, emptyRow }) {
               <button className="adm-modal__close" onClick={() => setEditing(null)}>&times;</button>
             </div>
             <div className="adm-modal__body">
-              {columns.filter((c) => c.editable !== false).map((c) => (
-                <div key={c.key} className="adm-field" style={{ marginBottom: '0.75rem' }}>
-                  <label className="adm-label">{c.label}</label>
-                  {c.type === 'textarea' ? (
-                    <textarea className="adm-textarea" value={editing[c.key] || ''} onChange={(e) => setEditing((p) => ({ ...p, [c.key]: e.target.value }))} />
-                  ) : c.type === 'number' ? (
-                    <input className="adm-input" type="number" value={editing[c.key] ?? ''} onChange={(e) => setEditing((p) => ({ ...p, [c.key]: Number(e.target.value) }))} />
-                  ) : (
-                    <input className="adm-input" value={editing[c.key] || ''} onChange={(e) => setEditing((p) => ({ ...p, [c.key]: e.target.value }))} />
-                  )}
-                </div>
-              ))}
+              {columns.filter((c) => c.editable !== false).map((c) => {
+                const isImage = c.type === 'image' || /image_url$|^image$|_image_url$/.test(c.key);
+                return (
+                  <div key={c.key} className="adm-field" style={{ marginBottom: '0.75rem' }}>
+                    {isImage ? (
+                      <ImageField
+                        label={c.label}
+                        value={editing[c.key] || ''}
+                        onChange={(url) => setEditing((p) => ({ ...p, [c.key]: url }))}
+                      />
+                    ) : (
+                      <>
+                        <label className="adm-label">{c.label}</label>
+                        {c.type === 'textarea' ? (
+                          <textarea className="adm-textarea" value={editing[c.key] || ''} onChange={(e) => setEditing((p) => ({ ...p, [c.key]: e.target.value }))} />
+                        ) : c.type === 'number' ? (
+                          <input className="adm-input" type="number" value={editing[c.key] ?? ''} onChange={(e) => setEditing((p) => ({ ...p, [c.key]: Number(e.target.value) }))} />
+                        ) : (
+                          <input className="adm-input" value={editing[c.key] || ''} onChange={(e) => setEditing((p) => ({ ...p, [c.key]: e.target.value }))} />
+                        )}
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             <div className="adm-modal__footer">
               <button className="adm-btn adm-btn--secondary" onClick={() => setEditing(null)}>Cancel</button>

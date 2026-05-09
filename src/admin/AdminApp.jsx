@@ -17,6 +17,7 @@ import InquiriesManager from './pages/InquiriesManager';
 import MenuManager from './pages/MenuManager';
 import NavigationManager from './pages/NavigationManager';
 import FooterManager from './pages/FooterManager';
+import ThemeManager from './pages/ThemeManager';
 
 function AdminContent() {
   const { admin, checking } = useAdmin();
@@ -40,6 +41,7 @@ function AdminContent() {
     content:    <ContentEditor />,
     navigation: <NavigationManager />,
     footer:     <FooterManager />,
+    theme:      <ThemeManager />,
     blog:       <BlogManager />,
     classes:    <ClassesManager />,
     rsvp:       <RSVPList />,

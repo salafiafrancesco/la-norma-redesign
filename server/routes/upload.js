@@ -5,17 +5,20 @@ import requireAuth from '../middleware/auth.js';
 import supabase from '../db/supabase.js';
 
 const router = Router();
-const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
+const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg']);
+const VIDEO_EXTENSIONS = new Set(['.mp4', '.webm', '.mov', '.m4v']);
+const ALLOWED_EXTENSIONS = new Set([...IMAGE_EXTENSIONS, ...VIDEO_EXTENSIONS]);
 const BUCKET = 'uploads';
 
 // Use memory storage (no disk writes — file goes straight to Supabase)
+// Cap at 50 MB to allow short hero videos; small images still fit.
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024 },
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (_req, file, callback) => {
     const extension = extname(file.originalname).toLowerCase();
     if (!ALLOWED_EXTENSIONS.has(extension)) {
-      callback(new Error('Only JPG, PNG, WEBP, and GIF files are allowed.'));
+      callback(new Error('File type not allowed. Use JPG/PNG/WEBP/GIF/SVG for images or MP4/WEBM/MOV for video.'));
       return;
     }
     callback(null, true);
@@ -47,10 +50,14 @@ async function ensureBucket() {
   bucketReady = true;
 }
 
-router.post('/', requireAuth, upload.single('image'), handleMulterError, async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No image file was provided.' });
+// Accept the file under any of these field names so existing clients ('image')
+// keep working AND new clients can use 'video' / 'file' for clarity.
+router.post('/', requireAuth, upload.any(), handleMulterError, async (req, res) => {
+  const incoming = Array.isArray(req.files) ? req.files[0] : req.file;
+  if (!incoming) {
+    return res.status(400).json({ error: 'No file was provided.' });
   }
+  req.file = incoming;
 
   try {
     await ensureBucket();

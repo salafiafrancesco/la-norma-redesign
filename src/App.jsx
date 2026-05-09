@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { ContentProvider } from './context/ContentContext';
 import { NavigationProvider, useNavigation } from './context/NavigationContext';
+import ThemeInjector from './components/ThemeInjector/ThemeInjector';
 import AboutPage from './pages/AboutPage';
 import BlogArticlePage from './pages/BlogArticlePage';
 import BlogPage from './pages/BlogPage';
@@ -117,6 +118,7 @@ export default function App() {
     <ErrorBoundary>
       <ContentProvider>
         <NavigationProvider>
+          <ThemeInjector />
           <a className="skip-to-content" href="#main-content">Skip to main content</a>
           <AppContent />
         </NavigationProvider>

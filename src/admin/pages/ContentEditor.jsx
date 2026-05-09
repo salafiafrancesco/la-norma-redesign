@@ -4,6 +4,7 @@ import {
   CONTENT_SECTION_MAP,
 } from '../../../shared/contentSchema.js';
 import { content as contentApi, uploads as uploadsApi } from '../api/client';
+import VideoField from '../components/VideoField';
 
 const IMAGE_KEYS = ['image_url', 'imageUrl'];
 
@@ -153,7 +154,21 @@ function FieldsEditor({ data, onChange, onImageUpload, sectionConfig }) {
     <div className="adm-form">
       {sectionConfig.fields.map((field) => {
         const value = data[field.key] ?? '';
-        const isImageField = IMAGE_KEYS.includes(field.key) || field.key.endsWith('_url');
+        const isVideoField = field.kind === 'video';
+        const isImageField = !isVideoField && (IMAGE_KEYS.includes(field.key) || field.key.endsWith('_url'));
+
+        if (isVideoField) {
+          return (
+            <div key={field.key} className="adm-field">
+              <VideoField
+                label={field.label}
+                value={value}
+                onChange={(v) => onChange(field.key, v)}
+                help={field.help}
+              />
+            </div>
+          );
+        }
 
         return (
           <div key={field.key} className="adm-field">

@@ -152,6 +152,7 @@ function transform(api = {}) {
     subheadline: heroData.subheadline ?? defaults.hero.subheadline,
     imageUrl: resolveUrl(heroData.image_url ?? defaults.hero.imageUrl),
     imageAlt: heroData.image_alt ?? defaults.hero.imageAlt,
+    videoUrl: heroData.video_url ? resolveUrl(heroData.video_url) : '',
     gallery: uniqueValues([
       resolveUrl(heroData.image_url ?? defaults.hero.imageUrl),
       ...((Array.isArray(heroData.gallery) ? heroData.gallery : defaults.hero.gallery) ?? []).map(resolveUrl),

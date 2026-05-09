@@ -5,6 +5,7 @@ import {
   cateringRequests as requestsApi,
   uploads as uploadsApi,
 } from '../api/client';
+import ImageField from '../components/ImageField';
 
 const STATUS_OPTIONS = ['new', 'contacted', 'closed'];
 const STATUS_COLORS = { new: '#dc2626', contacted: '#d97706', closed: '#16a34a' };
@@ -116,23 +117,36 @@ function CollectionTab({ collection, label, columns, emptyRow }) {
               <button className="adm-modal__close" onClick={() => setEditing(null)}>&times;</button>
             </div>
             <div className="adm-modal__body">
-              {columns.filter((col) => col.editable !== false).map((col) => (
-                <div key={col.key} className="adm-field" style={{ marginBottom: '0.75rem' }}>
-                  <label className="adm-label">{col.label}</label>
-                  {col.type === 'textarea' ? (
-                    <textarea className="adm-textarea" value={editing[col.key] || ''} onChange={(e) => setEditing((p) => ({ ...p, [col.key]: e.target.value }))} />
-                  ) : col.type === 'checkbox' ? (
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <input type="checkbox" checked={Boolean(editing[col.key])} onChange={(e) => setEditing((p) => ({ ...p, [col.key]: e.target.checked }))} />
-                      {col.label}
-                    </label>
-                  ) : col.type === 'number' ? (
-                    <input className="adm-input" type="number" value={editing[col.key] ?? ''} onChange={(e) => setEditing((p) => ({ ...p, [col.key]: Number(e.target.value) }))} />
-                  ) : (
-                    <input className="adm-input" value={editing[col.key] || ''} onChange={(e) => setEditing((p) => ({ ...p, [col.key]: e.target.value }))} />
-                  )}
-                </div>
-              ))}
+              {columns.filter((col) => col.editable !== false).map((col) => {
+                const isImage = col.type === 'image' || /image_url$|^image$|_image_url$/.test(col.key);
+                return (
+                  <div key={col.key} className="adm-field" style={{ marginBottom: '0.75rem' }}>
+                    {isImage ? (
+                      <ImageField
+                        label={col.label}
+                        value={editing[col.key] || ''}
+                        onChange={(url) => setEditing((p) => ({ ...p, [col.key]: url }))}
+                      />
+                    ) : (
+                      <>
+                        <label className="adm-label">{col.label}</label>
+                        {col.type === 'textarea' ? (
+                          <textarea className="adm-textarea" value={editing[col.key] || ''} onChange={(e) => setEditing((p) => ({ ...p, [col.key]: e.target.value }))} />
+                        ) : col.type === 'checkbox' ? (
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <input type="checkbox" checked={Boolean(editing[col.key])} onChange={(e) => setEditing((p) => ({ ...p, [col.key]: e.target.checked }))} />
+                            {col.label}
+                          </label>
+                        ) : col.type === 'number' ? (
+                          <input className="adm-input" type="number" value={editing[col.key] ?? ''} onChange={(e) => setEditing((p) => ({ ...p, [col.key]: Number(e.target.value) }))} />
+                        ) : (
+                          <input className="adm-input" value={editing[col.key] || ''} onChange={(e) => setEditing((p) => ({ ...p, [col.key]: e.target.value }))} />
+                        )}
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             <div className="adm-modal__footer">
               <button className="adm-btn adm-btn--secondary" onClick={() => setEditing(null)}>Cancel</button>

@@ -313,6 +313,18 @@ export default function HomePage() {
       {/* ============================================================ */}
       <header className="hp__hero" ref={heroRef}>
         <div className="hp__hero-bg" style={{ backgroundImage: `url(${hero.imageUrl})` }} role="img" aria-label={hero.imageAlt} />
+        {hero.videoUrl && /\.(mp4|webm|mov|m4v)(\?|$)/i.test(hero.videoUrl) && (
+          <video
+            className="hp__hero-video"
+            src={hero.videoUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+          />
+        )}
         <div className="hp__hero-overlay" />
         <div className="hp__hero-content container">
           <div className="hp__hero-text">

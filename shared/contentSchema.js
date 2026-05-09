@@ -51,6 +51,7 @@ export const CONTENT_SECTIONS = [
       { key: 'subheadline', label: 'Subheadline', multiline: true },
       { key: 'image_url', label: 'Hero image URL' },
       { key: 'image_alt', label: 'Hero image alt text' },
+      { key: 'video_url', label: 'Hero video (optional)', kind: 'video', help: 'Optional MP4/WebM or YouTube/Vimeo URL. When set, plays muted on top of the hero image.' },
     ],
   },
   {

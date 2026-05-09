@@ -84,9 +84,24 @@
 }
 
 .hp__hero-bg,
-.hp__hero-overlay {
+.hp__hero-overlay,
+.hp__hero-video {
   position: absolute;
   inset: 0;
+}
+
+.hp__hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hp__hero-video {
+    display: none;
+  }
 }
 
 .hp__hero-bg {
