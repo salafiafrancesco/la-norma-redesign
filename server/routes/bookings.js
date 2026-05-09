@@ -248,6 +248,34 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// Admin — bulk status change (must come before /:id so the literal path wins)
+// ---------------------------------------------------------------------------
+router.put('/bulk-status', requireAuth, async (req, res) => {
+  const ids = Array.isArray(req.body?.ids)
+    ? req.body.ids.map((v) => Number(v)).filter((n) => Number.isFinite(n))
+    : [];
+  const status = normalizeText(req.body?.status);
+
+  if (ids.length === 0) return res.status(400).json({ error: 'Provide at least one id.' });
+  if (!VALID_STATUSES.has(status)) {
+    return res.status(400).json({ error: 'Invalid status.' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('bookings')
+      .update({ status, updated_at: new Date().toISOString() })
+      .in('id', ids)
+      .select();
+    if (error) throw error;
+    res.json({ ok: true, updated: data?.length ?? 0, items: data || [] });
+  } catch (error) {
+    console.error('[bookings/bulk-status]', error);
+    res.status(500).json({ error: 'Unable to update bookings.' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Admin — get single booking
 // ---------------------------------------------------------------------------
 router.get('/:id', requireAuth, async (req, res) => {

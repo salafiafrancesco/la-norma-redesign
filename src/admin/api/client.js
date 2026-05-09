@@ -301,6 +301,7 @@ export const bookings = {
   getByToken: (token) => request('GET', `/bookings/token/${token}`),
   update: (id, data) => request('PUT', `/bookings/${id}`, data),
   delete: (id) => request('DELETE', `/bookings/${id}`),
+  bulkStatus: (ids, status) => request('PUT', '/bookings/bulk-status', { ids, status }),
 };
 
 export const homepageContent = {
@@ -340,6 +341,8 @@ export const cateringRequests = {
   list: (params = {}) => requestCachedList('/catering/requests', params),
   update: (id, data) => request('PUT', `/catering/requests/${id}`, data),
   delete: (id) => request('DELETE', `/catering/requests/${id}`),
+  bulkStatus: (ids, status) => request('PUT', '/catering/requests/bulk-status', { ids, status }),
+  bulkDelete: (ids) => request('DELETE', '/catering/requests/bulk', { ids }),
 };
 
 export const inquiries = {
@@ -348,6 +351,8 @@ export const inquiries = {
   },
   update: (id, data) => request('PUT', `/inquiries/${id}`, data),
   delete: (id) => request('DELETE', `/inquiries/${id}`),
+  bulkStatus: (ids, status) => request('PUT', '/inquiries/bulk-status', { ids, status }),
+  bulkDelete: (ids) => request('DELETE', '/inquiries/bulk', { ids }),
 };
 
 export const uploads = {

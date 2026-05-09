@@ -18,6 +18,8 @@ export default function InquiriesManager() {
   const [statusFilter, setStatusFilter] = useState('');
   const [detail, setDetail]   = useState(null);
   const [error, setError]     = useState('');
+  const [selected, setSelected] = useState(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const load = () => {
     let cancelled = false;
@@ -41,6 +43,59 @@ export default function InquiriesManager() {
   };
 
   useEffect(load, [typeFilter, statusFilter]);
+
+  // Clear selection whenever the visible list changes — stale ids could
+  // refer to rows the current user is no longer looking at.
+  useEffect(() => {
+    setSelected(new Set());
+  }, [typeFilter, statusFilter]);
+
+  const toggleSelected = (id) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    setSelected((prev) => {
+      if (prev.size === items.length) return new Set();
+      return new Set(items.map((i) => i.id));
+    });
+  };
+
+  const handleBulkStatus = async (status) => {
+    if (selected.size === 0) return;
+    setBulkBusy(true);
+    try {
+      const ids = Array.from(selected);
+      const result = await inquiriesApi.bulkStatus(ids, status);
+      const updatedById = new Map((result.items || []).map((i) => [i.id, i]));
+      setItems((prev) => prev.map((i) => updatedById.get(i.id) || i));
+      setSelected(new Set());
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!window.confirm(`Delete ${selected.size} ${selected.size === 1 ? 'inquiry' : 'inquiries'}? This cannot be undone.`)) return;
+    setBulkBusy(true);
+    try {
+      const ids = Array.from(selected);
+      await inquiriesApi.bulkDelete(ids);
+      setItems((prev) => prev.filter((i) => !selected.has(i.id)));
+      setSelected(new Set());
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
 
   const handleStatusChange = async (id, status) => {
     try {
@@ -102,6 +157,61 @@ export default function InquiriesManager() {
         </select>
       </div>
 
+      {/* Bulk action bar — appears once at least one row is selected */}
+      {selected.size > 0 && (
+        <div
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap',
+            background: 'var(--adm-bg, #f5f5f0)', border: '1px solid rgba(0,0,0,0.08)',
+            borderRadius: 8, padding: '0.65rem 0.85rem', marginBottom: '1rem',
+          }}
+        >
+          <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>
+            {selected.size} selected
+          </span>
+          <button
+            type="button"
+            className="adm-btn adm-btn--secondary adm-btn--sm"
+            onClick={() => handleBulkStatus('read')}
+            disabled={bulkBusy}
+          >
+            Mark as read
+          </button>
+          <button
+            type="button"
+            className="adm-btn adm-btn--secondary adm-btn--sm"
+            onClick={() => handleBulkStatus('replied')}
+            disabled={bulkBusy}
+          >
+            Mark as replied
+          </button>
+          <button
+            type="button"
+            className="adm-btn adm-btn--secondary adm-btn--sm"
+            onClick={() => handleBulkStatus('new')}
+            disabled={bulkBusy}
+          >
+            Mark as new
+          </button>
+          <button
+            type="button"
+            className="adm-btn adm-btn--danger adm-btn--sm"
+            onClick={handleBulkDelete}
+            disabled={bulkBusy}
+          >
+            Delete selected
+          </button>
+          <div style={{ flex: 1 }} />
+          <button
+            type="button"
+            className="adm-btn adm-btn--ghost adm-btn--sm"
+            onClick={() => setSelected(new Set())}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       <div className="adm-card">
         {loading ? (
           <div className="adm-page-loader"><div className="adm-spinner" /> Loading…</div>
@@ -110,6 +220,17 @@ export default function InquiriesManager() {
             <table className="adm-table">
               <thead>
                 <tr>
+                  <th style={{ width: 36 }}>
+                    <input
+                      type="checkbox"
+                      aria-label="Select all on this page"
+                      checked={items.length > 0 && selected.size === items.length}
+                      ref={(el) => {
+                        if (el) el.indeterminate = selected.size > 0 && selected.size < items.length;
+                      }}
+                      onChange={toggleAll}
+                    />
+                  </th>
                   <th>Date</th>
                   <th>Name</th>
                   <th>Type</th>
@@ -121,12 +242,25 @@ export default function InquiriesManager() {
               </thead>
               <tbody>
                 {items.length === 0 && (
-                  <tr><td colSpan="7" className="adm-table__empty">No inquiries found.</td></tr>
+                  <tr><td colSpan="8" className="adm-table__empty">No inquiries found.</td></tr>
                 )}
                 {items.map(inq => {
                   const typeInfo = TYPE_LABELS[inq.type] || { label: inq.type, color: '#555', bg: '#eee' };
+                  const isSelected = selected.has(inq.id);
                   return (
-                    <tr key={inq.id} style={{ cursor: 'pointer' }} onClick={() => setDetail(inq)}>
+                    <tr
+                      key={inq.id}
+                      style={{ cursor: 'pointer', background: isSelected ? 'rgba(59,88,68,0.05)' : undefined }}
+                      onClick={() => setDetail(inq)}
+                    >
+                      <td onClick={(e) => e.stopPropagation()} style={{ width: 36 }}>
+                        <input
+                          type="checkbox"
+                          aria-label={`Select inquiry ${inq.id}`}
+                          checked={isSelected}
+                          onChange={() => toggleSelected(inq.id)}
+                        />
+                      </td>
                       <td style={{ whiteSpace: 'nowrap', fontSize: '0.8125rem' }}>{formatDate(inq.created_at)}</td>
                       <td>
                         <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{inq.first_name} {inq.last_name}</div>

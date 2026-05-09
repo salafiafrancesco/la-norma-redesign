@@ -112,6 +112,50 @@ router.get('/requests', requireAuth, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// Admin — bulk status change (must come before /:id route)
+// ---------------------------------------------------------------------------
+router.put('/requests/bulk-status', requireAuth, async (req, res) => {
+  const ids = Array.isArray(req.body?.ids)
+    ? req.body.ids.map((v) => Number(v)).filter((n) => Number.isFinite(n))
+    : [];
+  const status = normalizeText(req.body?.status);
+
+  if (ids.length === 0) return res.status(400).json({ error: 'Provide at least one id.' });
+  if (!VALID_STATUSES.has(status)) {
+    return res.status(400).json({ error: 'Invalid status.' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('catering_requests')
+      .update({ status, updated_at: new Date().toISOString() })
+      .in('id', ids)
+      .select();
+    if (error) throw error;
+    res.json({ ok: true, updated: data?.length ?? 0, items: data || [] });
+  } catch (error) {
+    console.error('[catering/bulk-status]', error);
+    res.status(500).json({ error: 'Unable to update catering requests.' });
+  }
+});
+
+router.delete('/requests/bulk', requireAuth, async (req, res) => {
+  const ids = Array.isArray(req.body?.ids)
+    ? req.body.ids.map((v) => Number(v)).filter((n) => Number.isFinite(n))
+    : [];
+  if (ids.length === 0) return res.status(400).json({ error: 'Provide at least one id.' });
+
+  try {
+    const { error } = await supabase.from('catering_requests').delete().in('id', ids);
+    if (error) throw error;
+    res.json({ ok: true, deleted: ids.length });
+  } catch (error) {
+    console.error('[catering/bulk-delete]', error);
+    res.status(500).json({ error: 'Unable to delete catering requests.' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Admin — update a catering request (status, notes)
 // ---------------------------------------------------------------------------
 router.put('/requests/:id', requireAuth, async (req, res) => {

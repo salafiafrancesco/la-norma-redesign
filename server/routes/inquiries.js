@@ -106,6 +106,50 @@ router.get('/', requireAuth, async (req, res) => {
   }
 });
 
+// Bulk status change. Body: { ids: number[], status: string }.
+// Defined BEFORE /:id so the literal /bulk-status path wins the route match.
+router.put('/bulk-status', requireAuth, async (req, res) => {
+  const ids = Array.isArray(req.body?.ids)
+    ? req.body.ids.map((v) => Number(v)).filter((n) => Number.isFinite(n))
+    : [];
+  const status = normalizeText(req.body?.status);
+
+  if (ids.length === 0) return res.status(400).json({ error: 'Provide at least one id.' });
+  if (!INQUIRY_STATUSES.has(status)) {
+    return res.status(400).json({ error: 'Status must be new, read, or replied.' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('inquiries')
+      .update({ status, updated_at: new Date().toISOString() })
+      .in('id', ids)
+      .select();
+    if (error) throw error;
+    res.json({ ok: true, updated: data?.length ?? 0, items: data || [] });
+  } catch (error) {
+    console.error('[inquiries/bulk-status]', error);
+    res.status(500).json({ error: 'Unable to update inquiries.' });
+  }
+});
+
+// Bulk delete. Body: { ids: number[] }.
+router.delete('/bulk', requireAuth, async (req, res) => {
+  const ids = Array.isArray(req.body?.ids)
+    ? req.body.ids.map((v) => Number(v)).filter((n) => Number.isFinite(n))
+    : [];
+  if (ids.length === 0) return res.status(400).json({ error: 'Provide at least one id.' });
+
+  try {
+    const { error } = await supabase.from('inquiries').delete().in('id', ids);
+    if (error) throw error;
+    res.json({ ok: true, deleted: ids.length });
+  } catch (error) {
+    console.error('[inquiries/bulk-delete]', error);
+    res.status(500).json({ error: 'Unable to delete inquiries.' });
+  }
+});
+
 router.put('/:id', requireAuth, async (req, res) => {
   if (!isPlainObject(req.body)) {
     return res.status(400).json({ error: 'Body must be a plain object.' });
