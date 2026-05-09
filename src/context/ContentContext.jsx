@@ -113,6 +113,7 @@ function transform(api = {}) {
   const faqPageData = api.faqPage || {};
   const menuPageData = api.menuPage || {};
   const contactPageData = api.contactPage || {};
+  const privateEventsPageData = api.privateEventsPage || {};
 
   const links = {
     reserve: linksData.reserve ?? defaults.links.reserve,
@@ -391,6 +392,40 @@ function transform(api = {}) {
     },
   };
 
+  const privateEventsPage = {
+    meta: { ...defaults.privateEventsPage.meta, ...(privateEventsPageData.meta || {}) },
+    hero: { ...defaults.privateEventsPage.hero, ...(privateEventsPageData.hero || {}) },
+    manifesto: { ...defaults.privateEventsPage.manifesto, ...(privateEventsPageData.manifesto || {}) },
+    formats: {
+      ...defaults.privateEventsPage.formats,
+      ...(privateEventsPageData.formats || {}),
+      items: mergeArrayOrDefault(privateEventsPageData.formats?.items, defaults.privateEventsPage.formats.items),
+    },
+    curate: {
+      ...defaults.privateEventsPage.curate,
+      ...(privateEventsPageData.curate || {}),
+      items: mergeArrayOrDefault(privateEventsPageData.curate?.items, defaults.privateEventsPage.curate.items),
+    },
+    form: {
+      ...defaults.privateEventsPage.form,
+      ...(privateEventsPageData.form || {}),
+      progress_labels: mergeArrayOrDefault(privateEventsPageData.form?.progress_labels, defaults.privateEventsPage.form.progress_labels),
+      guest_options: mergeArrayOrDefault(privateEventsPageData.form?.guest_options, defaults.privateEventsPage.form.guest_options),
+      occasion_options: mergeArrayOrDefault(privateEventsPageData.form?.occasion_options, defaults.privateEventsPage.form.occasion_options),
+    },
+    testimonials: {
+      ...defaults.privateEventsPage.testimonials,
+      ...(privateEventsPageData.testimonials || {}),
+      items: mergeArrayOrDefault(privateEventsPageData.testimonials?.items, defaults.privateEventsPage.testimonials.items),
+    },
+    faq: {
+      ...defaults.privateEventsPage.faq,
+      ...(privateEventsPageData.faq || {}),
+      items: mergeArrayOrDefault(privateEventsPageData.faq?.items, defaults.privateEventsPage.faq.items),
+    },
+    invitation: { ...defaults.privateEventsPage.invitation, ...(privateEventsPageData.invitation || {}) },
+  };
+
   return {
     restaurant,
     links,
@@ -414,6 +449,7 @@ function transform(api = {}) {
     faqPage,
     menuPage,
     contactPage,
+    privateEventsPage,
   };
 }
 

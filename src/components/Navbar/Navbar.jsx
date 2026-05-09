@@ -27,6 +27,7 @@ const NAV_LINKS_FALLBACK = [
       { label: 'Cooking Classes', pageKey: PAGE_KEYS.cookingClasses },
       { label: 'Wine Tastings', pageKey: PAGE_KEYS.wineTastings },
       { label: 'Live Music', pageKey: PAGE_KEYS.liveMusic },
+      { label: 'Private Events', pageKey: PAGE_KEYS.privateEvents },
     ],
   },
   { label: 'Catering', pageKey: PAGE_KEYS.catering },
@@ -42,6 +43,7 @@ const MOBILE_EXPERIENCES_FALLBACK = [
   { label: 'Cooking Classes', pageKey: PAGE_KEYS.cookingClasses },
   { label: 'Wine Tastings', pageKey: PAGE_KEYS.wineTastings },
   { label: 'Live Music', pageKey: PAGE_KEYS.liveMusic },
+  { label: 'Private Events', pageKey: PAGE_KEYS.privateEvents },
 ];
 
 const MOBILE_SECONDARY_FALLBACK = [

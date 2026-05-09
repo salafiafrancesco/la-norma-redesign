@@ -538,6 +538,114 @@ export const general = {
   },
 };
 
+export const privateEventsPage = {
+  meta: {
+    title: 'Private Events',
+    description:
+      'Private dining, rehearsal dinners, and milestone events at La Norma — curated menus, wine guidance, and warm Sicilian hospitality on Longboat Key.',
+  },
+  hero: {
+    eyebrow: 'Private events',
+    headline: 'A room shaped for the moments that matter.',
+    sub: 'Rehearsal dinners, milestone celebrations, and hosted evenings — tailored from menu to pacing, run with the same warmth as the dining room.',
+    image_url: 'https://images.unsplash.com/photo-1470042660615-51b9c62e8d28?auto=format&fit=crop&w=1600&q=80',
+    image_alt: 'An elegantly set private dining table with candlelight',
+    primary_cta_label: 'Start your inquiry',
+    secondary_cta_label: 'View formats',
+  },
+  manifesto: {
+    quote: 'A private dinner should feel personal — not staged, not generic, not just a room with a menu.',
+    author: 'The La Norma kitchen',
+  },
+  formats: {
+    eyebrow: 'Three formats',
+    heading: 'Choose the scale that fits the occasion.',
+    items: [
+      {
+        id: 'intimate',
+        roman: 'I',
+        name: 'Intimate Dinner',
+        capacity: 'Up to 12 guests',
+        body: 'A private dining experience for anniversaries, family milestones, and smaller business dinners.',
+        includes: ['Dedicated service team', 'Custom 3-course format', 'Welcome prosecco', 'Flexible table setup'],
+        featured: false,
+      },
+      {
+        id: 'celebration',
+        roman: 'II',
+        name: 'Celebration Room',
+        capacity: 'Up to 20 guests',
+        body: 'Our most requested format for rehearsal dinners, birthdays, and hosted evenings with wine pairings.',
+        includes: ['Exclusive use of the private room', 'Custom 4-course menu', 'Wine pairing options', 'Decor coordination', 'Optional live music'],
+        featured: true,
+      },
+      {
+        id: 'buyout',
+        roman: 'III',
+        name: 'Full Buyout',
+        capacity: 'Up to 30 guests',
+        body: 'For milestone gatherings that call for the full dining room, dedicated hospitality, and a completely custom flow.',
+        includes: ['Full restaurant buyout', 'Tailored menu development', 'Sommelier-led wine service', 'Dedicated planning support'],
+        featured: false,
+      },
+    ],
+  },
+  curate: {
+    eyebrow: 'What we curate',
+    heading: 'The details handled before guests arrive.',
+    items: [
+      { num: '01', title: 'Chef-led menu planning', body: 'Menus are shaped around the guest list, dietary needs, and the tone of the occasion.' },
+      { num: '02', title: 'Thoughtful wine guidance', body: 'Pairings, aperitivo selections, and bottle pacing handled with the meal in mind.' },
+      { num: '03', title: 'Polished event pacing', body: 'Arrivals, speeches, courses, and transitions mapped so the evening never feels rushed.' },
+      { num: '04', title: 'Warm, personal service', body: 'Guests should feel looked after, not processed. That standard shapes every event we host.' },
+    ],
+  },
+  form: {
+    eyebrow: 'Start the conversation',
+    heading: 'Share the shape of your event.',
+    sub: 'Tell us your preferred date, guest range, and the kind of evening you are planning. We will come back within 24 hours.',
+    submit_label: 'Send inquiry',
+    success_title: 'Your event inquiry has been received.',
+    success_body: 'We will be in touch within 24 hours with availability guidance, menu direction, and any follow-up questions.',
+    progress_labels: ['Event basics', 'Your details', 'Review and send'],
+    guest_options: ['6-10', '11-16', '17-20', '21-30'],
+    occasion_options: [
+      'Anniversary dinner',
+      'Birthday celebration',
+      'Rehearsal dinner',
+      'Corporate dinner',
+      'Family gathering',
+      'Other',
+    ],
+  },
+  testimonials: {
+    eyebrow: 'Host feedback',
+    heading: 'Calm before the event. Looked after through it.',
+    items: [
+      { quote: 'They made our rehearsal dinner feel beautifully organized without ever making it feel formal or stressful.', author: 'Lindsay M.', role: 'Rehearsal dinner host' },
+      { quote: 'From menu planning to wine pacing, every recommendation felt practical and tasteful. We could actually enjoy our own event.', author: 'Daniel K.', role: 'Birthday celebration host' },
+      { quote: 'It felt like a boutique hospitality experience rather than a generic private room rental. That difference really showed up on the night.', author: 'Amelia & Jon', role: 'Anniversary dinner hosts' },
+    ],
+  },
+  faq: {
+    eyebrow: 'Practical details',
+    heading: 'Common questions before the inquiry.',
+    items: [
+      { q: 'How far ahead should we inquire?', a: 'For smaller groups, three to four weeks is ideal. For full buyouts or peak-season dates, earlier is strongly recommended.' },
+      { q: 'Can menus be adjusted for dietary restrictions?', a: 'Yes. Vegetarian, gluten-free, allergy-conscious, and mixed-diet guest lists can all be accommodated with advance planning.' },
+      { q: 'Is a deposit required?', a: 'Some event formats require a deposit to secure the date. We explain this clearly once availability and scope are confirmed.' },
+      { q: 'Can live music be added?', a: 'Yes. Selected formats can include live music or a musician from our preferred roster, depending on the tone of your event.' },
+    ],
+  },
+  invitation: {
+    eyebrow: 'An invitation',
+    heading: 'A special occasion deserves more than a room and a menu.',
+    body: 'Let us shape a private evening that feels polished, warm, and distinctly La Norma.',
+    primary_label: 'Send your inquiry',
+    secondary_label: 'Speak with the team',
+  },
+};
+
 export const siteDefaults = {
   restaurant,
   links,
@@ -561,4 +669,5 @@ export const siteDefaults = {
   faqPage,
   menuPage,
   contactPage,
+  privateEventsPage,
 };

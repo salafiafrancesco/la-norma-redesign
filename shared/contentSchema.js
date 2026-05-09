@@ -189,6 +189,14 @@ export const CONTENT_SECTIONS = [
     hint: 'Object with { "hero": { "eyebrow", "headline" }, "values": [{ "title", "body" }], "next_steps": { "heading", "body", "primary_label", "secondary_label" } }',
   },
   {
+    key: 'privateEventsPage',
+    label: 'Private Events Page',
+    icon: 'Page',
+    editor: 'json',
+    description: 'Hero, formats, curate list, form copy, testimonials, FAQ and invitation card for /private-events.',
+    hint: 'Object with { "meta", "hero": { "eyebrow", "headline", "sub", "image_url", "image_alt", "primary_cta_label", "secondary_cta_label" }, "manifesto": { "quote", "author" }, "formats": { "eyebrow", "heading", "items": [{ "id", "roman", "name", "capacity", "body", "includes": [], "featured" }] }, "curate": { "eyebrow", "heading", "items": [{ "num", "title", "body" }] }, "form": { "eyebrow", "heading", "sub", "submit_label", "success_title", "success_body", "progress_labels": [], "guest_options": [], "occasion_options": [] }, "testimonials": { "eyebrow", "heading", "items": [{ "quote", "author", "role" }] }, "faq": { "eyebrow", "heading", "items": [{ "q", "a" }] }, "invitation": { "eyebrow", "heading", "body", "primary_label", "secondary_label" } }',
+  },
+  {
     key: 'faqPage',
     label: 'FAQ Page',
     icon: 'Page',
