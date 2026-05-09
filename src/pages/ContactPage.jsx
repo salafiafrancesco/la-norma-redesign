@@ -321,37 +321,113 @@ export default function ContactPage() {
           </div>
         </section>
 
-        {/* ============================================================ */}
-        {/* SUPPORT — best path by intent                                */}
-        {/* ============================================================ */}
-        <section className="editorial-main" style={{ paddingTop: 0 }}>
-          <div className="container">
-            <section className="cp-support">
-              <p className="cp-support__eyebrow">Best path by intent</p>
-              <h2 className="cp-support__heading">{page.support.heading}</h2>
-              <ul className="cp-support__list">
-                {page.support.items.map((item, idx) => (
-                  <li key={idx}>
-                    <span className="cp-support__num">{String(idx + 1).padStart(2, '0')}</span>
-                    <div>
-                      <strong>{item.title}</strong>
-                      <p>{item.body}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <div className="cp-support__actions">
-                <button type="button" className="btn btn--primary" onClick={() => navigate(PAGE_KEYS.cookingClasses)}>
-                  {page.support.primary_label}
-                </button>
-                <button type="button" className="btn btn--outline-dark" onClick={() => navigate(PAGE_KEYS.privateEvents)}>
-                  {page.support.secondary_label}
-                </button>
-              </div>
-            </section>
-          </div>
-        </section>
       </main>
+
+      {/* ================================================================ */}
+      {/* SUPPORT — best path by intent (dark luxury closing block)        */}
+      {/* ================================================================ */}
+      <section className="cp-support-section">
+        <span className="cp-support-section__ornament cp-support-section__ornament--tl" aria-hidden="true" />
+        <span className="cp-support-section__ornament cp-support-section__ornament--br" aria-hidden="true" />
+
+        <div className="container cp-support-section__inner">
+          <header className="cp-support__header">
+            <p className="cp-support__eyebrow">
+              <span className="cp-support__eyebrow-rule" aria-hidden="true" />
+              Best path by intent
+            </p>
+            <h2 className="cp-support__heading">{page.support.heading}</h2>
+            <p className="cp-support__sub">
+              Three direct paths — pick the one that matches what you&rsquo;re planning, the rest is taken care of.
+            </p>
+          </header>
+
+          <div className="cp-support__grid">
+            {/* Path 01 — Dinner reservations */}
+            <a
+              href={OPENTABLE_RESERVATION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cp-support-card"
+            >
+              <span className="cp-support-card__bignum" aria-hidden="true">01</span>
+              <div className="cp-support-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 11h18M5 11V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/>
+                  <path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/>
+                  <path d="M9 15h6"/>
+                </svg>
+              </div>
+              <p className="cp-support-card__label">Path 01</p>
+              <h3 className="cp-support-card__title">{page.support.items[0]?.title || 'Dinner reservations'}</h3>
+              <p className="cp-support-card__body">{page.support.items[0]?.body}</p>
+              <span className="cp-support-card__link">
+                Reserve on OpenTable
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </a>
+
+            {/* Path 02 — Cooking classes & wine tastings */}
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); navigate(PAGE_KEYS.cookingClasses); }}
+              className="cp-support-card cp-support-card--feature"
+            >
+              <span className="cp-support-card__bignum" aria-hidden="true">02</span>
+              <div className="cp-support-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 3v6a4 4 0 0 0 8 0V3"/>
+                  <line x1="12" y1="13" x2="12" y2="21"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                </svg>
+              </div>
+              <p className="cp-support-card__label">Path 02</p>
+              <h3 className="cp-support-card__title">{page.support.items[1]?.title || 'Classes & tastings'}</h3>
+              <p className="cp-support-card__body">{page.support.items[1]?.body}</p>
+              <span className="cp-support-card__link">
+                Browse experiences
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </a>
+
+            {/* Path 03 — Private events */}
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); navigate(PAGE_KEYS.privateEvents); }}
+              className="cp-support-card"
+            >
+              <span className="cp-support-card__bignum" aria-hidden="true">03</span>
+              <div className="cp-support-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <p className="cp-support-card__label">Path 03</p>
+              <h3 className="cp-support-card__title">{page.support.items[2]?.title || 'Private events'}</h3>
+              <p className="cp-support-card__body">{page.support.items[2]?.body}</p>
+              <span className="cp-support-card__link">
+                Plan an event
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </a>
+          </div>
+
+          <p className="cp-support__hint">
+            Still not sure?
+            {' '}
+            <a href="#contact-form" className="cp-support__hint-link">Send us a message</a>
+            {' '}— we&rsquo;ll point you to the right path.
+          </p>
+        </div>
+      </section>
 
       <Footer />
     </div>
