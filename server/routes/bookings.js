@@ -19,6 +19,50 @@ function generateToken() {
   return crypto.randomBytes(24).toString('base64url');
 }
 
+// Escape special chars used by Postgres ILIKE pattern (% _) and the comma /
+// parens that Supabase uses to delimit OR filter conditions. Without this,
+// a search containing % can match unintended records, and a comma can break
+// the OR query parser.
+function escapeIlikePattern(value) {
+  return String(value || '')
+    .replace(/[\\%_]/g, (m) => `\\${m}`)
+    .replace(/[(),]/g, ' ');
+}
+
+// Atomic seat reservation via RPC. Returns the updated event row, or null
+// if the event is sold out / not published / not found. Falls back to a
+// non-atomic read+update path when the RPC is missing on the database.
+async function reserveSeats(eventId, guests) {
+  const { data, error } = await supabase.rpc('book_seats', {
+    p_event_id: eventId,
+    p_guests: guests,
+  });
+
+  if (error) {
+    if (/function.*does not exist|book_seats.*not found|Could not find the function/i.test(error.message)) {
+      return { fallback: true };
+    }
+    throw error;
+  }
+
+  if (Array.isArray(data) && data.length > 0) {
+    return { event: data[0] };
+  }
+  return { event: null };
+}
+
+async function releaseSeatsRpc(eventId, guests) {
+  const { error } = await supabase.rpc('release_seats', {
+    p_event_id: eventId,
+    p_guests: guests,
+  });
+  if (error && /function.*does not exist|release_seats.*not found|Could not find the function/i.test(error.message)) {
+    return { fallback: true };
+  }
+  if (error) throw error;
+  return { fallback: false };
+}
+
 // ---------------------------------------------------------------------------
 // Public — create a booking
 // ---------------------------------------------------------------------------
@@ -40,43 +84,47 @@ router.post('/', async (req, res) => {
     let totalCents = 0;
     let currency = 'USD';
 
-    // Validate event and check capacity
+    // Validate event and reserve capacity atomically (single round-trip via
+    // book_seats RPC). On databases where the RPC is missing, fall back to
+    // the non-atomic read+update path with a sold-out window check.
     if (eventId) {
-      const { data: event, error: eventError } = await supabase
-        .from('experience_events')
-        .select('*')
-        .eq('id', eventId)
-        .single();
+      const reservation = await reserveSeats(eventId, guests);
 
-      if (eventError || !event) return res.status(404).json({ error: 'Event not found.' });
-      if (event.status !== 'published') return res.status(400).json({ error: 'This event is not available for booking.' });
-
-      // Check capacity (0 = unlimited)
-      if (event.capacity > 0) {
-        const seatsAvailable = event.capacity - event.seats_booked;
-        if (seatsAvailable < guests) {
-          return res.status(400).json({
-            error: seatsAvailable <= 0
-              ? 'This event is sold out.'
-              : `Only ${seatsAvailable} seat${seatsAvailable === 1 ? '' : 's'} remaining.`,
-          });
-        }
-      }
-
-      totalCents = event.price_cents * guests;
-      currency = event.currency || 'USD';
-
-      // Reserve seats
-      if (event.capacity > 0) {
-        const { error: updateError } = await supabase
-          .from('experience_events')
-          .update({
+      if (reservation.fallback) {
+        const { data: event, error: eventError } = await supabase
+          .from('experience_events').select('*').eq('id', eventId).single();
+        if (eventError || !event) return res.status(404).json({ error: 'Event not found.' });
+        if (event.status !== 'published') return res.status(400).json({ error: 'This event is not available for booking.' });
+        if (event.capacity > 0) {
+          const seatsAvailable = event.capacity - event.seats_booked;
+          if (seatsAvailable < guests) {
+            return res.status(400).json({
+              error: seatsAvailable <= 0
+                ? 'This event is sold out.'
+                : `Only ${seatsAvailable} seat${seatsAvailable === 1 ? '' : 's'} remaining.`,
+            });
+          }
+          await supabase.from('experience_events').update({
             seats_booked: event.seats_booked + guests,
             updated_at: new Date().toISOString(),
-          })
-          .eq('id', eventId);
-
-        if (updateError) throw updateError;
+          }).eq('id', eventId);
+        }
+        totalCents = event.price_cents * guests;
+        currency = event.currency || 'USD';
+      } else if (!reservation.event) {
+        const { data: event } = await supabase
+          .from('experience_events').select('status, seats_booked, capacity').eq('id', eventId).single();
+        if (!event) return res.status(404).json({ error: 'Event not found.' });
+        if (event.status !== 'published') return res.status(400).json({ error: 'This event is not available for booking.' });
+        const seatsAvailable = (event.capacity || 0) - (event.seats_booked || 0);
+        return res.status(400).json({
+          error: seatsAvailable <= 0
+            ? 'This event is sold out.'
+            : `Only ${seatsAvailable} seat${seatsAvailable === 1 ? '' : 's'} remaining.`,
+        });
+      } else {
+        totalCents = (reservation.event.price_cents || 0) * guests;
+        currency = reservation.event.currency || 'USD';
       }
     }
 
@@ -152,8 +200,11 @@ router.get('/', requireAuth, async (req, res) => {
     const eventId = req.query.event_id ? Number(req.query.event_id) : null;
     if (eventId) query = query.eq('event_id', eventId);
 
-    const search = normalizeOptionalText(req.query.search);
-    if (search) query = query.or(`customer_name.ilike.%${search}%,customer_email.ilike.%${search}%`);
+    const searchRaw = normalizeOptionalText(req.query.search);
+    if (searchRaw) {
+      const safe = escapeIlikePattern(searchRaw);
+      query = query.or(`customer_name.ilike.%${safe}%,customer_email.ilike.%${safe}%`);
+    }
 
     const { data, error } = await query;
     if (error) throw error;
@@ -199,28 +250,32 @@ router.put('/:id', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid status.' });
     }
 
-    // Handle capacity changes on status transitions
+    // Handle capacity changes on status transitions atomically.
     if (newStatus && current.event_id && newStatus !== current.status) {
       const wasActive = current.status !== 'cancelled' && current.status !== 'refunded';
       const willBeActive = newStatus !== 'cancelled' && newStatus !== 'refunded';
 
       if (wasActive && !willBeActive) {
-        // Release seats
-        const { data: event } = await supabase.from('experience_events').select('seats_booked').eq('id', current.event_id).single();
-        if (event) {
-          await supabase.from('experience_events').update({
-            seats_booked: Math.max(0, event.seats_booked - current.guests),
-            updated_at: new Date().toISOString(),
-          }).eq('id', current.event_id);
+        const result = await releaseSeatsRpc(current.event_id, current.guests);
+        if (result.fallback) {
+          const { data: event } = await supabase.from('experience_events').select('seats_booked').eq('id', current.event_id).single();
+          if (event) {
+            await supabase.from('experience_events').update({
+              seats_booked: Math.max(0, event.seats_booked - current.guests),
+              updated_at: new Date().toISOString(),
+            }).eq('id', current.event_id);
+          }
         }
       } else if (!wasActive && willBeActive) {
-        // Re-reserve seats
-        const { data: event } = await supabase.from('experience_events').select('seats_booked, capacity').eq('id', current.event_id).single();
-        if (event) {
-          await supabase.from('experience_events').update({
-            seats_booked: Math.min(event.capacity || 9999, event.seats_booked + current.guests),
-            updated_at: new Date().toISOString(),
-          }).eq('id', current.event_id);
+        const reservation = await reserveSeats(current.event_id, current.guests);
+        if (reservation.fallback) {
+          const { data: event } = await supabase.from('experience_events').select('seats_booked, capacity').eq('id', current.event_id).single();
+          if (event) {
+            await supabase.from('experience_events').update({
+              seats_booked: Math.min(event.capacity || 9999, event.seats_booked + current.guests),
+              updated_at: new Date().toISOString(),
+            }).eq('id', current.event_id);
+          }
         }
       }
     }
@@ -248,14 +303,17 @@ router.delete('/:id', requireAuth, async (req, res) => {
     const bookingId = Number(req.params.id);
     const { data: current } = await supabase.from('bookings').select('*').eq('id', bookingId).single();
 
-    // Release seats if booking was active
+    // Release seats atomically if booking was active.
     if (current?.event_id && current.status !== 'cancelled' && current.status !== 'refunded') {
-      const { data: event } = await supabase.from('experience_events').select('seats_booked').eq('id', current.event_id).single();
-      if (event) {
-        await supabase.from('experience_events').update({
-          seats_booked: Math.max(0, event.seats_booked - current.guests),
-          updated_at: new Date().toISOString(),
-        }).eq('id', current.event_id);
+      const result = await releaseSeatsRpc(current.event_id, current.guests);
+      if (result.fallback) {
+        const { data: event } = await supabase.from('experience_events').select('seats_booked').eq('id', current.event_id).single();
+        if (event) {
+          await supabase.from('experience_events').update({
+            seats_booked: Math.max(0, event.seats_booked - current.guests),
+            updated_at: new Date().toISOString(),
+          }).eq('id', current.event_id);
+        }
       }
     }
 

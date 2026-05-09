@@ -9,12 +9,12 @@ const NAV = [
   { key: 'footer',    icon: '\u25A1', label: 'Footer' },
   { key: 'blog',      icon: '\u2756', label: 'Journal' },
   { key: 'experiences', icon: '\u2726', label: 'Experiences', group: 'Experiences' },
-  { key: 'events',    icon: '\u266B', label: 'Events (legacy)' },
   { key: 'catering',  icon: '\u2615', label: 'Catering' },
   { key: 'inquiries', icon: '\u2709', label: 'Inquiries', group: 'Leads' },
   { key: 'newsletter', icon: '\u2706', label: 'Newsletter' },
   { key: 'images',    icon: '\u25A3', label: 'Images', group: 'Assets' },
   { key: 'theme',     icon: '\u25D0', label: 'Theme & Colors' },
+  { key: 'events',    icon: '\u266B', label: 'Events (legacy)', group: 'Legacy' },
 ];
 
 const PAGE_TITLES = {
