@@ -1002,10 +1002,49 @@ body.admin-body {
   .adm-page { padding: 1.25rem; }
 }
 
+/* Mobile hamburger — hidden on tablet+ */
+.adm-topbar__burger {
+  display: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.22rem;
+  cursor: pointer;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+.adm-topbar__burger span {
+  width: 1.05rem;
+  height: 1.5px;
+  background: var(--adm-text);
+  border-radius: 2px;
+}
+
+.adm-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 90;
+  animation: admBackdropFade 0.2s var(--ease);
+}
+@keyframes admBackdropFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 @media (max-width: 640px) {
   :root { --adm-sidebar-w: 0px; }
 
   .adm-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 100;
     transform: translateX(-100%);
     width: 260px;
     transition: transform 0.25s var(--ease);
@@ -1013,6 +1052,14 @@ body.admin-body {
 
   .adm-sidebar.is-open {
     transform: translateX(0);
+  }
+
+  .adm-sidebar-backdrop {
+    display: block;
+  }
+
+  .adm-topbar__burger {
+    display: inline-flex;
   }
 
   .adm-main {

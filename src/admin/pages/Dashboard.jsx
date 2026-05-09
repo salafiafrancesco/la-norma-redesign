@@ -155,8 +155,8 @@ export default function Dashboard({ setPage }) {
               <tbody>
                 {recentBookings.map((entry) => (
                   <tr key={entry.id}>
-                    <td>{entry.first_name} {entry.last_name}</td>
-                    <td>{entry.event_title || entry.experience_title || 'General booking'}</td>
+                    <td>{entry.customer_name || '—'}</td>
+                    <td>{entry.experience_events?.title || 'General booking'}</td>
                     <td>{entry.guests}</td>
                     <td>
                       <span className={`adm-badge adm-badge--${entry.status}`}>{entry.status}</span>

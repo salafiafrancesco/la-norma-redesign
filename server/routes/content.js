@@ -25,6 +25,8 @@ function storeValue(value) {
   };
 }
 
+const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
 function validatePayload(sectionConfig, payload) {
   if (!isPlainObject(payload)) return 'Body must be a plain object.';
 
@@ -32,6 +34,17 @@ function validatePayload(sectionConfig, payload) {
     const allowedKeys = new Set(sectionConfig.fields.map((field) => field.key));
     const invalidKey = Object.keys(payload).find((key) => !allowedKeys.has(key));
     if (invalidKey) return `Field "${invalidKey}" is not valid for the ${sectionConfig.label} section.`;
+  }
+
+  // Theme section: enforce 3/6/8-digit hex color tokens server-side. The
+  // client-side editor already validates, but trusting the client alone is
+  // not enough since the values are injected as CSS custom properties.
+  if (sectionConfig.key === 'theme') {
+    for (const [key, value] of Object.entries(payload)) {
+      if (typeof value !== 'string' || !HEX_COLOR.test(value)) {
+        return `Theme color "${key}" must be a hex value like #RRGGBB.`;
+      }
+    }
   }
 
   return '';

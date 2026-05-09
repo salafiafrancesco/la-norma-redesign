@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { uploads as uploadsApi } from '../api/client';
-import API_BASE from '../../config/api';
 
 export default function ImagesPage() {
   const [files, setFiles]     = useState([]);
@@ -48,8 +47,7 @@ export default function ImagesPage() {
   };
 
   const copyUrl = (url) => {
-    const base = API_BASE || window.location.origin;
-    navigator.clipboard.writeText(base + url);
+    navigator.clipboard.writeText(url);
     setCopied(url);
     setTimeout(() => setCopied(''), 2000);
   };
@@ -75,7 +73,7 @@ export default function ImagesPage() {
       </div>
 
       <div className="adm-alert adm-alert--info">
-        Upload images here, then copy the URL to use it in any content section. Max 8 MB per file.
+        Upload images here, then copy the URL to use it in any content section. Max 50 MB per file.
       </div>
 
       {loading ? (
@@ -91,7 +89,7 @@ export default function ImagesPage() {
           {files.map(f => (
             <div key={f.filename} className="adm-card" style={{ padding: '0.75rem' }}>
               <img
-                src={API_BASE + f.url}
+                src={f.url}
                 alt={f.filename}
                 style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 6, display: 'block', marginBottom: '0.75rem' }}
               />

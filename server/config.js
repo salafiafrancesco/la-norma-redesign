@@ -2,7 +2,21 @@ export const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 export const PORT = Number(process.env.PORT || 3001);
 
 export const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'lanorma2025';
+
+// Production: ADMIN_PASSWORD must be set as an environment variable. No
+// fallback — a hard-coded default would be a single-string compromise.
+// Development: fall back to a known local password and log a warning.
+export const ADMIN_PASSWORD =
+  process.env.ADMIN_PASSWORD ||
+  (IS_PRODUCTION ? null : 'lanorma2025');
+
+if (IS_PRODUCTION && !ADMIN_PASSWORD) {
+  console.error(
+    '\n[FATAL] ADMIN_PASSWORD environment variable is not set in production.\n' +
+    'Add it in your hosting provider before starting the API.\n',
+  );
+  process.exit(1);
+}
 
 export const JWT_SECRET =
   process.env.JWT_SECRET ||

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useAdmin } from '../context/AdminContext';
 
 const NAV = [
@@ -37,10 +38,25 @@ const PAGE_TITLES = {
 export default function AdminLayout({ page, setPage, children }) {
   const { admin, logout } = useAdmin();
   const initial = admin?.username?.charAt(0) || 'A';
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Auto-close the sidebar after navigating on mobile.
+  const handleNav = (key) => {
+    setPage(key);
+    setSidebarOpen(false);
+  };
+
+  // Lock body scroll while the mobile sidebar is open.
+  useEffect(() => {
+    if (!sidebarOpen) return undefined;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [sidebarOpen]);
 
   return (
     <div className="adm-shell">
-      <aside className="adm-sidebar">
+      <aside className={`adm-sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="adm-sidebar__brand">
           <div className="adm-sidebar__dots" aria-hidden="true">
             <span className="adm-sidebar__dot adm-sidebar__dot--red" />
@@ -62,7 +78,7 @@ export default function AdminLayout({ page, setPage, children }) {
                   <button
                     className={`adm-nav__link${page === item.key ? ' is-active' : ''}`}
                     type="button"
-                    onClick={() => setPage(item.key)}
+                    onClick={() => handleNav(item.key)}
                   >
                     <span className="adm-nav__icon">{item.icon}</span>
                     {item.label}
@@ -84,8 +100,27 @@ export default function AdminLayout({ page, setPage, children }) {
         </div>
       </aside>
 
+      {sidebarOpen && (
+        <div
+          className="adm-sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       <main className="adm-main">
         <div className="adm-topbar">
+          <button
+            type="button"
+            className="adm-topbar__burger"
+            onClick={() => setSidebarOpen((v) => !v)}
+            aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'}
+            aria-expanded={sidebarOpen}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
           <span className="adm-topbar__title">{PAGE_TITLES[page] || ''}</span>
           <span className="adm-topbar__spacer" />
           <a

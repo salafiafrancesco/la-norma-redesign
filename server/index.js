@@ -59,6 +59,8 @@ app.use(helmet({
   } : false,
 }));
 
+// Admin client uses an Authorization: Bearer header (not cookies), so
+// `credentials: true` is unnecessary. Tighter CORS surface this way.
 const corsMiddleware = cors({
   origin: (origin, callback) => {
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {
@@ -67,7 +69,7 @@ const corsMiddleware = cors({
     }
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
-  credentials: true,
+  credentials: false,
 });
 
 app.use(corsMiddleware);
