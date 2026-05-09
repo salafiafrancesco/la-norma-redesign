@@ -68,6 +68,35 @@ const VOICES_FALLBACK_QUOTES = [
 const HOME_DESCRIPTION =
   'A refined Sicilian restaurant on Longboat Key offering handmade pasta, wood-fired pizza, curated wine tastings, cooking classes, and private dining.';
 
+const DAY_ABBR = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' };
+
+function parseHourToken(token) {
+  const m = token.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+  if (!m) return null;
+  let h = parseInt(m[1], 10);
+  const min = m[2] ? parseInt(m[2], 10) : 0;
+  const ap = m[3].toUpperCase();
+  if (ap === 'PM' && h !== 12) h += 12;
+  if (ap === 'AM' && h === 12) h = 0;
+  return h * 60 + min;
+}
+
+function isOpenAt(row, now) {
+  if (!row || row.closed || !row.hours) return false;
+  const parts = row.hours.split(/[–—-]/);
+  if (parts.length !== 2) return false;
+  const start = parseHourToken(parts[0]);
+  const end = parseHourToken(parts[1]);
+  if (start == null || end == null) return false;
+  const cur = now.getHours() * 60 + now.getMinutes();
+  return cur >= start && cur < end;
+}
+
+function compactHours(hours) {
+  if (!hours) return '';
+  return hours.replace(/\s*[–—-]\s*/, '–').replace(/\s+/g, ' ').replace(/:00\s*(AM|PM)/gi, '$1');
+}
+
 export default function HomePage() {
   const hero = useSection('hero');
   const restaurant = useSection('restaurant');
@@ -77,6 +106,8 @@ export default function HomePage() {
   const { navigate, navigatePath } = useNavigation();
   const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
   const hoursRows = general?.hoursWeekly || [];
+  const todayRow = hoursRows.find((r) => r.day === todayName);
+  const openNow = isOpenAt(todayRow, new Date());
   const schemaOrg = general?.schemaOrg || {};
 
   // Dynamic collections from API
@@ -600,32 +631,40 @@ export default function HomePage() {
         {/* ============================================================ */}
         {/* 7. VISIT (consolidated hours/address/booking)                */}
         {/* ============================================================ */}
-        <section className="hp__section hp__section--alt" id="visit" ref={visitRef}>
+        <section className="hp__section hp__section--alt hp__section--visit" id="visit" ref={visitRef}>
           <div className="container">
-            <div className={`fade-up${visitInVis ? ' visible' : ''}`} ref={visitInRef}>
-              <p className="hp__eyebrow">Visit us</p>
-              <h2 className="hp__heading">Dinner on Longboat Key, shaped with polish and warmth.</h2>
+            <div className={`hp__visit-head fade-up${visitInVis ? ' visible' : ''}`} ref={visitInRef}>
+              <p className="hp__eyebrow hp__eyebrow--center">Visit us</p>
+              <h2 className="hp__heading hp__heading--center">Dinner on Longboat Key, shaped with polish and warmth.</h2>
             </div>
 
-            <div className={`hp__visit-grid fade-up delay-1${visitInVis ? ' visible' : ''}`}>
-              <div className="hp__visit-info">
-                <div className="hp__hours-panel" aria-label="Opening hours">
-                  <div className="hp__hours-head">
-                    <p className="hp__hours-label">Opening hours</p>
-                    <p className="hp__hours-main">{restaurant.hours}</p>
+            <div className={`hp__visit-stage fade-up delay-1${visitInVis ? ' visible' : ''}`}>
+              {/* LEFT — info pane */}
+              <div className="hp__visit-pane">
+                <div className="hp__hours-feature" aria-label="Opening hours">
+                  <div className="hp__hours-feature__head">
+                    <p className="hp__hours-feature__eyebrow">
+                      Tonight <span className="hp__hours-feature__sep" aria-hidden="true">·</span> {todayName}
+                    </p>
+                    <span className={`hp__hours-status${openNow ? ' is-open' : ''}`}>
+                      <span className="hp__hours-status__dot" aria-hidden="true" />
+                      {openNow ? 'Open now' : 'Closed now'}
+                    </span>
                   </div>
+                  <p className="hp__hours-feature__time">
+                    {todayRow?.closed ? 'Closed today' : (todayRow?.hours || restaurant.hours)}
+                  </p>
 
-                  <ul className="hp__hours-list">
+                  <ul className="hp__hours-strip" aria-label="Weekly hours">
                     {hoursRows.map((row) => (
                       <li
                         key={row.day}
-                        className={`hp__hours-row${row.day === todayName ? ' is-today' : ''}`}
+                        className={`hp__hours-strip__day${row.day === todayName ? ' is-today' : ''}${row.closed ? ' is-closed' : ''}`}
                       >
-                        <span className="hp__hours-day">
-                          {row.day}
-                          {row.day === todayName && <span className="hp__today-badge">Today</span>}
+                        <span className="hp__hours-strip__abbr">{DAY_ABBR[row.day] || row.day.slice(0, 3)}</span>
+                        <span className="hp__hours-strip__time">
+                          {row.closed ? 'Closed' : compactHours(row.hours)}
                         </span>
-                        <span className="hp__hours-time">{row.hours}</span>
                       </li>
                     ))}
                   </ul>
@@ -639,52 +678,61 @@ export default function HomePage() {
                   )}
                 </div>
 
-                <div className="hp__visit-row">
-                  <div className="hp__visit-group">
-                    <h3>Where</h3>
-                    <p>{restaurant.address}</p>
-                    <p>{restaurant.city}, {restaurant.state} {restaurant.zip}</p>
-                    <a href={restaurant.mapEmbedUrl} target="_blank" rel="noopener noreferrer">Get directions &rarr;</a>
+                <div className="hp__visit-meta">
+                  <div className="hp__visit-meta__col">
+                    <span className="hp__visit-meta__label">Find us</span>
+                    <p className="hp__visit-meta__line">{restaurant.address}</p>
+                    <p className="hp__visit-meta__line">{restaurant.city}, {restaurant.state} {restaurant.zip}</p>
+                    <a className="hp__visit-meta__link" href={restaurant.mapEmbedUrl} target="_blank" rel="noopener noreferrer">
+                      Get directions <span aria-hidden="true">&rarr;</span>
+                    </a>
                   </div>
-
-                  <div className="hp__visit-group">
-                    <h3>Contact</h3>
-                    <p><a href={`tel:${restaurant.phone}`}>{restaurant.phone}</a></p>
-                    <p><a href={`mailto:${restaurant.email}`}>{restaurant.email}</a></p>
+                  <div className="hp__visit-meta__col">
+                    <span className="hp__visit-meta__label">Reach us</span>
+                    <p className="hp__visit-meta__line"><a href={`tel:${restaurant.phone}`}>{restaurant.phone}</a></p>
+                    <p className="hp__visit-meta__line"><a href={`mailto:${restaurant.email}`}>{restaurant.email}</a></p>
                   </div>
                 </div>
               </div>
 
-              <div className="hp__visit-booking">
-                <h3>Reserve your table</h3>
-                <p>Secure your preferred time on OpenTable — weekends fill early.</p>
-                <div className="hp__visit-booking__actions">
-                  <a href={OPENTABLE_RESERVATION_URL} className="btn btn--primary" target="_blank" rel="noopener noreferrer">Reserve on OpenTable</a>
-                  <a href={`tel:${restaurant.phone}`} className="btn btn--outline-dark">Call the host stand</a>
+              {/* RIGHT — atmospheric map + floating reserve card */}
+              <div className="hp__visit-frame">
+                <div className="hp__visit-map" ref={mapRef}>
+                  {mapVis ? (
+                    <iframe
+                      title="La Norma Ristorante location"
+                      src={`https://www.google.com/maps?q=${encodeURIComponent(`${restaurant.address}, ${restaurant.city}, ${restaurant.state} ${restaurant.zip}`)}&output=embed`}
+                      loading="lazy"
+                      allowFullScreen
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  ) : (
+                    <div className="hp__visit-map__placeholder" aria-hidden="true" />
+                  )}
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.address}, ${restaurant.city}, ${restaurant.state} ${restaurant.zip}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hp__visit-map__open"
+                  >
+                    Open in Google Maps <span aria-hidden="true">&rarr;</span>
+                  </a>
+                </div>
+
+                <div className="hp__visit-reserve">
+                  <p className="hp__visit-reserve__eyebrow">Reservations</p>
+                  <h3 className="hp__visit-reserve__title">A table reserved for you.</h3>
+                  <p className="hp__visit-reserve__copy">Weekends fill early — secure your time on OpenTable.</p>
+                  <div className="hp__visit-reserve__actions">
+                    <a href={OPENTABLE_RESERVATION_URL} className="btn btn--primary" target="_blank" rel="noopener noreferrer">
+                      Book on OpenTable
+                    </a>
+                    <a href={`tel:${restaurant.phone}`} className="hp__visit-reserve__call">
+                      Or call <span>{restaurant.phone}</span>
+                    </a>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="hp__visit-map" ref={mapRef}>
-              {mapVis ? (
-                <iframe
-                  title="La Norma Ristorante location"
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(`${restaurant.address}, ${restaurant.city}, ${restaurant.state} ${restaurant.zip}`)}&output=embed`}
-                  loading="lazy"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              ) : (
-                <div className="hp__visit-map__placeholder" aria-hidden="true" />
-              )}
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.address}, ${restaurant.city}, ${restaurant.state} ${restaurant.zip}`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hp__visit-map__open"
-              >
-                Open in Google Maps &rarr;
-              </a>
             </div>
           </div>
         </section>
