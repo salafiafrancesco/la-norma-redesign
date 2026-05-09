@@ -283,6 +283,124 @@ async function ensureCateringPageContent() {
   console.log('[init] Catering page content seeded.');
 }
 
+async function ensureNavLinks() {
+  const { count, error: countError } = await supabase
+    .from('nav_links')
+    .select('*', { count: 'exact', head: true });
+
+  if (countError && /relation.*does not exist|undefined|Could not find the table|schema cache/i.test(countError.message)) {
+    console.warn('[init] nav_links table missing — create it via Supabase dashboard with columns: id BIGSERIAL PK, sort_order INT DEFAULT 0, label TEXT NOT NULL, page_key TEXT, href TEXT, parent_id BIGINT REFERENCES nav_links(id) ON DELETE CASCADE, scope TEXT DEFAULT \'both\', target TEXT, is_dropdown_parent BOOLEAN DEFAULT false, created_at TIMESTAMPTZ DEFAULT now(), updated_at TIMESTAMPTZ DEFAULT now().');
+    return;
+  }
+
+  if (count > 0) return;
+
+  // Top-level desktop+mobile primary
+  const top = [
+    { sort_order: 1, label: 'Home', page_key: 'home', scope: 'both' },
+    { sort_order: 2, label: 'Menu', page_key: 'menu', scope: 'both' },
+    { sort_order: 3, label: 'Experiences', page_key: null, scope: 'desktop', is_dropdown_parent: true },
+    { sort_order: 4, label: 'Catering', page_key: 'catering', scope: 'both' },
+  ];
+
+  const { data: topRows, error: topError } = await supabase
+    .from('nav_links')
+    .insert(top)
+    .select();
+  if (topError) {
+    if (/Could not find the table|schema cache|relation.*does not exist/i.test(topError.message)) {
+      console.warn('[init] nav_links table missing — skipping seed. Create the table in Supabase to enable Navigation admin.');
+      return;
+    }
+    throw new Error(`[init] nav_links top: ${topError.message}`);
+  }
+
+  const expParent = topRows.find((r) => r.is_dropdown_parent);
+  const dropdownChildren = expParent
+    ? [
+        { sort_order: 1, label: 'Cooking Classes', page_key: 'cooking-classes', parent_id: expParent.id, scope: 'desktop' },
+        { sort_order: 2, label: 'Wine Tastings', page_key: 'wine-tastings', parent_id: expParent.id, scope: 'desktop' },
+        { sort_order: 3, label: 'Live Music', page_key: 'live-music', parent_id: expParent.id, scope: 'desktop' },
+      ]
+    : [];
+
+  // Mobile-only: experiences flat list (no dropdown on mobile)
+  const mobileExtras = [
+    { sort_order: 10, label: 'Cooking Classes', page_key: 'cooking-classes', scope: 'mobile' },
+    { sort_order: 11, label: 'Wine Tastings', page_key: 'wine-tastings', scope: 'mobile' },
+    { sort_order: 12, label: 'Live Music', page_key: 'live-music', scope: 'mobile' },
+    { sort_order: 20, label: 'About', page_key: 'about', scope: 'both' },
+    { sort_order: 21, label: 'Journal', page_key: 'blog', scope: 'both' },
+    { sort_order: 22, label: 'FAQ', page_key: 'faq', scope: 'both' },
+    { sort_order: 23, label: 'Contact', page_key: 'contact', scope: 'both' },
+    { sort_order: 24, label: 'Privacy Policy', page_key: 'privacy-policy', scope: 'both' },
+  ];
+
+  const allChildren = [...dropdownChildren, ...mobileExtras];
+  if (allChildren.length > 0) {
+    const { error } = await supabase.from('nav_links').insert(allChildren);
+    if (error) throw new Error(`[init] nav_links children: ${error.message}`);
+  }
+
+  console.log(`[init] nav_links seeded (${top.length + allChildren.length} records).`);
+}
+
+async function ensureFooterColumns() {
+  const { count, error: countError } = await supabase
+    .from('footer_columns')
+    .select('*', { count: 'exact', head: true });
+
+  if (countError && /relation.*does not exist|undefined|Could not find the table|schema cache/i.test(countError.message)) {
+    console.warn('[init] footer_columns / footer_column_links tables missing — create via Supabase dashboard. footer_columns: id BIGSERIAL PK, sort_order INT, label TEXT NOT NULL. footer_column_links: id BIGSERIAL PK, column_id BIGINT REFERENCES footer_columns(id) ON DELETE CASCADE, sort_order INT, label TEXT, page_key TEXT, href TEXT, target TEXT.');
+    return;
+  }
+
+  if (count > 0) return;
+
+  const { data: cols, error: colsError } = await supabase
+    .from('footer_columns')
+    .insert([
+      { sort_order: 1, label: 'About' },
+      { sort_order: 2, label: 'Experiences' },
+    ])
+    .select();
+  if (colsError) {
+    if (/Could not find the table|schema cache|relation.*does not exist/i.test(colsError.message)) {
+      console.warn('[init] footer_columns table missing — skipping seed. Create the table in Supabase to enable Footer admin.');
+      return;
+    }
+    throw new Error(`[init] footer_columns: ${colsError.message}`);
+  }
+
+  const aboutCol = cols.find((c) => c.label === 'About');
+  const expCol = cols.find((c) => c.label === 'Experiences');
+
+  const links = [];
+  if (aboutCol) {
+    links.push(
+      { column_id: aboutCol.id, sort_order: 1, label: 'Our story', page_key: 'about' },
+      { column_id: aboutCol.id, sort_order: 2, label: 'Journal', page_key: 'blog' },
+      { column_id: aboutCol.id, sort_order: 3, label: 'Private events', page_key: 'private-events' },
+      { column_id: aboutCol.id, sort_order: 4, label: 'Contact', page_key: 'contact' },
+    );
+  }
+  if (expCol) {
+    links.push(
+      { column_id: expCol.id, sort_order: 1, label: 'Wine tastings', page_key: 'wine-tastings' },
+      { column_id: expCol.id, sort_order: 2, label: 'Cooking classes', page_key: 'cooking-classes' },
+      { column_id: expCol.id, sort_order: 3, label: 'Live music', page_key: 'live-music' },
+      { column_id: expCol.id, sort_order: 4, label: 'Catering', page_key: 'catering' },
+    );
+  }
+
+  if (links.length > 0) {
+    const { error } = await supabase.from('footer_column_links').insert(links);
+    if (error) throw new Error(`[init] footer_column_links: ${error.message}`);
+  }
+
+  console.log(`[init] footer_columns seeded (${cols.length} cols, ${links.length} links).`);
+}
+
 async function ensureCateringRequestsTable() {
   // Check if the table exists by attempting a count query.
   const { error } = await supabase
@@ -329,6 +447,28 @@ async function ensureCateringRequestsTable() {
   }
 }
 
+async function ensureInquiriesContactType() {
+  // The original CHECK constraint allows only ('wine_tasting', 'live_music', 'private_event').
+  // We need to extend it to also accept 'contact'. Idempotent — safe to run on every boot.
+  const { error: sqlError } = await supabase.rpc('exec_sql', {
+    query: `
+      ALTER TABLE inquiries DROP CONSTRAINT IF EXISTS inquiries_type_check;
+      ALTER TABLE inquiries ADD CONSTRAINT inquiries_type_check
+        CHECK (type IN ('wine_tasting', 'live_music', 'private_event', 'contact'));
+    `,
+  });
+
+  if (sqlError) {
+    console.warn(
+      '[init] Could not auto-update inquiries_type_check constraint:',
+      sqlError.message,
+      '\nApply this SQL via Supabase dashboard once:\n' +
+      "  ALTER TABLE inquiries DROP CONSTRAINT IF EXISTS inquiries_type_check;\n" +
+      "  ALTER TABLE inquiries ADD CONSTRAINT inquiries_type_check CHECK (type IN ('wine_tasting','live_music','private_event','contact'));"
+    );
+  }
+}
+
 export async function ensureInitialized() {
   await ensureAdminUser();
   await ensureSiteContent();
@@ -339,4 +479,7 @@ export async function ensureInitialized() {
   await ensureHomepageCollections();
   await ensureCateringPageContent();
   await ensureCateringRequestsTable();
+  await ensureNavLinks();
+  await ensureFooterColumns();
+  await ensureInquiriesContactType();
 }

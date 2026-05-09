@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSection } from '../../context/ContentContext';
 import { useNavigation } from '../../context/NavigationContext';
 import { PAGE_KEYS } from '../../../shared/routes.js';
 import { OPENTABLE_RESERVATION_URL } from '../../utils/hospitalityMedia';
+import { useSiteNavigation } from '../../hooks/useSiteNavigation';
 import './Navbar.css';
 
 const IMMERSIVE_PAGES = new Set([
@@ -14,7 +15,10 @@ const IMMERSIVE_PAGES = new Set([
   PAGE_KEYS.catering,
 ]);
 
-const NAV_LINKS = [
+// Hardcoded fallbacks — used until the API responds (and on error). These
+// preserve the instant first paint and remain the source of truth for SSR /
+// no-JS rendering. The API replaces these values at runtime once loaded.
+const NAV_LINKS_FALLBACK = [
   { label: 'Home', pageKey: PAGE_KEYS.home },
   { label: 'Menu', pageKey: PAGE_KEYS.menu },
   {
@@ -28,31 +32,49 @@ const NAV_LINKS = [
   { label: 'Catering', pageKey: PAGE_KEYS.catering },
 ];
 
-const SECONDARY_LINKS = [
-  { label: 'About', pageKey: PAGE_KEYS.about },
-  { label: 'Journal', pageKey: PAGE_KEYS.blog },
-  { label: 'FAQ', pageKey: PAGE_KEYS.faq },
-  { label: 'Contact', pageKey: PAGE_KEYS.contact },
-  { label: 'Privacy Policy', pageKey: PAGE_KEYS.privacyPolicy },
-];
-
-const MOBILE_PRIMARY = [
+const MOBILE_PRIMARY_FALLBACK = [
   { label: 'Home', pageKey: PAGE_KEYS.home },
   { label: 'Menu', pageKey: PAGE_KEYS.menu },
   { label: 'Catering', pageKey: PAGE_KEYS.catering },
 ];
 
-const MOBILE_EXPERIENCES = [
+const MOBILE_EXPERIENCES_FALLBACK = [
   { label: 'Cooking Classes', pageKey: PAGE_KEYS.cookingClasses },
   { label: 'Wine Tastings', pageKey: PAGE_KEYS.wineTastings },
   { label: 'Live Music', pageKey: PAGE_KEYS.liveMusic },
 ];
 
-const MOBILE_SECONDARY = [
+const MOBILE_SECONDARY_FALLBACK = [
   { label: 'About', pageKey: PAGE_KEYS.about },
   { label: 'Journal', pageKey: PAGE_KEYS.blog },
   { label: 'Contact', pageKey: PAGE_KEYS.contact },
 ];
+
+function buildDesktopNav(navLinks) {
+  // Top-level desktop items (no parent), plus children under is_dropdown_parent.
+  const tops = navLinks
+    .filter((link) => !link.parent_id && (link.scope === 'desktop' || link.scope === 'both'))
+    .sort((a, b) => a.sort_order - b.sort_order);
+
+  return tops.map((top) => {
+    if (top.is_dropdown_parent) {
+      const children = navLinks
+        .filter((link) => link.parent_id === top.id)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((child) => ({ label: child.label, pageKey: child.page_key, href: child.href }));
+      return { label: top.label, dropdown: children };
+    }
+    return { label: top.label, pageKey: top.page_key, href: top.href };
+  });
+}
+
+function filterMobileScope(navLinks, predicate) {
+  return navLinks
+    .filter((link) => !link.parent_id && (link.scope === 'mobile' || link.scope === 'both'))
+    .filter(predicate)
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((link) => ({ label: link.label, pageKey: link.page_key, href: link.href }));
+}
 
 const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -60,10 +82,40 @@ export default function Navbar() {
   const restaurant = useSection('restaurant');
   const links = useSection('links');
   const { navigate, page, resolveHref } = useNavigation();
+  const { navLinks, loaded: navLoaded } = useSiteNavigation();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const drawerRef = useRef(null);
   const hamburgerRef = useRef(null);
+
+  const desktopNav = useMemo(
+    () => (navLoaded && navLinks.length > 0 ? buildDesktopNav(navLinks) : NAV_LINKS_FALLBACK),
+    [navLinks, navLoaded],
+  );
+
+  const mobilePrimary = useMemo(() => {
+    if (!navLoaded || navLinks.length === 0) return MOBILE_PRIMARY_FALLBACK;
+    return filterMobileScope(
+      navLinks,
+      (link) => !['cooking-classes', 'wine-tastings', 'live-music', 'about', 'blog', 'faq', 'contact', 'privacy-policy'].includes(link.page_key),
+    );
+  }, [navLinks, navLoaded]);
+
+  const mobileExperiences = useMemo(() => {
+    if (!navLoaded || navLinks.length === 0) return MOBILE_EXPERIENCES_FALLBACK;
+    return filterMobileScope(
+      navLinks,
+      (link) => ['cooking-classes', 'wine-tastings', 'live-music'].includes(link.page_key),
+    );
+  }, [navLinks, navLoaded]);
+
+  const mobileSecondary = useMemo(() => {
+    if (!navLoaded || navLinks.length === 0) return MOBILE_SECONDARY_FALLBACK;
+    return filterMobileScope(
+      navLinks,
+      (link) => ['about', 'blog', 'faq', 'contact', 'privacy-policy'].includes(link.page_key),
+    );
+  }, [navLinks, navLoaded]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 24);
@@ -153,7 +205,7 @@ export default function Navbar() {
         </a>
 
         <nav className="navbar__nav" aria-label="Primary navigation">
-          {NAV_LINKS.map((link) => (
+          {desktopNav.map((link) => (
             link.dropdown ? (
               <div key={link.label} className={`navbar__dropdown${isLinkActive(link) ? ' is-active' : ''}`}>
                 <button type="button" className="navbar__link navbar__link--dropdown">
@@ -261,7 +313,7 @@ export default function Navbar() {
 
           <nav className="navbar__mobile-nav" aria-label="Mobile navigation">
             <div className="navbar__mobile-group">
-              {MOBILE_PRIMARY.map((link) => (
+              {mobilePrimary.map((link) => (
                 <a
                   key={link.label}
                   href={resolveHref(link.pageKey)}
@@ -275,7 +327,7 @@ export default function Navbar() {
 
             <div className="navbar__mobile-group">
               <span className="navbar__mobile-group-label">Experiences</span>
-              {MOBILE_EXPERIENCES.map((link) => (
+              {mobileExperiences.map((link) => (
                 <a
                   key={link.label}
                   href={resolveHref(link.pageKey)}
@@ -288,7 +340,7 @@ export default function Navbar() {
             </div>
 
             <div className="navbar__mobile-group">
-              {MOBILE_SECONDARY.map((link) => (
+              {mobileSecondary.map((link) => (
                 <a
                   key={link.label}
                   href={resolveHref(link.pageKey)}

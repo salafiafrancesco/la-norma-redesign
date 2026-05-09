@@ -14,6 +14,9 @@ import CateringManager from './pages/CateringManager';
 import ExperiencesManager from './pages/ExperiencesManager';
 import HomepageManager from './pages/HomepageManager';
 import InquiriesManager from './pages/InquiriesManager';
+import MenuManager from './pages/MenuManager';
+import NavigationManager from './pages/NavigationManager';
+import FooterManager from './pages/FooterManager';
 
 function AdminContent() {
   const { admin, checking } = useAdmin();
@@ -33,7 +36,10 @@ function AdminContent() {
   const pages = {
     dashboard:  <Dashboard setPage={setPage} />,
     homepage:   <HomepageManager />,
+    menu:       <MenuManager />,
     content:    <ContentEditor />,
+    navigation: <NavigationManager />,
+    footer:     <FooterManager />,
     blog:       <BlogManager />,
     classes:    <ClassesManager />,
     rsvp:       <RSVPList />,

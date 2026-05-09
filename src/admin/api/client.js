@@ -337,6 +337,22 @@ export const cateringContent = {
   delete: (collection, id) => request('DELETE', `/catering-content/${collection}/${id}`),
 };
 
+export const siteNavigation = {
+  getAll: () => fetch(`${BASE}/site-navigation`).then((r) => {
+    if (!r.ok) throw new Error(`Site navigation failed (${r.status})`);
+    return r.json();
+  }),
+  createNavLink: (data) => request('POST', '/site-navigation/nav-links', data),
+  updateNavLink: (id, data) => request('PUT', `/site-navigation/nav-links/${id}`, data),
+  deleteNavLink: (id) => request('DELETE', `/site-navigation/nav-links/${id}`),
+  createFooterColumn: (data) => request('POST', '/site-navigation/footer-columns', data),
+  updateFooterColumn: (id, data) => request('PUT', `/site-navigation/footer-columns/${id}`, data),
+  deleteFooterColumn: (id) => request('DELETE', `/site-navigation/footer-columns/${id}`),
+  createFooterLink: (data) => request('POST', '/site-navigation/footer-column-links', data),
+  updateFooterLink: (id, data) => request('PUT', `/site-navigation/footer-column-links/${id}`, data),
+  deleteFooterLink: (id) => request('DELETE', `/site-navigation/footer-column-links/${id}`),
+};
+
 export const cateringRequests = {
   list: (params = {}) => requestCachedList('/catering/requests', params),
   update: (id, data) => request('PUT', `/catering/requests/${id}`, data),

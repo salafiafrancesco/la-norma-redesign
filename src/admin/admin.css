@@ -1058,3 +1058,22 @@ body.admin-body ::-webkit-scrollbar-thumb {
 body.admin-body ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* MenuManager helpers */
+.adm-flex--center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.adm-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem 1rem;
+}
+.adm-card__lead {
+  margin: 0 0 1rem;
+  color: #6B7280;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.adm-gap-1 { gap: 0.35rem; }

@@ -21,6 +21,7 @@ import experienceEventRoutes from './routes/experienceEvents.js';
 import homepageContentRoutes from './routes/homepageContent.js';
 import inquiryRoutes from './routes/inquiries.js';
 import rsvpRoutes from './routes/rsvp.js';
+import siteNavigationRoutes from './routes/siteNavigation.js';
 import uploadRoutes from './routes/upload.js';
 
 export const app = express();
@@ -115,6 +116,7 @@ app.use('/api/classes', classRoutes);
 app.use('/api/experience-events', experienceEventRoutes);
 app.use('/api/homepage-content', homepageContentRoutes);
 app.use('/api/rsvp', bookingSubmissionLimiter, rsvpRoutes);
+app.use('/api/site-navigation', siteNavigationRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/inquiries', bookingSubmissionLimiter, inquiryRoutes);

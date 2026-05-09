@@ -1,15 +1,51 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PAGE_KEYS, resolveNavigationTarget } from '../../../shared/routes.js';
 import { useNavigation } from '../../context/NavigationContext';
 import { useSection } from '../../context/ContentContext';
+import { useSiteNavigation } from '../../hooks/useSiteNavigation';
 import API_BASE from '../../config/api';
 import './Footer.css';
+
+const FOOTER_COLUMNS_FALLBACK = [
+  {
+    label: 'About',
+    links: [
+      { label: 'Our story', page_key: PAGE_KEYS.about },
+      { label: 'Journal', page_key: PAGE_KEYS.blog },
+      { label: 'Private events', page_key: PAGE_KEYS.privateEvents },
+      { label: 'Contact', page_key: PAGE_KEYS.contact },
+    ],
+  },
+  {
+    label: 'Experiences',
+    links: [
+      { label: 'Wine tastings', page_key: PAGE_KEYS.wineTastings },
+      { label: 'Cooking classes', page_key: PAGE_KEYS.cookingClasses },
+      { label: 'Live music', page_key: PAGE_KEYS.liveMusic },
+      { label: 'Catering', page_key: PAGE_KEYS.catering },
+    ],
+  },
+];
 
 export default function Footer() {
   const restaurant = useSection('restaurant');
   const footerNav = useSection('footerNav');
   const { navigate, navigatePath, resolveHref } = useNavigation();
+  const { footerColumns, footerColumnLinks, loaded: navLoaded } = useSiteNavigation();
   const currentYear = new Date().getFullYear();
+
+  const columns = useMemo(() => {
+    if (!navLoaded || footerColumns.length === 0) return FOOTER_COLUMNS_FALLBACK;
+    return footerColumns
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((col) => ({
+        label: col.label,
+        links: footerColumnLinks
+          .filter((l) => l.column_id === col.id)
+          .sort((a, b) => a.sort_order - b.sort_order),
+      }));
+  }, [footerColumns, footerColumnLinks, navLoaded]);
 
   const [nlEmail, setNlEmail] = useState('');
   const [nlStatus, setNlStatus] = useState('');
@@ -46,20 +82,6 @@ export default function Footer() {
     }
   };
 
-  const aboutLinks = [
-    { label: 'Our story', key: PAGE_KEYS.about },
-    { label: 'Journal', key: PAGE_KEYS.blog },
-    { label: 'Private events', key: PAGE_KEYS.privateEvents },
-    { label: 'Contact', key: PAGE_KEYS.contact },
-  ];
-
-  const experienceLinks = [
-    { label: 'Wine tastings', key: PAGE_KEYS.wineTastings },
-    { label: 'Cooking classes', key: PAGE_KEYS.cookingClasses },
-    { label: 'Live music', key: PAGE_KEYS.liveMusic },
-    { label: 'Catering', key: PAGE_KEYS.catering },
-  ];
-
   return (
     <footer className="footer" role="contentinfo">
       <div className="footer__top container">
@@ -86,39 +108,39 @@ export default function Footer() {
             <p className="footer__hours-note">{restaurant.hours}</p>
           </section>
 
-          <section className="footer__panel">
-            <p className="footer__panel-label">About</p>
-            <ul className="footer__nav-list">
-              {aboutLinks.map((l) => l.key && (
-                <li key={l.label}>
-                  <a
-                    href={resolveHref(l.key)}
-                    className="footer__text-link"
-                    onClick={(e) => { e.preventDefault(); navigate(l.key); }}
-                  >
-                    {l.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="footer__panel">
-            <p className="footer__panel-label">Experiences</p>
-            <ul className="footer__nav-list">
-              {experienceLinks.map((l) => l.key && (
-                <li key={l.label}>
-                  <a
-                    href={resolveHref(l.key)}
-                    className="footer__text-link"
-                    onClick={(e) => { e.preventDefault(); navigate(l.key); }}
-                  >
-                    {l.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {columns.map((col) => (
+            <section key={col.label} className="footer__panel">
+              <p className="footer__panel-label">{col.label}</p>
+              <ul className="footer__nav-list">
+                {col.links.map((l, idx) => {
+                  const key = `${col.label}-${l.page_key || l.href || idx}`;
+                  const href = l.page_key ? resolveHref(l.page_key) : (l.href || '#');
+                  const isExternal = !l.page_key && /^https?:/i.test(l.href || '');
+                  return (
+                    <li key={key}>
+                      <a
+                        href={href}
+                        className="footer__text-link"
+                        target={l.target || (isExternal ? '_blank' : undefined)}
+                        rel={isExternal ? 'noopener noreferrer' : undefined}
+                        onClick={(e) => {
+                          if (l.page_key) {
+                            e.preventDefault();
+                            navigate(l.page_key);
+                          } else if (!isExternal && l.href) {
+                            e.preventDefault();
+                            navigatePath(l.href);
+                          }
+                        }}
+                      >
+                        {l.label}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
 
           <section className="footer__panel">
             <p className="footer__panel-label">Follow</p>
