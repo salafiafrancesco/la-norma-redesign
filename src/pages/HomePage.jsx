@@ -12,6 +12,12 @@ import './HomePage.css';
 
 const TONIGHT_SLOTS = ['6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM'];
 
+const STATS_FALLBACK = [
+  { id: 'years', value: '18 years', label: 'Family-run since 2008' },
+  { id: 'wines', value: '70+ wines', label: 'Italian wine list' },
+  { id: 'seats', value: '250+ seats', label: 'Served weekly' },
+];
+
 const HOURS_ROWS = [
   { day: 'Monday', hours: '5:00 PM – 9:00 PM' },
   { day: 'Tuesday', hours: '5:00 PM – 9:00 PM' },
@@ -292,16 +298,15 @@ export default function HomePage() {
               <p className="hp__signature-body">
                 Family-run since 2008. Wood-fired oven, hand-rolled pasta, Italian wine list, and a dining room that's quiet enough for conversation.
               </p>
-              {stats.length > 0 && (
-                <div className="hp__sig-stats">
-                  {stats.map((s) => (
-                    <div key={s.id} className="hp__sig-stat">
-                      <span className="hp__sig-stat-value">{s.value}</span>
-                      <span className="hp__sig-stat-label">{s.label}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="hp__sig-stats">
+                {(stats.length > 0 ? stats : STATS_FALLBACK).map((s, i) => (
+                  <div key={s.id} className={`hp__sig-stat hp__sig-stat--${i + 1}`}>
+                    <span className="hp__sig-stat-mark" aria-hidden="true" />
+                    <span className="hp__sig-stat-value">{s.value}</span>
+                    <span className="hp__sig-stat-label">{s.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
