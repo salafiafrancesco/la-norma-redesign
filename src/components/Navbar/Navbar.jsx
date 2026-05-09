@@ -84,7 +84,7 @@ export default function Navbar() {
     const focusables = drawer
       ? Array.from(drawer.querySelectorAll(FOCUSABLE_SELECTOR))
       : [];
-    focusables[0]?.focus();
+    focusables[0]?.focus({ preventScroll: true });
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {

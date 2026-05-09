@@ -268,6 +268,8 @@
 .navbar__mobile-menu {
   position: fixed;
   inset: 0;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   justify-content: flex-end;
   padding-left: max(1rem, env(safe-area-inset-left));
@@ -282,7 +284,7 @@
   overscroll-behavior: none;
   transition:
     opacity 0.2s var(--ease),
-    visibility 0s linear 0.2s;
+    visibility 0s linear 0.28s;
 }
 
 .navbar__mobile-menu::before {
@@ -305,7 +307,9 @@
   position: relative;
   z-index: 1;
   width: min(100%, 26rem);
-  min-height: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
   margin-left: auto;
   padding: max(1rem, env(safe-area-inset-top)) var(--gutter) max(1.75rem, env(safe-area-inset-bottom));
   display: flex;
@@ -319,18 +323,14 @@
     linear-gradient(180deg, #1a2321 0%, #101615 100%);
   box-shadow: -24px 0 56px rgba(6, 10, 10, 0.45);
   border-left: 1px solid rgba(248, 243, 235, 0.08);
-  opacity: 0;
-  transform: translate3d(0.85rem, 0, 0) scale(0.985);
-  transform-origin: right center;
-  will-change: opacity, transform;
-  transition:
-    opacity 0.2s var(--ease),
-    transform 0.24s var(--ease);
+  transform: translate3d(100%, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+  transition: transform 0.28s var(--ease);
 }
 
 .navbar__mobile-menu.is-open .navbar__mobile-shell {
-  opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
+  transform: translate3d(0, 0, 0);
 }
 
 .navbar__mobile-top {
