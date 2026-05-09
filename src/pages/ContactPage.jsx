@@ -15,6 +15,7 @@ function isValidEmail(v) {
 
 export default function ContactPage() {
   const restaurant = useSection('restaurant');
+  const page = useSection('contactPage');
   const { navigate } = useNavigation();
   const fid = useId();
 
@@ -80,27 +81,24 @@ export default function ContactPage() {
       <main id="main-content" className="editorial-main">
         <div className="container">
           <header className="editorial-hero">
-            <p className="editorial-hero__eyebrow">Contact</p>
-            <h1 className="editorial-hero__heading">Know where to start, and the right next step becomes obvious.</h1>
-            <p className="editorial-hero__subheading">
-              Reserve dinner instantly on OpenTable, call the team directly, or choose the experience page that best
-              matches what you are planning.
-            </p>
+            <p className="editorial-hero__eyebrow">{page.hero.eyebrow}</p>
+            <h1 className="editorial-hero__heading">{page.hero.headline}</h1>
+            <p className="editorial-hero__subheading">{page.hero.sub}</p>
             <div className="editorial-hero__actions">
               <a href={OPENTABLE_RESERVATION_URL} className="btn btn--primary" target="_blank" rel="noopener noreferrer">
-                Reserve on OpenTable
+                {page.hero.primary_cta_label}
               </a>
               <a href={`tel:${restaurant.phone}`} className="btn btn--outline-dark">
-                Call the restaurant
+                {page.hero.secondary_cta_label}
               </a>
             </div>
           </header>
 
           <section className="editorial-card">
-            <h2 className="editorial-card__title">Contact details</h2>
+            <h2 className="editorial-card__title">{page.details_title}</h2>
             <div className="editorial-info-grid">
               <article className="editorial-info-card">
-                <h3 className="editorial-info-card__title">Visit</h3>
+                <h3 className="editorial-info-card__title">{page.info_cards.visit_title}</h3>
                 <div className="editorial-info-card__body">
                   <p>{restaurant.address}</p>
                   <p>{restaurant.city}, {restaurant.state} {restaurant.zip}</p>
@@ -113,7 +111,7 @@ export default function ContactPage() {
               </article>
 
               <article className="editorial-info-card">
-                <h3 className="editorial-info-card__title">Reach us</h3>
+                <h3 className="editorial-info-card__title">{page.info_cards.reach_title}</h3>
                 <div className="editorial-info-card__body">
                   <p><a href={`tel:${restaurant.phone}`}>{restaurant.phone}</a></p>
                   <p><a href={`mailto:${restaurant.email}`}>{restaurant.email}</a></p>
@@ -122,26 +120,24 @@ export default function ContactPage() {
               </article>
 
               <article className="editorial-info-card">
-                <h3 className="editorial-info-card__title">Best path by intent</h3>
+                <h3 className="editorial-info-card__title">{page.info_cards.intent_title}</h3>
                 <div className="editorial-info-card__body">
-                  <p>Dinner reservation: OpenTable</p>
-                  <p>Cooking class RSVP: class page</p>
-                  <p>Private events: inquiry page</p>
+                  {page.info_cards.intent_lines.map((line, idx) => (
+                    <p key={idx}>{line}</p>
+                  ))}
                 </div>
               </article>
             </div>
           </section>
 
           <section className="editorial-card editorial-contact-form" id="contact-form" aria-labelledby="contact-form-title">
-            <h2 className="editorial-card__title" id="contact-form-title">Send a message</h2>
-            <p className="editorial-card__lead">
-              For anything that doesn&rsquo;t fit a reservation, class, or event inquiry. We reply within one business day.
-            </p>
+            <h2 className="editorial-card__title" id="contact-form-title">{page.form.title}</h2>
+            <p className="editorial-card__lead">{page.form.lead}</p>
 
             {submitted ? (
               <div className="editorial-contact-form__success" role="status" aria-live="polite">
-                <h3>Thank you</h3>
-                <p>Your message is in. A member of the team will reply by email within one business day.</p>
+                <h3>{page.form.success_title}</h3>
+                <p>{page.form.success_message}</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate className="editorial-contact-form__form">
@@ -180,44 +176,32 @@ export default function ContactPage() {
 
                 <div className="editorial-contact-form__actions">
                   <button type="submit" className="btn btn--primary" disabled={submitting}>
-                    {submitting ? 'Sending…' : 'Send message'}
+                    {submitting ? 'Sending…' : page.form.submit_label}
                   </button>
-                  <p className="editorial-contact-form__note">
-                    For dinner, OpenTable is faster. For events, the inquiry pages capture the right details.
-                  </p>
+                  <p className="editorial-contact-form__note">{page.form.note}</p>
                 </div>
               </form>
             )}
           </section>
 
           <section className="editorial-support">
-            <h2 className="editorial-support__title">Choose the page that fits what you need.</h2>
+            <h2 className="editorial-support__title">{page.support.heading}</h2>
             <ul className="editorial-support__list">
-              <li>
-                <div>
-                  <strong>Dinner reservations</strong>
-                  <div>Fastest for everyday dining and planned evenings.</div>
-                </div>
-              </li>
-              <li>
-                <div>
-                  <strong>Cooking classes and wine tastings</strong>
-                  <div>Best when you want a premium experience with clearer booking context.</div>
-                </div>
-              </li>
-              <li>
-                <div>
-                  <strong>Private events</strong>
-                  <div>Use the inquiry flow when guest count, menu, and event format all matter.</div>
-                </div>
-              </li>
+              {page.support.items.map((item, idx) => (
+                <li key={idx}>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <div>{item.body}</div>
+                  </div>
+                </li>
+              ))}
             </ul>
             <div className="editorial-support__actions">
               <button type="button" className="btn btn--primary" onClick={() => navigate(PAGE_KEYS.cookingClasses)}>
-                Cooking classes
+                {page.support.primary_label}
               </button>
               <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.privateEvents)}>
-                Private events
+                {page.support.secondary_label}
               </button>
             </div>
           </section>

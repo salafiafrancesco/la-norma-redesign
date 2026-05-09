@@ -195,7 +195,55 @@ export const CONTENT_SECTIONS = [
     description: 'Hero copy and FAQ list for /faq.',
     hint: 'Object with { "hero": { "eyebrow", "headline", "sub" }, "items": [{ "question", "answer" }], "editorial": { "heading", "body" } }',
   },
+  {
+    key: 'menuPage',
+    label: 'Menu Page',
+    icon: 'Page',
+    editor: 'json',
+    description: 'Hero, stats bar and editorial support panel for /menu.',
+    hint: 'Object with { "description", "hero": { "image_url", "image_alt", "eyebrow", "headline", "h2", "sub", "primary_cta_label", "secondary_cta_label", "stats": [{ "value", "label" }] }, "support": { "heading", "body", "primary_label", "secondary_label" } }',
+  },
+  {
+    key: 'contactPage',
+    label: 'Contact Page',
+    icon: 'Page',
+    editor: 'json',
+    description: 'Hero, contact card titles, intent panel and form copy for /contact.',
+    hint: 'Object with { "hero": { "eyebrow", "headline", "sub", "primary_cta_label", "secondary_cta_label" }, "details_title", "info_cards": { "visit_title", "reach_title", "intent_title", "intent_lines": [string] }, "form": { "title", "lead", "success_title", "success_message", "submit_label", "note" }, "support": { "heading", "items": [{ "title", "body" }], "primary_label", "secondary_label" } }',
+  },
+  {
+    key: 'theme',
+    label: 'Theme & Colors',
+    icon: 'Theme',
+    editor: 'fields',
+    description: 'Brand color tokens injected at runtime as CSS custom properties on :root.',
+    fields: [
+      { key: 'cream', label: 'Cream (background)' },
+      { key: 'charcoal', label: 'Charcoal (primary text)' },
+      { key: 'olive', label: 'Olive (secondary accent)' },
+      { key: 'olive_dark', label: 'Olive dark' },
+      { key: 'olive_light', label: 'Olive light' },
+      { key: 'terracotta', label: 'Terracotta (CTA / eyebrows)' },
+      { key: 'terracotta_dk', label: 'Terracotta dark' },
+      { key: 'gold', label: 'Gold (highlights)' },
+      { key: 'gold_light', label: 'Gold light' },
+      { key: 'gold_pale', label: 'Gold pale' },
+    ],
+  },
 ];
+
+export const THEME_DEFAULTS = {
+  cream: '#F8F3EB',
+  charcoal: '#1A2120',
+  olive: '#3B5844',
+  olive_dark: '#273D2F',
+  olive_light: '#587265',
+  terracotta: '#B85C38',
+  terracotta_dk: '#974929',
+  gold: '#C4973A',
+  gold_light: '#D9B86A',
+  gold_pale: '#EDD99A',
+};
 
 export const CONTENT_SECTION_MAP = Object.fromEntries(
   CONTENT_SECTIONS.map((section) => [section.key, section]),

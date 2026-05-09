@@ -22,9 +22,6 @@ function isValidEmail(v) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
-const HERO_SUBTITLE =
-  'Sicilian kitchen on Longboat Key. Off-premise events, private gatherings, and yacht parties from Sarasota Bay.';
-
 const TIERS = [
   {
     id: 'cocktail', title: 'Cocktail Reception',
@@ -232,7 +229,7 @@ export default function CateringPage() {
             <p className="cat-hero__eyebrow">{c.heroEyebrow}</p>
             <h1 className="cat-hero__heading">{c.heroTitle}</h1>
             <h2 className="cat-hero__h2">{c.heroSubtitle}</h2>
-            <p className="cat-hero__sub">{HERO_SUBTITLE}</p>
+            <p className="cat-hero__sub">{c.heroSub}</p>
             <div className="cat-hero__actions">
               <button type="button" className="btn btn--primary" onClick={() => goToForm()}>Request a Quote</button>
               <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.menu)}>View Sample Menu</button>

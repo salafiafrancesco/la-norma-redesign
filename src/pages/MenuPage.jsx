@@ -3,25 +3,25 @@ import MenuHighlights from '../components/MenuHighlights/MenuHighlights';
 import Navbar from '../components/Navbar/Navbar';
 import Specialties from '../components/Specialties/Specialties';
 import { useNavigation } from '../context/NavigationContext';
+import { useSection } from '../context/ContentContext';
 import { usePageMetadata } from '../hooks/usePageMetadata';
 import { PAGE_KEYS } from '../../shared/routes.js';
 import './EditorialPage.css';
 
-const MENU_DESCRIPTION =
-  'Explore the La Norma menu with Sicilian antipasti, house-made pasta, wood-fired pizza, seafood, and desserts on Longboat Key.';
-
 export default function MenuPage() {
   const { navigate } = useNavigation();
+  const page = useSection('menuPage');
+  const { hero, support, description } = page;
 
   usePageMetadata({
     title: 'Menu',
-    description: MENU_DESCRIPTION,
+    description,
     structuredData: [
       {
         '@context': 'https://schema.org',
         '@type': 'Menu',
         name: 'La Norma Menu',
-        description: MENU_DESCRIPTION,
+        description,
         hasMenuSection: ['Antipasti', 'Primi & Pizze', 'Secondi & Dolci'].map((name) => ({
           '@type': 'MenuSection',
           name,
@@ -37,44 +37,36 @@ export default function MenuPage() {
       <header className="mp-hero">
         <div
           className="mp-hero__bg"
-          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1800&q=85)' }}
+          style={{ backgroundImage: `url(${hero.image_url})` }}
           role="img"
-          aria-label="House-made Sicilian pasta, plated"
+          aria-label={hero.image_alt}
         />
         <div className="mp-hero__overlay" />
         <div className="mp-hero__content container">
           <span className="mp-hero__rule" aria-hidden="true" />
           <div className="mp-hero__copy">
-            <p className="mp-hero__eyebrow">La Norma Ristorante · Longboat Key</p>
-            <h1 className="mp-hero__heading">The Menu</h1>
-            <h2 className="mp-hero__h2">House-made pasta, wood-fired pizza, Sicilian classics.</h2>
-            <p className="mp-hero__sub">
-              Built around a warm, polished dinner service — antipasti through dessert, with seasonal Sicilian inflections and an Italian wine list.
-            </p>
+            <p className="mp-hero__eyebrow">{hero.eyebrow}</p>
+            <h1 className="mp-hero__heading">{hero.headline}</h1>
+            <h2 className="mp-hero__h2">{hero.h2}</h2>
+            <p className="mp-hero__sub">{hero.sub}</p>
             <div className="mp-hero__actions">
               <button type="button" className="btn btn--primary" onClick={() => navigate(PAGE_KEYS.home, { anchor: 'reserve' })}>
-                Reserve dinner
+                {hero.primary_cta_label}
               </button>
               <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.privateEvents)}>
-                Plan a private dinner
+                {hero.secondary_cta_label}
               </button>
             </div>
           </div>
         </div>
         <div className="mp-hero__stats-bar">
           <div className="container mp-hero__stats">
-            <div className="mp-hero__stat" style={{ animationDelay: '0.4s' }}>
-              <span className="mp-hero__stat-value">Daily fresh</span>
-              <span className="mp-hero__stat-label">Hand-rolled pasta</span>
-            </div>
-            <div className="mp-hero__stat" style={{ animationDelay: '0.52s' }}>
-              <span className="mp-hero__stat-value">550°C</span>
-              <span className="mp-hero__stat-label">Wood-fired oven</span>
-            </div>
-            <div className="mp-hero__stat" style={{ animationDelay: '0.64s' }}>
-              <span className="mp-hero__stat-value">70+ wines</span>
-              <span className="mp-hero__stat-label">Italian wine list</span>
-            </div>
+            {hero.stats.map((stat, idx) => (
+              <div className="mp-hero__stat" style={{ animationDelay: `${0.4 + idx * 0.12}s` }} key={`${stat.label}-${idx}`}>
+                <span className="mp-hero__stat-value">{stat.value}</span>
+                <span className="mp-hero__stat-label">{stat.label}</span>
+              </div>
+            ))}
           </div>
         </div>
         <a href="#specialties" className="mp-hero__scroll" aria-label="Scroll to the menu">
@@ -90,17 +82,14 @@ export default function MenuPage() {
         <section className="editorial-main" style={{ paddingTop: 0 }}>
           <div className="container">
             <section className="editorial-support">
-              <h2 className="editorial-support__title">Know the menu, then choose the right next step.</h2>
-              <p className="editorial-support__body">
-                If dinner is the plan, reserve now. If the evening needs more structure, the tastings, classes, and
-                private-event formats give guests a clearer path.
-              </p>
+              <h2 className="editorial-support__title">{support.heading}</h2>
+              <p className="editorial-support__body">{support.body}</p>
               <div className="editorial-support__actions">
                 <button type="button" className="btn btn--primary" onClick={() => navigate(PAGE_KEYS.home, { anchor: 'reserve' })}>
-                  Reserve a table
+                  {support.primary_label}
                 </button>
                 <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.wineTastings)}>
-                  Wine tastings
+                  {support.secondary_label}
                 </button>
               </div>
             </section>

@@ -3,6 +3,7 @@ export const cateringDefaults = {
   hero_eyebrow: 'La Norma Hospitality · Off-Premise Experiences',
   hero_title: 'Catering',
   hero_subtitle: 'Private Events & Yacht Parties',
+  hero_sub: 'Sicilian kitchen on Longboat Key. Off-premise events, private gatherings, and yacht parties from Sarasota Bay.',
   hero_image_url: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=1800&q=80',
   hero_stats: [
     { value: '15–250', label: 'Guests' },

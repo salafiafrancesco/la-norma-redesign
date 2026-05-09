@@ -453,6 +453,71 @@ export const faqPage = {
   },
 };
 
+export const menuPage = {
+  description:
+    'Explore the La Norma menu with Sicilian antipasti, house-made pasta, wood-fired pizza, seafood, and desserts on Longboat Key.',
+  hero: {
+    image_url: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1800&q=85',
+    image_alt: 'House-made Sicilian pasta, plated',
+    eyebrow: 'La Norma Ristorante · Longboat Key',
+    headline: 'The Menu',
+    h2: 'House-made pasta, wood-fired pizza, Sicilian classics.',
+    sub: 'Built around a warm, polished dinner service — antipasti through dessert, with seasonal Sicilian inflections and an Italian wine list.',
+    primary_cta_label: 'Reserve dinner',
+    secondary_cta_label: 'Plan a private dinner',
+    stats: [
+      { value: 'Daily fresh', label: 'Hand-rolled pasta' },
+      { value: '550°C', label: 'Wood-fired oven' },
+      { value: '70+ wines', label: 'Italian wine list' },
+    ],
+  },
+  support: {
+    heading: 'Know the menu, then choose the right next step.',
+    body: 'If dinner is the plan, reserve now. If the evening needs more structure, the tastings, classes, and private-event formats give guests a clearer path.',
+    primary_label: 'Reserve a table',
+    secondary_label: 'Wine tastings',
+  },
+};
+
+export const contactPage = {
+  hero: {
+    eyebrow: 'Contact',
+    headline: 'Know where to start, and the right next step becomes obvious.',
+    sub: 'Reserve dinner instantly on OpenTable, call the team directly, or choose the experience page that best matches what you are planning.',
+    primary_cta_label: 'Reserve on OpenTable',
+    secondary_cta_label: 'Call the restaurant',
+  },
+  details_title: 'Contact details',
+  info_cards: {
+    visit_title: 'Visit',
+    reach_title: 'Reach us',
+    intent_title: 'Best path by intent',
+    intent_lines: [
+      'Dinner reservation: OpenTable',
+      'Cooking class RSVP: class page',
+      'Private events: inquiry page',
+    ],
+  },
+  form: {
+    title: 'Send a message',
+    lead: "For anything that doesn't fit a reservation, class, or event inquiry. We reply within one business day.",
+    success_title: 'Thank you',
+    success_message: 'Your message is in. A member of the team will reply by email within one business day.',
+    submit_label: 'Send message',
+    note: 'For dinner, OpenTable is faster. For events, the inquiry pages capture the right details.',
+  },
+  support: {
+    heading: 'Choose the page that fits what you need.',
+    items: [
+      { title: 'Dinner reservations', body: 'Fastest for everyday dining and planned evenings.' },
+      { title: 'Cooking classes and wine tastings', body: 'Best when you want a premium experience with clearer booking context.' },
+      { title: 'Private events', body: 'Use the inquiry flow when guest count, menu, and event format all matter.' },
+    ],
+    primary_label: 'Cooking classes',
+    secondary_label: 'Private events',
+  },
+};
+
 export const general = {
   hoursWeekly: [
     { day: 'Monday', hours: '5:00 PM – 9:00 PM', closed: false },
@@ -494,4 +559,6 @@ export const siteDefaults = {
   liveMusicPage,
   aboutPage,
   faqPage,
+  menuPage,
+  contactPage,
 };

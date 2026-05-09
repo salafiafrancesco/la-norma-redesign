@@ -111,6 +111,8 @@ function transform(api = {}) {
   const liveMusicPageData = api.liveMusicPage || {};
   const aboutPageData = api.aboutPage || {};
   const faqPageData = api.faqPage || {};
+  const menuPageData = api.menuPage || {};
+  const contactPageData = api.contactPage || {};
 
   const links = {
     reserve: linksData.reserve ?? defaults.links.reserve,
@@ -249,6 +251,7 @@ function transform(api = {}) {
     heroEyebrow: cateringData.hero_eyebrow ?? d.hero_eyebrow,
     heroTitle: cateringData.hero_title ?? d.hero_title,
     heroSubtitle: cateringData.hero_subtitle ?? d.hero_subtitle,
+    heroSub: cateringData.hero_sub ?? d.hero_sub,
     heroImageUrl: resolveUrl(cateringData.hero_image_url ?? d.hero_image_url),
     heroStats: cateringData.hero_stats ?? d.hero_stats,
     // Statement
@@ -361,6 +364,32 @@ function transform(api = {}) {
     editorial: { ...defaults.faqPage.editorial, ...(faqPageData.editorial || {}) },
   };
 
+  const menuPage = {
+    description: menuPageData.description || defaults.menuPage.description,
+    hero: {
+      ...defaults.menuPage.hero,
+      ...(menuPageData.hero || {}),
+      stats: mergeArrayOrDefault(menuPageData.hero?.stats, defaults.menuPage.hero.stats),
+    },
+    support: { ...defaults.menuPage.support, ...(menuPageData.support || {}) },
+  };
+
+  const contactPage = {
+    hero: { ...defaults.contactPage.hero, ...(contactPageData.hero || {}) },
+    details_title: contactPageData.details_title || defaults.contactPage.details_title,
+    info_cards: {
+      ...defaults.contactPage.info_cards,
+      ...(contactPageData.info_cards || {}),
+      intent_lines: mergeArrayOrDefault(contactPageData.info_cards?.intent_lines, defaults.contactPage.info_cards.intent_lines),
+    },
+    form: { ...defaults.contactPage.form, ...(contactPageData.form || {}) },
+    support: {
+      ...defaults.contactPage.support,
+      ...(contactPageData.support || {}),
+      items: mergeArrayOrDefault(contactPageData.support?.items, defaults.contactPage.support.items),
+    },
+  };
+
   return {
     restaurant,
     links,
@@ -382,6 +411,8 @@ function transform(api = {}) {
     liveMusicPage,
     aboutPage,
     faqPage,
+    menuPage,
+    contactPage,
   };
 }
 
