@@ -96,6 +96,16 @@ router.get('/', requireAuth, async (req, res) => {
     const status = req.query.status ? normalizeText(req.query.status) : '';
     if (status) query = query.eq('status', status);
 
+    // Soft-delete filtering. Default: only active rows. ?trash=1: only
+    // deleted rows. ?include_trashed=1: both.
+    const trash = req.query.trash === '1' || req.query.trash === 'true';
+    const includeTrashed = req.query.include_trashed === '1' || req.query.include_trashed === 'true';
+    if (trash) {
+      query = query.not('deleted_at', 'is', null);
+    } else if (!includeTrashed) {
+      query = query.is('deleted_at', null);
+    }
+
     query = query.order('created_at', { ascending: false });
     const { data, error } = await query;
     if (error) throw error;
@@ -133,20 +143,51 @@ router.put('/bulk-status', requireAuth, async (req, res) => {
   }
 });
 
-// Bulk delete. Body: { ids: number[] }.
+// Bulk soft-delete. Body: { ids: number[] }. Use ?force=1 to hard-delete.
 router.delete('/bulk', requireAuth, async (req, res) => {
+  const ids = Array.isArray(req.body?.ids)
+    ? req.body.ids.map((v) => Number(v)).filter((n) => Number.isFinite(n))
+    : [];
+  if (ids.length === 0) return res.status(400).json({ error: 'Provide at least one id.' });
+  const force = req.query.force === '1' || req.query.force === 'true';
+
+  try {
+    if (force) {
+      const { error } = await supabase.from('inquiries').delete().in('id', ids);
+      if (error) throw error;
+      return res.json({ ok: true, deleted: ids.length, mode: 'hard' });
+    }
+    const { data, error } = await supabase
+      .from('inquiries')
+      .update({ deleted_at: new Date().toISOString() })
+      .in('id', ids)
+      .select();
+    if (error) throw error;
+    res.json({ ok: true, deleted: data?.length ?? 0, mode: 'soft' });
+  } catch (error) {
+    console.error('[inquiries/bulk-delete]', error);
+    res.status(500).json({ error: 'Unable to delete inquiries.' });
+  }
+});
+
+// Bulk restore — clears deleted_at on the given ids.
+router.post('/bulk-restore', requireAuth, async (req, res) => {
   const ids = Array.isArray(req.body?.ids)
     ? req.body.ids.map((v) => Number(v)).filter((n) => Number.isFinite(n))
     : [];
   if (ids.length === 0) return res.status(400).json({ error: 'Provide at least one id.' });
 
   try {
-    const { error } = await supabase.from('inquiries').delete().in('id', ids);
+    const { data, error } = await supabase
+      .from('inquiries')
+      .update({ deleted_at: null })
+      .in('id', ids)
+      .select();
     if (error) throw error;
-    res.json({ ok: true, deleted: ids.length });
+    res.json({ ok: true, restored: data?.length ?? 0, items: data || [] });
   } catch (error) {
-    console.error('[inquiries/bulk-delete]', error);
-    res.status(500).json({ error: 'Unable to delete inquiries.' });
+    console.error('[inquiries/bulk-restore]', error);
+    res.status(500).json({ error: 'Unable to restore inquiries.' });
   }
 });
 
@@ -196,14 +237,43 @@ router.put('/:id', requireAuth, async (req, res) => {
   }
 });
 
+// Single-row delete: soft by default, hard with ?force=1.
 router.delete('/:id', requireAuth, async (req, res) => {
+  const id = Number(req.params.id);
+  const force = req.query.force === '1' || req.query.force === 'true';
   try {
-    const { error } = await supabase.from('inquiries').delete().eq('id', Number(req.params.id));
+    if (force) {
+      const { error } = await supabase.from('inquiries').delete().eq('id', id);
+      if (error) throw error;
+      return res.json({ ok: true, mode: 'hard' });
+    }
+    const { error } = await supabase
+      .from('inquiries')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id);
     if (error) throw error;
-    res.json({ ok: true });
+    res.json({ ok: true, mode: 'soft' });
   } catch (error) {
     console.error('[inquiries/delete]', error);
     res.status(500).json({ error: 'Unable to delete the inquiry.' });
+  }
+});
+
+// Restore a single soft-deleted row.
+router.post('/:id/restore', requireAuth, async (req, res) => {
+  const id = Number(req.params.id);
+  try {
+    const { data, error } = await supabase
+      .from('inquiries')
+      .update({ deleted_at: null })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('[inquiries/restore]', error);
+    res.status(500).json({ error: 'Unable to restore the inquiry.' });
   }
 });
 

@@ -351,8 +351,12 @@ export const inquiries = {
   },
   update: (id, data) => request('PUT', `/inquiries/${id}`, data),
   delete: (id) => request('DELETE', `/inquiries/${id}`),
+  forceDelete: (id) => request('DELETE', `/inquiries/${id}?force=1`),
+  restore: (id) => request('POST', `/inquiries/${id}/restore`),
   bulkStatus: (ids, status) => request('PUT', '/inquiries/bulk-status', { ids, status }),
   bulkDelete: (ids) => request('DELETE', '/inquiries/bulk', { ids }),
+  bulkForceDelete: (ids) => request('DELETE', '/inquiries/bulk?force=1', { ids }),
+  bulkRestore: (ids) => request('POST', '/inquiries/bulk-restore', { ids }),
 };
 
 export const uploads = {

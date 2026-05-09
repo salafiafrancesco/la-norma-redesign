@@ -20,12 +20,14 @@ export default function InquiriesManager() {
   const [error, setError]     = useState('');
   const [selected, setSelected] = useState(() => new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [view, setView] = useState('active'); // 'active' | 'trash'
 
   const load = () => {
     let cancelled = false;
     const params = {};
     if (typeFilter)   params.type   = typeFilter;
     if (statusFilter) params.status = statusFilter;
+    if (view === 'trash') params.trash = '1';
     inquiriesApi.list(params)
       .then((data) => {
         if (!cancelled) setItems(data);
@@ -42,13 +44,13 @@ export default function InquiriesManager() {
     };
   };
 
-  useEffect(load, [typeFilter, statusFilter]);
+  useEffect(load, [typeFilter, statusFilter, view]);
 
   // Clear selection whenever the visible list changes — stale ids could
   // refer to rows the current user is no longer looking at.
   useEffect(() => {
     setSelected(new Set());
-  }, [typeFilter, statusFilter]);
+  }, [typeFilter, statusFilter, view]);
 
   const toggleSelected = (id) => {
     setSelected((prev) => {
@@ -83,17 +85,49 @@ export default function InquiriesManager() {
 
   const handleBulkDelete = async () => {
     if (selected.size === 0) return;
-    if (!window.confirm(`Delete ${selected.size} ${selected.size === 1 ? 'inquiry' : 'inquiries'}? This cannot be undone.`)) return;
+    const message = view === 'trash'
+      ? `Permanently delete ${selected.size} ${selected.size === 1 ? 'inquiry' : 'inquiries'}? This cannot be undone.`
+      : `Move ${selected.size} ${selected.size === 1 ? 'inquiry' : 'inquiries'} to Trash?`;
+    if (!window.confirm(message)) return;
     setBulkBusy(true);
     try {
       const ids = Array.from(selected);
-      await inquiriesApi.bulkDelete(ids);
+      if (view === 'trash') {
+        await inquiriesApi.bulkForceDelete(ids);
+      } else {
+        await inquiriesApi.bulkDelete(ids);
+      }
       setItems((prev) => prev.filter((i) => !selected.has(i.id)));
       setSelected(new Set());
     } catch (e) {
       setError(e.message);
     } finally {
       setBulkBusy(false);
+    }
+  };
+
+  const handleBulkRestore = async () => {
+    if (selected.size === 0) return;
+    setBulkBusy(true);
+    try {
+      const ids = Array.from(selected);
+      await inquiriesApi.bulkRestore(ids);
+      setItems((prev) => prev.filter((i) => !selected.has(i.id)));
+      setSelected(new Set());
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleRestore = async (id) => {
+    try {
+      await inquiriesApi.restore(id);
+      setItems((prev) => prev.filter((i) => i.id !== id));
+      if (detail?.id === id) setDetail(null);
+    } catch (e) {
+      setError(e.message);
     }
   };
 
@@ -127,7 +161,7 @@ export default function InquiriesManager() {
       <div className="adm-toolbar">
         <h2 className="adm-section-title">
           Inquiries
-          {newCount > 0 && (
+          {view === 'active' && newCount > 0 && (
             <span style={{
               marginLeft: '0.75rem',
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -138,6 +172,22 @@ export default function InquiriesManager() {
           )}
         </h2>
         <div className="adm-toolbar__spacer" />
+        <div className="adm-flex adm-gap-1">
+          <button
+            type="button"
+            className={`adm-btn adm-btn--sm${view === 'active' ? ' adm-btn--primary' : ' adm-btn--ghost'}`}
+            onClick={() => setView('active')}
+          >
+            Active
+          </button>
+          <button
+            type="button"
+            className={`adm-btn adm-btn--sm${view === 'trash' ? ' adm-btn--primary' : ' adm-btn--ghost'}`}
+            onClick={() => setView('trash')}
+          >
+            Trash
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -169,37 +219,51 @@ export default function InquiriesManager() {
           <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>
             {selected.size} selected
           </span>
-          <button
-            type="button"
-            className="adm-btn adm-btn--secondary adm-btn--sm"
-            onClick={() => handleBulkStatus('read')}
-            disabled={bulkBusy}
-          >
-            Mark as read
-          </button>
-          <button
-            type="button"
-            className="adm-btn adm-btn--secondary adm-btn--sm"
-            onClick={() => handleBulkStatus('replied')}
-            disabled={bulkBusy}
-          >
-            Mark as replied
-          </button>
-          <button
-            type="button"
-            className="adm-btn adm-btn--secondary adm-btn--sm"
-            onClick={() => handleBulkStatus('new')}
-            disabled={bulkBusy}
-          >
-            Mark as new
-          </button>
+          {view === 'active' && (
+            <>
+              <button
+                type="button"
+                className="adm-btn adm-btn--secondary adm-btn--sm"
+                onClick={() => handleBulkStatus('read')}
+                disabled={bulkBusy}
+              >
+                Mark as read
+              </button>
+              <button
+                type="button"
+                className="adm-btn adm-btn--secondary adm-btn--sm"
+                onClick={() => handleBulkStatus('replied')}
+                disabled={bulkBusy}
+              >
+                Mark as replied
+              </button>
+              <button
+                type="button"
+                className="adm-btn adm-btn--secondary adm-btn--sm"
+                onClick={() => handleBulkStatus('new')}
+                disabled={bulkBusy}
+              >
+                Mark as new
+              </button>
+            </>
+          )}
+          {view === 'trash' && (
+            <button
+              type="button"
+              className="adm-btn adm-btn--secondary adm-btn--sm"
+              onClick={handleBulkRestore}
+              disabled={bulkBusy}
+            >
+              Restore selected
+            </button>
+          )}
           <button
             type="button"
             className="adm-btn adm-btn--danger adm-btn--sm"
             onClick={handleBulkDelete}
             disabled={bulkBusy}
           >
-            Delete selected
+            {view === 'trash' ? 'Delete forever' : 'Move to Trash'}
           </button>
           <div style={{ flex: 1 }} />
           <button
@@ -293,7 +357,11 @@ export default function InquiriesManager() {
                       <td onClick={e => e.stopPropagation()}>
                         <div className="adm-flex adm-gap-1">
                           <button className="adm-btn adm-btn--ghost adm-btn--sm" onClick={() => setDetail(inq)}>View</button>
-                          <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => handleDelete(inq.id)}>Delete</button>
+                          {view === 'trash' ? (
+                            <button className="adm-btn adm-btn--secondary adm-btn--sm" onClick={() => handleRestore(inq.id)}>Restore</button>
+                          ) : (
+                            <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => handleDelete(inq.id)}>Delete</button>
+                          )}
                         </div>
                       </td>
                     </tr>
