@@ -1,8 +1,12 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { authenticator } from 'otplib';
+import otplib from 'otplib';
 import qrcode from 'qrcode';
+
+// otplib v13 dropped the named ESM export — pull `authenticator` off the
+// default export instead.
+const { authenticator } = otplib;
 import supabase from '../db/supabase.js';
 import requireAuth from '../middleware/auth.js';
 import { JWT_SECRET } from '../config.js';
