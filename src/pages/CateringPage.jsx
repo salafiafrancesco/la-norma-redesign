@@ -227,25 +227,34 @@ export default function CateringPage() {
         <div className="cat-hero__bg" style={{ backgroundImage: `url(${c.heroImageUrl})` }} role="img" aria-label="La Norma catering presentation" />
         <div className="cat-hero__overlay" />
         <div className="cat-hero__content container">
-          <p className="cat-hero__eyebrow">{c.heroEyebrow}</p>
-          <h1 className="cat-hero__heading">{c.heroTitle}</h1>
-          <h2 className="cat-hero__h2">{c.heroSubtitle}</h2>
-          <p className="cat-hero__sub">{HERO_SUBTITLE}</p>
-          <div className="cat-hero__actions">
-            <button type="button" className="btn btn--primary" onClick={() => goToForm()}>Request a Quote</button>
-            <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.menu)}>View Sample Menu</button>
+          <span className="cat-hero__rule" aria-hidden="true" />
+          <div className="cat-hero__copy">
+            <p className="cat-hero__eyebrow">{c.heroEyebrow}</p>
+            <h1 className="cat-hero__heading">{c.heroTitle}</h1>
+            <h2 className="cat-hero__h2">{c.heroSubtitle}</h2>
+            <p className="cat-hero__sub">{HERO_SUBTITLE}</p>
+            <div className="cat-hero__actions">
+              <button type="button" className="btn btn--primary" onClick={() => goToForm()}>Request a Quote</button>
+              <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.menu)}>View Sample Menu</button>
+            </div>
           </div>
-          {c.heroStats?.length > 0 && (
-            <div className="cat-hero__stats">
-              {c.heroStats.map((s) => (
-                <div key={s.label} className="cat-hero__stat">
+        </div>
+        {c.heroStats?.length > 0 && (
+          <div className="cat-hero__stats-bar">
+            <div className="container cat-hero__stats">
+              {c.heroStats.map((s, i) => (
+                <div key={s.label} className="cat-hero__stat" style={{ animationDelay: `${0.4 + i * 0.12}s` }}>
                   <span className="cat-hero__stat-value">{s.value}</span>
                   <span className="cat-hero__stat-label">{s.label}</span>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+        <a href="#approach" className="cat-hero__scroll" aria-label="Scroll to next section">
+          <span>Scroll</span>
+          <span className="cat-hero__scroll-line" aria-hidden="true" />
+        </a>
       </header>
 
       <main id="main-content">
