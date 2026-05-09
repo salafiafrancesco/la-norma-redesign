@@ -33,8 +33,8 @@ export function AdminProvider({ children }) {
     };
   }, []);
 
-  const login = useCallback(async (username, password) => {
-    const { token, username: user } = await authApi.login(username, password);
+  const login = useCallback(async (username, password, totpCode) => {
+    const { token, username: user } = await authApi.login(username, password, totpCode);
     authApi.saveToken(token);
     setAdmin({ username: user });
     setChecking(false);

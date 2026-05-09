@@ -16,6 +16,7 @@ const NAV = [
   { key: 'images',    icon: '\u25A3', label: 'Images', group: 'Assets' },
   { key: 'theme',     icon: '\u25D0', label: 'Theme & Colors' },
   { key: 'auditlog',  icon: '\u2327', label: 'Audit Log', group: 'System' },
+  { key: 'account',   icon: '\u2602', label: 'Account & Security' },
 ];
 
 const PAGE_TITLES = {
@@ -33,6 +34,7 @@ const PAGE_TITLES = {
   images: 'Image Library',
   theme: 'Theme & Colors',
   auditlog: 'Audit Log',
+  account: 'Account & Security',
 };
 
 export default function AdminLayout({ page, setPage, children }) {

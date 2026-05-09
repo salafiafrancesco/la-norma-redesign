@@ -249,13 +249,20 @@ async function listCollectionWithMeta({ adminPath, publicPath, params = {} }) {
 }
 
 export const auth = {
-  login: (username, password) => request('POST', '/auth/login', { username, password }),
+  login: (username, password, totpCode) =>
+    request('POST', '/auth/login', { username, password, totp_code: totpCode }),
   me: () => request('GET', '/auth/me'),
   changePassword: (currentPassword, newPassword) =>
     request('POST', '/auth/change-password', { currentPassword, newPassword }),
   logout: () => localStorage.removeItem('ln_admin_token'),
   saveToken: (token) => localStorage.setItem('ln_admin_token', token),
   getToken,
+  twoFactor: {
+    status: () => request('GET', '/auth/2fa/status'),
+    setup: () => request('POST', '/auth/2fa/setup'),
+    enable: (totpCode) => request('POST', '/auth/2fa/enable', { totp_code: totpCode }),
+    disable: (password) => request('POST', '/auth/2fa/disable', { password }),
+  },
 };
 
 export const content = {
@@ -271,17 +278,6 @@ export const blog = {
   create: (data) => request('POST', '/blog', data),
   update: (id, data) => request('PUT', `/blog/${id}`, data),
   delete: (id) => request('DELETE', `/blog/${id}`),
-};
-
-export const events = {
-  list: async (params = {}) => (
-    await listCollectionWithMeta({ adminPath: '/events/all', publicPath: '/events', params })
-  ).items,
-  listWithMeta: (params = {}) => listCollectionWithMeta({ adminPath: '/events/all', publicPath: '/events', params }),
-  get: (id) => request('GET', `/events/${id}`),
-  create: (data) => request('POST', '/events', data),
-  update: (id, data) => request('PUT', `/events/${id}`, data),
-  delete: (id) => request('DELETE', `/events/${id}`),
 };
 
 export const experienceEvents = {

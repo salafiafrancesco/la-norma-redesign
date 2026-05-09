@@ -16,6 +16,7 @@ import NavigationManager from './pages/NavigationManager';
 import FooterManager from './pages/FooterManager';
 import NewsletterManager from './pages/NewsletterManager';
 import AuditLogManager from './pages/AuditLogManager';
+import AccountManager from './pages/AccountManager';
 import ThemeManager from './pages/ThemeManager';
 
 function AdminContent() {
@@ -48,6 +49,7 @@ function AdminContent() {
     inquiries:  <InquiriesManager />,
     newsletter: <NewsletterManager />,
     auditlog:   <AuditLogManager />,
+    account:    <AccountManager />,
   };
 
   return (
