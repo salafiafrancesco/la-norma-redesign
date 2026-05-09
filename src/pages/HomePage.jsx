@@ -312,95 +312,107 @@ export default function HomePage() {
         <section className="hp__section hp__section--alt" id="menu-preview">
           <div className="container">
             <div className={`hp__menu-inner fade-up${menuVis ? ' visible' : ''}`} ref={menuRef}>
-              <p className="hp__eyebrow">{menuHighlights.label}</p>
-              <h2 className="hp__heading" style={{ whiteSpace: 'pre-line' }}>{menuHighlights.headline}</h2>
+              <div className="hp__menu-text">
+                <p className="hp__eyebrow">{menuHighlights.label}</p>
+                <h2 className="hp__menu-heading" style={{ whiteSpace: 'pre-line' }}>{menuHighlights.headline}</h2>
 
-              <picture>
-                <img
-                  src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80"
-                  alt="La Norma signature dish — close-up, moody lighting"
-                  className={`hp__menu-image fade-up delay-1${menuVis ? ' visible' : ''}`}
-                  loading="lazy"
-                  data-is-placeholder="true"
-                />
-              </picture>
-
-              {categories.length > 0 && (
-                <>
-                  <div
-                    className="hp__menu-tabs"
-                    role="tablist"
-                    aria-label="Menu categories"
-                    onKeyDown={handleTabKey}
-                  >
-                    {categories.map((cat, i) => (
-                      <button
-                        key={cat.name}
-                        type="button"
-                        role="tab"
-                        aria-selected={i === activeTab}
-                        tabIndex={i === activeTab ? 0 : -1}
-                        className={`hp__menu-tab${i === activeTab ? ' is-active' : ''}`}
-                        onClick={() => setActiveTab(i)}
-                      >
-                        {cat.name}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div
-                    className="hp__menu-swipe"
-                    onTouchStart={handleTabSwipeStart}
-                    onTouchEnd={handleTabSwipeEnd}
-                  >
+                {categories.length > 0 && (
+                  <>
                     <div
-                      key={activeTab}
-                      className={`hp__menu-list fade-up delay-1${menuVis ? ' visible' : ''}`}
-                      role="tabpanel"
-                      aria-live="polite"
+                      className="hp__menu-tabs"
+                      role="tablist"
+                      aria-label="Menu categories"
+                      onKeyDown={handleTabKey}
                     >
-                      {(() => {
-                        const items = categories[activeTab]?.items || [];
-                        const visible = items.slice(0, 5);
-                        const remaining = items.length - visible.length;
-                        return (
-                          <>
-                            {visible.map((item) => (
-                              <div key={item.name} className="hp__menu-item">
-                                <div className="hp__menu-item-info">
-                                  <p className="hp__menu-item-name">{item.name}</p>
-                                  {item.desc && <p className="hp__menu-item-desc">{item.desc}</p>}
-                                </div>
-                                <span className="hp__menu-item-price">{item.price}</span>
-                              </div>
-                            ))}
-                            {remaining > 0 && (
-                              <button
-                                type="button"
-                                className="hp__menu-item hp__menu-item--more"
-                                onClick={() => navigate(PAGE_KEYS.menu)}
-                              >
-                                <span className="hp__menu-item-name">View {remaining} more</span>
-                                <span className="hp__menu-item-price">&rarr;</span>
-                              </button>
-                            )}
-                          </>
-                        );
-                      })()}
+                      {categories.map((cat, i) => (
+                        <button
+                          key={cat.name}
+                          type="button"
+                          role="tab"
+                          aria-selected={i === activeTab}
+                          tabIndex={i === activeTab ? 0 : -1}
+                          className={`hp__menu-tab${i === activeTab ? ' is-active' : ''}`}
+                          onClick={() => setActiveTab(i)}
+                        >
+                          {cat.name}
+                        </button>
+                      ))}
                     </div>
-                  </div>
 
-                  <div className="hp__menu-cta">
-                    <button
-                      type="button"
-                      className="hp__menu-cta-btn"
-                      onClick={() => navigate(PAGE_KEYS.menu)}
+                    <div
+                      className="hp__menu-swipe"
+                      onTouchStart={handleTabSwipeStart}
+                      onTouchEnd={handleTabSwipeEnd}
                     >
-                      Browse the full menu
-                    </button>
-                  </div>
-                </>
-              )}
+                      <div
+                        key={activeTab}
+                        className={`hp__menu-list fade-up delay-1${menuVis ? ' visible' : ''}`}
+                        role="tabpanel"
+                        aria-live="polite"
+                      >
+                        {(() => {
+                          const items = categories[activeTab]?.items || [];
+                          const visible = items.slice(0, 5);
+                          const remaining = items.length - visible.length;
+                          return (
+                            <>
+                              {visible.map((item, idx) => (
+                                <div key={item.name} className="hp__menu-item">
+                                  <span className="hp__menu-item-num" aria-hidden="true">{String(idx + 1).padStart(2, '0')}</span>
+                                  <div className="hp__menu-item-info">
+                                    <div className="hp__menu-item-row">
+                                      <p className="hp__menu-item-name">{item.name}</p>
+                                      <span className="hp__menu-item-leader" aria-hidden="true" />
+                                      <span className="hp__menu-item-price">{item.price}</span>
+                                    </div>
+                                    {item.desc && <p className="hp__menu-item-desc">{item.desc}</p>}
+                                  </div>
+                                </div>
+                              ))}
+                              {remaining > 0 && (
+                                <button
+                                  type="button"
+                                  className="hp__menu-item hp__menu-item--more"
+                                  onClick={() => navigate(PAGE_KEYS.menu)}
+                                >
+                                  <span className="hp__menu-item-name">View {remaining} more</span>
+                                  <span className="hp__menu-item-price">&rarr;</span>
+                                </button>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="hp__menu-cta">
+                      <button
+                        type="button"
+                        className="hp__menu-cta-btn"
+                        onClick={() => navigate(PAGE_KEYS.menu)}
+                      >
+                        Browse the full menu &rarr;
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <figure className="hp__menu-figure">
+                <picture>
+                  <img
+                    src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80"
+                    alt="La Norma signature dish — close-up, moody lighting"
+                    className="hp__menu-image"
+                    loading="lazy"
+                    data-is-placeholder="true"
+                  />
+                </picture>
+                <figcaption className="hp__menu-caption">
+                  <span className="hp__menu-caption__label">La specialità</span>
+                  <span className="hp__menu-caption__name">Pasta alla Norma</span>
+                </figcaption>
+              </figure>
             </div>
           </div>
         </section>
