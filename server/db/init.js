@@ -330,10 +330,10 @@ async function ensureNavLinks() {
     { sort_order: 11, label: 'Wine Tastings', page_key: 'wine-tastings', scope: 'mobile' },
     { sort_order: 12, label: 'Live Music', page_key: 'live-music', scope: 'mobile' },
     { sort_order: 20, label: 'About', page_key: 'about', scope: 'both' },
-    { sort_order: 21, label: 'Journal', page_key: 'blog', scope: 'both' },
-    { sort_order: 22, label: 'FAQ', page_key: 'faq', scope: 'both' },
+    { sort_order: 21, label: 'Journal', page_key: 'blog', scope: 'mobile' },
+    { sort_order: 22, label: 'FAQ', page_key: 'faq', scope: 'mobile' },
     { sort_order: 23, label: 'Contact', page_key: 'contact', scope: 'both' },
-    { sort_order: 24, label: 'Privacy Policy', page_key: 'privacy-policy', scope: 'both' },
+    { sort_order: 24, label: 'Privacy Policy', page_key: 'privacy-policy', scope: 'mobile' },
   ];
 
   const allChildren = [...dropdownChildren, ...mobileExtras];
@@ -508,6 +508,36 @@ async function ensureBookingsExtendedSchema() {
       ON bookings(stripe_session_id);
     CREATE INDEX IF NOT EXISTS idx_bookings_user_id
       ON bookings(user_id);
+
+    -- Atomic seat reservation. Returns the updated row, or no rows if the
+    -- event is not bookable (not published, not enough capacity).
+    -- Solves the race condition between concurrent POST /api/bookings calls.
+    CREATE OR REPLACE FUNCTION book_seats(p_event_id BIGINT, p_guests INT)
+    RETURNS SETOF experience_events AS $$
+    BEGIN
+      RETURN QUERY
+        UPDATE experience_events
+        SET seats_booked = seats_booked + p_guests,
+            updated_at = now()
+        WHERE id = p_event_id
+          AND status = 'published'
+          AND (capacity = 0 OR seats_booked + p_guests <= capacity)
+        RETURNING *;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    -- Atomic seat release. Clamps at 0 to avoid negative counts.
+    CREATE OR REPLACE FUNCTION release_seats(p_event_id BIGINT, p_guests INT)
+    RETURNS SETOF experience_events AS $$
+    BEGIN
+      RETURN QUERY
+        UPDATE experience_events
+        SET seats_booked = GREATEST(0, seats_booked - p_guests),
+            updated_at = now()
+        WHERE id = p_event_id
+        RETURNING *;
+    END;
+    $$ LANGUAGE plpgsql;
   `;
 
   try {
