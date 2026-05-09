@@ -236,13 +236,20 @@ export default function AboutPage() {
         </section>
 
         {/* ============================================================ */}
-        {/* 6. SENSORY GALLERY — asymmetric grid                         */}
+        {/* 6. SENSORY GALLERY — asymmetric editorial grid               */}
         {/* ============================================================ */}
         <section className="ap-section ap-gallery" ref={galleryRef}>
           <div className="container">
             <div className={`ap-gallery__head fade-up${galleryVis ? ' visible' : ''}`}>
-              <p className="ap-eyebrow">A glimpse inside</p>
-              <h2 className="ap-heading">Slow service, candlelight, and Sicilian ingredients.</h2>
+              <div className="ap-gallery__head-text">
+                <p className="ap-eyebrow">A glimpse inside</p>
+                <h2 className="ap-heading">Slow service, candlelight, and Sicilian ingredients.</h2>
+              </div>
+              <p className="ap-gallery__count" aria-hidden="true">
+                <span>Selected views</span>
+                <span className="ap-gallery__count-rule" />
+                <span className="ap-gallery__count-num">01 — 04</span>
+              </p>
             </div>
             <div className="ap-gallery__grid">
               {GALLERY.map((img, i) => (
@@ -251,6 +258,9 @@ export default function AboutPage() {
                   className={`ap-gallery__item ap-gallery__item--${img.area} fade-up delay-${(i % 4) + 1}${galleryVis ? ' visible' : ''}`}
                 >
                   <img src={img.url} alt={img.alt} loading="lazy" />
+                  <figcaption className="ap-gallery__caption">
+                    <span className="ap-gallery__caption-num">{String(i + 1).padStart(2, '0')}</span>
+                  </figcaption>
                 </figure>
               ))}
             </div>
