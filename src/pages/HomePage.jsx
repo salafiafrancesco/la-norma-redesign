@@ -194,26 +194,32 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
-  // Sticky bar: visible after hero, hidden at visit
+  // Sticky bar: visible after hero, hidden while visit section is in view
   useEffect(() => {
     const heroEl = heroRef.current;
     const visitEl = visitRef.current;
     if (!heroEl) return undefined;
 
-    const obs = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) setStickyVisible(true);
-      else setStickyVisible(false);
+    let heroOut = false;
+    let visitIn = false;
+
+    const sync = () => setStickyVisible(heroOut && !visitIn);
+
+    const heroObs = new IntersectionObserver(([entry]) => {
+      heroOut = !entry.isIntersecting;
+      sync();
     }, { threshold: 0.1 });
 
     const visitObs = visitEl ? new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setStickyVisible(false);
+      visitIn = entry.isIntersecting;
+      sync();
     }, { threshold: 0.3 }) : null;
 
-    obs.observe(heroEl);
+    heroObs.observe(heroEl);
     if (visitEl && visitObs) visitObs.observe(visitEl);
 
     return () => {
-      obs.disconnect();
+      heroObs.disconnect();
       visitObs?.disconnect();
     };
   }, []);
@@ -404,15 +410,14 @@ export default function HomePage() {
               </div>
 
               <figure className="hp__menu-figure">
-                <picture>
-                  <img
-                    src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80"
-                    alt="La Norma signature dish — close-up, moody lighting"
-                    className="hp__menu-image"
-                    loading="lazy"
-                    data-is-placeholder="true"
-                  />
-                </picture>
+                <img
+                  src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80"
+                  alt="La Norma signature dish — close-up, moody lighting"
+                  className="hp__menu-image"
+                  loading="lazy"
+                  width="1600"
+                  height="2000"
+                />
                 <figcaption className="hp__menu-caption">
                   <span className="hp__menu-caption__label">La specialità</span>
                   <span className="hp__menu-caption__name">Pasta alla Norma</span>
