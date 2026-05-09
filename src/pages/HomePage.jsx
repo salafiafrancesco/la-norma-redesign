@@ -223,14 +223,17 @@ export default function HomePage() {
         <div className="hp__hero-bg" style={{ backgroundImage: `url(${hero.imageUrl})` }} role="img" aria-label={hero.imageAlt} />
         <div className="hp__hero-overlay" />
         <div className="hp__hero-content container">
-          <p className="hp__hero-eyebrow">{hero.eyebrow} · Since 2008</p>
-          <h1 className="hp__hero-h1">{hero.headline[0]}<br />{hero.headline[1]}</h1>
-          <p className="hp__hero-sub">{hero.subheadline}</p>
-          <div className="hp__hero-actions">
-            <a href={OPENTABLE_RESERVATION_URL} className="btn btn--primary" target="_blank" rel="noopener noreferrer">Reserve a Table</a>
-            <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.menu)}>View Menu</button>
+          <div className="hp__hero-text">
+            <p className="hp__hero-eyebrow">{hero.eyebrow} · Since 2008</p>
+            <h1 className="hp__hero-h1">{hero.headline[0]}<br />{hero.headline[1]}</h1>
+            <p className="hp__hero-sub">{hero.subheadline}</p>
+            <div className="hp__hero-actions">
+              <a href={OPENTABLE_RESERVATION_URL} className="btn btn--primary" target="_blank" rel="noopener noreferrer">Reserve a Table</a>
+              <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.menu)}>View Menu</button>
+            </div>
           </div>
-          <div className="hp__tonight-widget" role="group" aria-label="Tonight's availability">
+          <aside className="hp__hero-side">
+            <div className="hp__tonight-widget" role="group" aria-label="Tonight's availability">
             <div className="hp__tonight-widget__head">
               <span className="hp__tonight-widget__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -269,8 +272,13 @@ export default function HomePage() {
                 &rarr;
               </a>
             </div>
-          </div>
+            </div>
+          </aside>
         </div>
+        <a href="#signature" className="hp__hero-scroll" aria-label="Scroll to next section">
+          <span>Scroll</span>
+          <span className="hp__hero-scroll__line" aria-hidden="true" />
+        </a>
       </header>
 
       <main id="main-content">

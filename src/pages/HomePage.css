@@ -106,11 +106,109 @@
 
 .hp__hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  width: 100%;
+  align-items: center;
+}
+
+.hp__hero-text {
   display: grid;
   gap: 1.35rem;
-  max-width: 44rem;
+  max-width: 38rem;
+}
+
+.hp__hero-side {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
   width: 100%;
+}
+
+.hp__hero-side .hp__tonight-widget {
+  margin-top: 0;
+  width: 100%;
+  max-width: 28rem;
+}
+
+@media (min-width: 980px) {
+  .hp__hero-content {
+    grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+    gap: clamp(2rem, 4vw, 4rem);
+    align-items: end;
+  }
+
+  .hp__hero-text {
+    max-width: 36rem;
+  }
+
+  .hp__hero-side {
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+}
+
+/* Scroll indicator */
+.hp__hero-scroll {
+  position: absolute;
+  bottom: clamp(1.25rem, 2.5vw, 2rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--ff-accent);
+  font-size: 0.7rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(248, 243, 235, 0.7);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.hp__hero-scroll:hover {
+  color: var(--gold-light);
+}
+
+.hp__hero-scroll__line {
+  width: 1px;
+  height: 2.4rem;
+  background: linear-gradient(180deg, currentColor 30%, transparent 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hp__hero-scroll__line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gold-light);
+  animation: hpScrollDot 2.2s var(--ease) infinite;
+  transform-origin: top;
+}
+
+@keyframes hpScrollDot {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  45%  { transform: scaleY(1); transform-origin: top; }
+  55%  { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+@media (max-width: 640px) {
+  .hp__hero-scroll {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hp__hero-scroll__line::after {
+    animation: none;
+    transform: scaleY(1);
+    opacity: 0.4;
+  }
 }
 
 .hp__hero-eyebrow {
@@ -124,9 +222,12 @@
 
 .hp__hero-h1 {
   font-family: var(--ff-display);
-  font-size: var(--fs-hero);
+  font-size: clamp(3.25rem, 8.5vw, 7.5rem);
+  font-weight: 500;
   line-height: 0.92;
+  letter-spacing: -0.02em;
   color: var(--cream);
+  margin: 0;
 }
 
 .hp__hero-sub {
