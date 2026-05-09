@@ -22,88 +22,71 @@ function isValidEmail(v) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
-const TIERS_FALLBACK = [
+const HERO_SUBTITLE =
+  'Sicilian kitchen on Longboat Key. Off-premise events, private gatherings, and yacht parties from Sarasota Bay.';
+
+const TIERS = [
   {
-    id: 'cocktail', sort_order: 1, title: 'Cocktail Reception',
+    id: 'cocktail', title: 'Cocktail Reception',
     range_label: '15–60 guests · 2–3 hrs',
     body: "Passed hors d'oeuvres, a curated bar of antipasti, and just enough structure to keep the room flowing. Designed for evenings where guests should never wait, never sit down, and never feel rushed.",
     ideal_for: 'Cocktail parties, gallery openings, intimate celebrations',
-    image_url: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=900&q=80',
-    badge_label: '', cta_label: 'Inquire about this format',
+    image_url: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=80',
+    badge_label: '',
   },
   {
-    id: 'grazing', sort_order: 2, title: 'Grazing Experience',
+    id: 'grazing', title: 'Grazing Experience',
     range_label: '30–120 guests · 3–4 hrs',
     body: 'Our most photographed format. Elevated risers, marble boards, and a centerpiece grazing table dressed with Sicilian charcuterie, artisanal cheeses, fresh figs, and house-baked focaccia. Built to be the visual anchor of the event.',
     ideal_for: 'Yacht parties, wedding receptions, milestone events',
     image_url: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=900&q=80',
-    badge_label: 'Signature', cta_label: 'Inquire about this format',
+    badge_label: 'Signature',
   },
   {
-    id: 'full', sort_order: 3, title: 'Full Event Catering',
+    id: 'full', title: 'Full Event Catering',
     range_label: '50–250 guests · 4–6 hrs',
     body: 'A complete service — from amuse-bouche through dessert, with kitchen team, servers, and front-of-house coordination. For events where the catering is the evening.',
     ideal_for: 'Corporate galas, large private events, multi-course seated dinners',
     image_url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=80',
-    badge_label: '', cta_label: 'Inquire about this format',
+    badge_label: '',
   },
 ];
 
-const SIGNATURES_FALLBACK = [
-  { id: 's1', sort_order: 1, title: 'Antipasto & charcuterie displays', description: 'Aged Parma, soppressata, Sicilian cheeses, fresh and dried fruit, on marble.', image_url: 'https://images.unsplash.com/photo-1626200419199-391ae4be7a41?auto=format&fit=crop&w=700&q=80' },
-  { id: 's2', sort_order: 2, title: 'Cocktail-style finger foods', description: 'Arancini al ragù, polpette, bruschette, sliders di porchetta — passed warm.', image_url: 'https://images.unsplash.com/photo-1541014741259-de529411b96a?auto=format&fit=crop&w=700&q=80' },
-  { id: 's3', sort_order: 3, title: 'Mini Italian classics', description: 'Lasagna in single portions, eggplant parmigiana cups, risotto al limone.', image_url: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=700&q=80' },
-  { id: 's4', sort_order: 4, title: 'Individual portions & salad cups', description: 'Caprese skewers, panzanella jars, citrus-fennel salad — engineered for standing receptions.', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=700&q=80' },
-  { id: 's5', sort_order: 5, title: 'Artisanal cheeses & cured meats', description: 'Pecorino, Caciocavallo, Bresaola, Mortadella — sourced from named producers.', image_url: 'https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=700&q=80' },
-  { id: 's6', sort_order: 6, title: 'Refined desserts & pastries', description: 'Cannoli filled à la minute, mini cassata, pistachio panna cotta.', image_url: 'https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&w=700&q=80' },
+const SIGNATURES = [
+  { id: 's1', title: 'Antipasto & charcuterie displays', description: 'Aged Parma, soppressata, Sicilian cheeses, fresh and dried fruit, on marble.', image_url: 'https://images.unsplash.com/photo-1626200419199-391ae4be7a41?auto=format&fit=crop&w=700&q=80' },
+  { id: 's2', title: 'Cocktail-style finger foods', description: 'Arancini al ragù, polpette, bruschette, sliders di porchetta — passed warm.', image_url: 'https://images.unsplash.com/photo-1541014741259-de529411b96a?auto=format&fit=crop&w=700&q=80' },
+  { id: 's3', title: 'Mini Italian classics', description: 'Lasagna in single portions, eggplant parmigiana cups, risotto al limone.', image_url: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=700&q=80' },
+  { id: 's4', title: 'Individual portions & salad cups', description: 'Caprese skewers, panzanella jars, citrus-fennel salad — engineered for standing receptions.', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=700&q=80' },
+  { id: 's5', title: 'Artisanal cheeses & cured meats', description: 'Pecorino, Caciocavallo, Bresaola, Mortadella — sourced from named producers.', image_url: 'https://images.unsplash.com/photo-1452195100486-9cc805987862?auto=format&fit=crop&w=700&q=80' },
+  { id: 's6', title: 'Refined desserts & pastries', description: 'Cannoli filled à la minute, mini cassata, pistachio panna cotta.', image_url: 'https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&w=700&q=80' },
 ];
 
-const GALLERY_FALLBACK = [
-  { id: 'g1', sort_order: 1, image_url: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80', dish_name: 'Pasta alla Norma', alt_text: 'Plated Pasta alla Norma' },
-  { id: 'g2', sort_order: 2, image_url: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=80', dish_name: 'Burrata e pomodorini', alt_text: 'Burrata with cherry tomatoes' },
-  { id: 'g3', sort_order: 3, image_url: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80', dish_name: 'Risotto al limone', alt_text: 'Lemon risotto' },
-  { id: 'g4', sort_order: 4, image_url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=900&q=80', dish_name: 'Wood-fired pizza', alt_text: 'Wood-fired Margherita pizza' },
-  { id: 'g5', sort_order: 5, image_url: 'https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=900&q=80', dish_name: 'Antipasto board', alt_text: 'Antipasto board' },
-  { id: 'g6', sort_order: 6, image_url: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=80', dish_name: 'Cannoli alla siciliana', alt_text: 'Sicilian cannoli' },
-  { id: 'g7', sort_order: 7, image_url: 'https://images.unsplash.com/photo-1572441713132-c542fc4fe282?auto=format&fit=crop&w=900&q=80', dish_name: 'Caprese skewers', alt_text: 'Caprese skewers' },
-  { id: 'g8', sort_order: 8, image_url: 'https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=900&q=80', dish_name: 'Tiramisu', alt_text: 'Tiramisu dessert' },
-];
-
-const PROCESS_FALLBACK = [
+const PROCESS = [
   { id: 'p1', step_number: 1, title: 'Tell us about your event', description: 'Date, headcount, vibe, location. A 2-minute form — or a phone call if easier.' },
   { id: 'p2', step_number: 2, title: 'We design your menu', description: 'Within 24–48 hours, our chef sends a custom menu and cost estimate. Revisions welcome.' },
   { id: 'p3', step_number: 3, title: 'We confirm one week out', description: 'Final headcount, allergies, timing, dock or address details. Locked in writing.' },
   { id: 'p4', step_number: 4, title: 'We host the day with you', description: 'Setup, service, breakdown. You stay with your guests.' },
 ];
 
-const PORTFOLIO_FALLBACK = [
-  { id: 'pf1', sort_order: 1, title: 'Sunset reception aboard a 75ft Hatteras', tag: 'Yacht', headcount: '28 guests', image_url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&q=80' },
-  { id: 'pf2', sort_order: 2, title: 'Corporate dinner — Sarasota Yacht Club', tag: 'Corporate', headcount: '80 guests', image_url: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=900&q=80' },
-  { id: 'pf3', sort_order: 3, title: '50th birthday grazing reception', tag: 'Private', headcount: '60 guests', image_url: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=900&q=80' },
-  { id: 'pf4', sort_order: 4, title: 'Wedding rehearsal dinner — Longboat Key', tag: 'Private', headcount: '45 guests', image_url: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=900&q=80' },
-  { id: 'pf5', sort_order: 5, title: 'Tech summit closing reception', tag: 'Corporate', headcount: '120 guests', image_url: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=900&q=80' },
-  { id: 'pf6', sort_order: 6, title: 'Anniversary dinner aboard catamaran', tag: 'Yacht', headcount: '18 guests', image_url: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=900&q=80' },
+const TESTIMONIALS = [
+  { id: 't1', quote: 'They handled a 60-guest reception on a moving yacht like it was a sit-down dinner at home. Flawless.', author_name: 'Charter captain', author_role: 'Longboat Key' },
+  { id: 't2', quote: 'The grazing table was the centerpiece of the night. Half my guests asked for the caterer’s name.', author_name: 'Private host', author_role: '50th birthday celebration' },
+  { id: 't3', quote: "Custom menu, dietary restrictions handled silently, on-time to the minute. We've already rebooked.", author_name: 'Corporate event lead', author_role: 'Sarasota tech firm' },
 ];
 
-const TESTIMONIALS_FALLBACK = [
-  { id: 't1', sort_order: 1, quote: 'They handled a 60-guest reception on a moving yacht like it was a sit-down dinner at home. Flawless.', author_name: 'Charter captain', author_role: 'Longboat Key' },
-  { id: 't2', sort_order: 2, quote: 'The grazing table was the centerpiece of the night. Half my guests asked for the caterer’s name.', author_name: 'Private host', author_role: '50th birthday celebration' },
-  { id: 't3', sort_order: 3, quote: "Custom menu, dietary restrictions handled silently, on-time to the minute. We've already rebooked.", author_name: 'Corporate event lead', author_role: 'Sarasota tech firm' },
-];
-
-const FAQS_FALLBACK = [
-  { id: 'f1', sort_order: 1, question: "What's the minimum guest count?", answer: 'Fifteen guests for off-premise catering. We also handle in-restaurant private events for smaller groups.' },
-  { id: 'f2', sort_order: 2, question: 'How far in advance should I book?', answer: 'We accept events with 48 hours notice when possible, but 2–3 weeks ahead gives us full menu flexibility.' },
-  { id: 'f3', sort_order: 3, question: 'Do you handle service staff?', answer: 'Yes — chefs, servers, and bartenders are included in our Full Event tier and available as add-ons for the others.' },
-  { id: 'f4', sort_order: 4, question: "What's the service area?", answer: 'Sarasota County and Longboat Key are standard. We travel further on request.' },
-  { id: 'f5', sort_order: 5, question: 'Can you accommodate dietary restrictions?', answer: 'Always. Gluten-free, vegan, kosher-style, and allergies are part of every menu we design.' },
-  { id: 'f6', sort_order: 6, question: 'Do you provide rentals (linens, glassware)?', answer: 'We coordinate rentals through trusted local partners — billed transparently in your quote.' },
-  { id: 'f7', sort_order: 7, question: "What's your cancellation policy?", answer: 'Sent with the menu proposal. Generally: full refund of deposit up to 14 days out.' },
-  { id: 'f8', sort_order: 8, question: 'Do you offer tastings?', answer: 'Yes, for events of 50+ guests. Tasting fees credited toward the final bill.' },
+const FAQS = [
+  { id: 'f1', question: "What's the minimum guest count?", answer: 'Fifteen guests for off-premise catering. We also handle in-restaurant private events for smaller groups.' },
+  { id: 'f2', question: 'How far in advance should I book?', answer: 'We accept events with 48 hours notice when possible, but 2–3 weeks ahead gives us full menu flexibility.' },
+  { id: 'f3', question: 'Do you handle service staff?', answer: 'Yes — chefs, servers, and bartenders are included in our Full Event tier and available as add-ons for the others.' },
+  { id: 'f4', question: "What's the service area?", answer: 'Sarasota County and Longboat Key are standard. We travel further on request.' },
+  { id: 'f5', question: 'Can you accommodate dietary restrictions?', answer: 'Always. Gluten-free, vegan, kosher-style, and allergies are part of every menu we design.' },
+  { id: 'f6', question: 'Do you provide rentals (linens, glassware)?', answer: 'We coordinate rentals through trusted local partners — billed transparently in your quote.' },
+  { id: 'f7', question: "What's your cancellation policy?", answer: 'Sent with the menu proposal. Generally: full refund of deposit up to 14 days out.' },
+  { id: 'f8', question: 'Do you offer tastings?', answer: 'Yes, for events of 50+ guests. Tasting fees credited toward the final bill.' },
 ];
 
 /* ================================================================== */
-/* CateringPage                                                       */
+/* CateringPage — 9-section editorial layout                          */
 /* ================================================================== */
 export default function CateringPage() {
   const c = useSection('catering');
@@ -111,18 +94,15 @@ export default function CateringPage() {
   const { navigate } = useNavigation();
   const fieldUid = useId();
 
-  // Dynamic content from API
-  const [tiers, setTiers] = useState([]);
-  const [signatures, setSignatures] = useState([]);
-  const [gallery, setGallery] = useState([]);
-  const [processSteps, setProcessSteps] = useState([]);
-  const [portfolio, setPortfolio] = useState([]);
-  const [testimonials, setTestimonials] = useState([]);
-  const [faqs, setFaqs] = useState([]);
-  const [contentLoaded, setContentLoaded] = useState(false);
+  // Live data overrides (from CMS) — fall back to static arrays above when empty
+  const [tiersData, setTiersData] = useState([]);
+  const [signaturesData, setSignaturesData] = useState([]);
+  const [processData, setProcessData] = useState([]);
+  const [testimonialsData, setTestimonialsData] = useState([]);
+  const [faqsData, setFaqsData] = useState([]);
 
-  // Lightbox
-  const [lightboxIndex, setLightboxIndex] = useState(-1);
+  // FAQ open state (controlled to support aria-expanded properly)
+  const [openFaq, setOpenFaq] = useState(null);
 
   // Form
   const [form, setForm] = useState({ name: '', email: '', phone: '', event_date: '', event_type: '', guests: '', message: '', location_type: '', budget_range: '' });
@@ -136,9 +116,7 @@ export default function CateringPage() {
   const [tiersRef, tiersVis] = useInView();
   const [yachtRef, yachtVis] = useInView();
   const [sigRef, sigVis] = useInView();
-  const [galRef, galVis] = useInView();
   const [procRef, procVis] = useInView();
-  const [portRef, portVis] = useInView();
   const [testRef, testVis] = useInView();
   const [faqRef, faqVis] = useInView();
   const [ctaRef, ctaVis] = useInView();
@@ -159,39 +137,37 @@ export default function CateringPage() {
     }],
   });
 
-  // Fetch all catering content collections
+  // Fetch live content (overrides static fallbacks when present)
   useEffect(() => {
     fetch(`${API_BASE}/api/catering-content/all`)
       .then((r) => r.ok ? r.json() : Promise.reject())
       .then((data) => {
-        setTiers(data.tiers || []);
-        setSignatures(data.signatures || []);
-        setGallery(data.gallery || []);
-        setProcessSteps(data.process || []);
-        setPortfolio(data.portfolio || []);
-        setTestimonials(data.testimonials || []);
-        setFaqs(data.faqs || []);
-        setContentLoaded(true);
+        setTiersData(data.tiers || []);
+        setSignaturesData(data.signatures || []);
+        setProcessData(data.process || []);
+        setTestimonialsData(data.testimonials || []);
+        setFaqsData(data.faqs || []);
       })
-      .catch(() => setContentLoaded(true));
+      .catch(() => {});
   }, []);
 
-  // Lightbox keyboard
+  // Pre-fill event_type from URL hash (#request-form?type=Yacht%20Party)
   useEffect(() => {
-    if (lightboxIndex < 0) return undefined;
-    const handler = (e) => {
-      if (e.key === 'Escape') setLightboxIndex(-1);
-      if (e.key === 'ArrowRight') setLightboxIndex((i) => Math.min(i + 1, gallery.length - 1));
-      if (e.key === 'ArrowLeft') setLightboxIndex((i) => Math.max(i - 1, 0));
-    };
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handler);
-    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', handler); };
-  }, [lightboxIndex, gallery.length]);
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get('event_type');
+    if (t && CATERING_EVENT_TYPES.includes(t)) {
+      setForm((f) => ({ ...f, event_type: t }));
+    }
+  }, []);
 
   const setField = (k, v) => {
     setForm((f) => ({ ...f, [k]: v }));
     if (errors[k]) setErrors((e) => { const n = { ...e }; delete n[k]; return n; });
+  };
+
+  const goToForm = (eventType) => {
+    if (eventType) setField('event_type', eventType);
+    scrollToId('request-form');
   };
 
   const handleSubmit = async (e) => {
@@ -228,8 +204,14 @@ export default function CateringPage() {
     finally { setSubmitting(false); }
   };
 
-  // Tiers carousel ref for mobile scroll
   const tiersScrollRef = useRef(null);
+
+  // Resolve final lists (live data wins over fallback)
+  const tiers = tiersData.length > 0 ? tiersData : TIERS;
+  const signatures = signaturesData.length > 0 ? signaturesData : SIGNATURES;
+  const processSteps = processData.length > 0 ? processData : PROCESS;
+  const testimonials = testimonialsData.length > 0 ? testimonialsData : TESTIMONIALS;
+  const faqs = faqsData.length > 0 ? faqsData : FAQS;
 
   return (
     <div className="cat-page">
@@ -244,10 +226,11 @@ export default function CateringPage() {
         <div className="cat-hero__content container">
           <p className="cat-hero__eyebrow">{c.heroEyebrow}</p>
           <h1 className="cat-hero__heading">{c.heroTitle}</h1>
-          <p className="cat-hero__sub">{c.heroSubtitle}</p>
+          <h2 className="cat-hero__h2">{c.heroSubtitle}</h2>
+          <p className="cat-hero__sub">{HERO_SUBTITLE}</p>
           <div className="cat-hero__actions">
-            <button type="button" className="btn btn--primary" onClick={() => scrollToId('catering-request')}>Request a Quote</button>
-            <button type="button" className="btn btn--outline-light" onClick={() => scrollToId('menu-gallery')}>View Sample Menu</button>
+            <button type="button" className="btn btn--primary" onClick={() => goToForm()}>Request a Quote</button>
+            <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.menu)}>View Sample Menu</button>
           </div>
           {c.heroStats?.length > 0 && (
             <div className="cat-hero__stats">
@@ -263,9 +246,8 @@ export default function CateringPage() {
       </header>
 
       <main id="main-content">
-
         {/* ============================================================ */}
-        {/* 2. STATEMENT — Our Approach                                  */}
+        {/* 2. STATEMENT                                                 */}
         {/* ============================================================ */}
         <section className="cat-section cat-section--alt" id="approach">
           <div className="container">
@@ -296,10 +278,11 @@ export default function CateringPage() {
           <div className="container">
             <div className={`fade-up${tiersVis ? ' visible' : ''}`} ref={tiersRef}>
               <p className="cat-section__eyebrow">How we cater</p>
-              <h2 className="cat-section__heading">Choose the format that fits your occasion</h2>
+              <h2 className="cat-section__heading">Three formats, infinitely customizable.</h2>
+              <p className="cat-section__sub">Pick the format that matches the room you&rsquo;re hosting.</p>
             </div>
             <div className="cat-tiers" ref={tiersScrollRef}>
-              {(tiers.length > 0 ? tiers : TIERS_FALLBACK).map((tier, i) => (
+              {tiers.map((tier, i) => (
                 <article key={tier.id} className={`cat-tier fade-up delay-${i + 1}${tiersVis ? ' visible' : ''}`}>
                   <div className="cat-tier__media">
                     {tier.image_url && <img src={tier.image_url} alt={tier.title} loading="lazy" />}
@@ -310,8 +293,8 @@ export default function CateringPage() {
                     <p className="cat-tier__range">{tier.range_label}</p>
                     <p className="cat-tier__desc">{tier.body}</p>
                     <p className="cat-tier__ideal"><strong>Ideal for:</strong> {tier.ideal_for}</p>
-                    <button type="button" className="cat-tier__cta" onClick={() => { setField('event_type', tier.title); scrollToId('catering-request'); }}>
-                      {tier.cta_label}
+                    <button type="button" className="cat-tier__cta" onClick={() => goToForm(tier.title)}>
+                      Inquire about this format &rarr;
                     </button>
                   </div>
                 </article>
@@ -334,14 +317,14 @@ export default function CateringPage() {
                 {(c.yachtBody || '').split('\n').filter(Boolean).map((p, i) => (
                   <p key={i} className="cat-yacht__body">{p}</p>
                 ))}
-                <button type="button" className="btn btn--primary" onClick={() => { setField('event_type', 'Yacht Party'); scrollToId('catering-request'); }}>
-                  {c.yachtCtaLabel}
+                <button type="button" className="btn btn--primary" onClick={() => goToForm('Yacht Party')}>
+                  {c.yachtCtaLabel} &rarr;
                 </button>
               </div>
               <aside className="cat-yacht__panel">
                 <p className="cat-yacht__panel-label">What we handle</p>
                 <ul className="cat-yacht__panel-list">
-                  {c.yachtSidePanel.map((item) => <li key={item}>{item}</li>)}
+                  {(c.yachtSidePanel || []).map((item) => <li key={item}>{item}</li>)}
                 </ul>
               </aside>
             </div>
@@ -355,10 +338,11 @@ export default function CateringPage() {
           <div className="container">
             <div className={`fade-up${sigVis ? ' visible' : ''}`} ref={sigRef}>
               <p className="cat-section__eyebrow">What we serve</p>
-              <h2 className="cat-section__heading">Signature offerings</h2>
+              <h2 className="cat-section__heading">Signature offerings.</h2>
+              <p className="cat-section__sub">Six pillars of every La Norma catering, customized to your event.</p>
             </div>
             <div className="cat-offerings">
-              {(signatures.length > 0 ? signatures : SIGNATURES_FALLBACK).map((item, i) => (
+              {signatures.map((item, i) => (
                 <article key={item.id} className={`cat-offering fade-up delay-${(i % 3) + 1}${sigVis ? ' visible' : ''}`}>
                   {item.image_url && <img src={item.image_url} alt={item.title} loading="lazy" className="cat-offering__img" />}
                   <h3 className="cat-offering__title">{item.title}</h3>
@@ -366,42 +350,22 @@ export default function CateringPage() {
                 </article>
               ))}
             </div>
-            <p className="cat-offerings__note">Allergies, themes, or specific Sicilian regions? Our chef builds custom menus on request.</p>
+            <p className="cat-offerings__note"><em>Allergies, themes, or specific Sicilian regions? Our chef builds custom menus on request.</em></p>
           </div>
         </section>
 
         {/* ============================================================ */}
-        {/* 6. MENU GALLERY                                              */}
-        {/* ============================================================ */}
-        <section className="cat-section" id="menu-gallery">
-          <div className="container">
-            <div className={`fade-up${galVis ? ' visible' : ''}`} ref={galRef}>
-              <p className="cat-section__eyebrow">Gallery</p>
-              <h2 className="cat-section__heading">{c.menuGalleryHeading}</h2>
-              <p className="cat-gallery__sub">{c.menuGallerySubheading}</p>
-            </div>
-            <div className={`cat-gallery fade-up delay-1${galVis ? ' visible' : ''}`}>
-              {(gallery.length > 0 ? gallery : GALLERY_FALLBACK).map((img, i) => (
-                <div key={img.id} className="cat-gallery__item" onClick={() => setLightboxIndex(i)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && setLightboxIndex(i)} aria-label={`View ${img.dish_name || 'dish'}`}>
-                  <img src={img.image_url} alt={img.alt_text || img.dish_name || 'La Norma catering dish'} loading="lazy" />
-                  {img.dish_name && <span className="cat-gallery__caption">{img.dish_name}</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* 7. PROCESS TIMELINE                                          */}
+        {/* 6. PROCESS TIMELINE                                          */}
         {/* ============================================================ */}
         <section className="cat-section cat-section--dark" id="process">
           <div className="container">
             <div className={`fade-up${procVis ? ' visible' : ''}`} ref={procRef}>
-              <p className="cat-section__eyebrow" style={{ color: 'var(--gold-light, #E0C97F)' }}>{c.processHeading}</p>
-              <h2 className="cat-section__heading" style={{ color: 'var(--cream)' }}>From first call to final course</h2>
+              <p className="cat-section__eyebrow" style={{ color: 'var(--gold-light, #E0C97F)' }}>How it works</p>
+              <h2 className="cat-section__heading" style={{ color: 'var(--cream)' }}>From conversation to celebration.</h2>
+              <p className="cat-section__sub" style={{ color: 'rgba(248, 243, 235, 0.72)' }}>Four steps, transparent timing, no surprises.</p>
             </div>
             <div className={`cat-process fade-up delay-1${procVis ? ' visible' : ''}`}>
-              {(processSteps.length > 0 ? processSteps : PROCESS_FALLBACK).map((step) => (
+              {processSteps.map((step) => (
                 <div key={step.id} className="cat-process__step">
                   <span className="cat-process__num">{String(step.step_number).padStart(2, '0')}</span>
                   <h3 className="cat-process__title">{step.title}</h3>
@@ -413,42 +377,16 @@ export default function CateringPage() {
         </section>
 
         {/* ============================================================ */}
-        {/* 8. PORTFOLIO                                                 */}
+        {/* 7. TESTIMONIALS                                              */}
         {/* ============================================================ */}
-        <section className="cat-section" id="portfolio">
-          <div className="container">
-            <div className={`fade-up${portVis ? ' visible' : ''}`} ref={portRef}>
-              <p className="cat-section__eyebrow">{c.portfolioHeading}</p>
-              <h2 className="cat-section__heading">{c.portfolioSubheading}</h2>
-            </div>
-            <div className="cat-portfolio">
-              {(portfolio.length > 0 ? portfolio : PORTFOLIO_FALLBACK).map((ev, i) => (
-                <article key={ev.id} className={`cat-portfolio__card fade-up delay-${(i % 2) + 1}${portVis ? ' visible' : ''}`}>
-                  <div className="cat-portfolio__media">
-                    <img src={ev.image_url} alt={ev.title} loading="lazy" />
-                    {ev.tag && <span className="cat-portfolio__tag">{ev.tag}</span>}
-                  </div>
-                  <div className="cat-portfolio__info">
-                    <h3>{ev.title}</h3>
-                    {ev.headcount && <p>{ev.headcount}</p>}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* 9. TESTIMONIALS                                              */}
-        {/* ============================================================ */}
-        <section className="cat-section cat-section--alt" id="testimonials">
+        <section className="cat-section cat-section--dark cat-testimonials-section" id="testimonials">
           <div className="container">
             <div className={`fade-up${testVis ? ' visible' : ''}`} ref={testRef}>
-              <p className="cat-section__eyebrow">Client feedback</p>
-              <h2 className="cat-section__heading">{c.testimonialsHeading}</h2>
+              <p className="cat-section__eyebrow" style={{ color: 'var(--gold-light, #E0C97F)' }}>Guest voices</p>
+              <h2 className="cat-section__heading" style={{ color: 'var(--cream)' }}>What hosts say.</h2>
             </div>
-            <div className={`cat-testimonials fade-up delay-1${testVis ? ' visible' : ''}`}>
-              {(testimonials.length > 0 ? testimonials : TESTIMONIALS_FALLBACK).map((t) => (
+            <div className={`cat-testimonials cat-testimonials--dark fade-up delay-1${testVis ? ' visible' : ''}`}>
+              {testimonials.map((t) => (
                 <blockquote key={t.id} className="cat-testimonial">
                   <p className="cat-testimonial__quote">{t.quote}</p>
                   <footer className="cat-testimonial__footer">
@@ -462,27 +400,44 @@ export default function CateringPage() {
         </section>
 
         {/* ============================================================ */}
-        {/* 10. FAQ                                                      */}
+        {/* 8. FAQ                                                       */}
         {/* ============================================================ */}
         <section className="cat-section" id="faq">
           <div className="container">
             <div className={`fade-up${faqVis ? ' visible' : ''}`} ref={faqRef}>
               <p className="cat-section__eyebrow">Questions</p>
-              <h2 className="cat-section__heading">{c.faqHeading}</h2>
+              <h2 className="cat-section__heading">Common questions.</h2>
             </div>
-            <div className="cat-faq">
-              {(faqs.length > 0 ? faqs : FAQS_FALLBACK).map((f) => (
-                <details key={f.id} className="cat-faq__item">
-                  <summary>{f.question}</summary>
-                  <p>{f.answer}</p>
-                </details>
-              ))}
+            <div className="cat-faq" role="list">
+              {faqs.map((f, i) => {
+                const isOpen = openFaq === i;
+                const panelId = `${fieldUid}-faq-panel-${i}`;
+                const buttonId = `${fieldUid}-faq-btn-${i}`;
+                return (
+                  <div key={f.id} className={`cat-faq__item${isOpen ? ' is-open' : ''}`} role="listitem">
+                    <button
+                      type="button"
+                      id={buttonId}
+                      className="cat-faq__question"
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      onClick={() => setOpenFaq(isOpen ? null : i)}
+                    >
+                      <span>{f.question}</span>
+                      <span className="cat-faq__chevron" aria-hidden="true" />
+                    </button>
+                    <div id={panelId} role="region" aria-labelledby={buttonId} className="cat-faq__answer" hidden={!isOpen}>
+                      <p>{f.answer}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
 
         {/* ============================================================ */}
-        {/* 11. CTA + FORM                                               */}
+        {/* 9. CTA + FORM                                                */}
         {/* ============================================================ */}
         <section className="cat-section cat-section--dark cat-cta-section" id="catering-request">
           <div className="container">
@@ -494,7 +449,7 @@ export default function CateringPage() {
           </div>
         </section>
 
-        <section className="cat-section cat-form-section">
+        <section className="cat-section cat-form-section" id="request-form">
           <div className="container">
             <div className="cat-form-layout">
               <div className="cat-form-shell">
@@ -590,7 +545,7 @@ export default function CateringPage() {
                 </div>
                 <div className="cat-aside-card">
                   <p className="cat-aside-card__label">Contact</p>
-                  <ul className="cat-aside-card__list" style={{ listStyle: 'none' }}>
+                  <ul className="cat-aside-card__list cat-aside-card__list--contact">
                     <li><a href={`tel:${c.contactPhone}`}>{c.contactPhone}</a></li>
                     <li><a href={`mailto:${c.contactEmail}`}>{c.contactEmail}</a></li>
                     <li>{c.contactWebsite}</li>
@@ -604,14 +559,6 @@ export default function CateringPage() {
       </main>
 
       <Footer />
-
-      {/* Lightbox */}
-      {lightboxIndex >= 0 && gallery[lightboxIndex] && (
-        <div className="cat-lightbox" onClick={() => setLightboxIndex(-1)} role="dialog" aria-label="Image lightbox">
-          <button className="cat-lightbox__close" onClick={() => setLightboxIndex(-1)} aria-label="Close">&times;</button>
-          <img src={gallery[lightboxIndex].image_url} alt={gallery[lightboxIndex].alt_text || gallery[lightboxIndex].dish_name || 'Catering dish'} onClick={(e) => e.stopPropagation()} />
-        </div>
-      )}
     </div>
   );
 }
