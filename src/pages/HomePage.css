@@ -39,6 +39,10 @@
   margin-bottom: 0.85rem;
 }
 
+.hp__eyebrow--center {
+  text-align: center;
+}
+
 .hp__heading {
   font-family: var(--ff-display);
   font-size: var(--fs-xl);

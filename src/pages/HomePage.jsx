@@ -454,8 +454,8 @@ export default function HomePage() {
         <section className="hp__section" id="voices">
           <div className="container">
             <div className={`fade-up${voicesVis ? ' visible' : ''}`} ref={voicesRef}>
-              <p className="hp__eyebrow" style={{ textAlign: 'center' }}>Guest perspectives</p>
-              <h2 className="hp__heading" style={{ textAlign: 'center' }}>The details guests mention after the last course</h2>
+              <p className="hp__eyebrow hp__eyebrow--center">Guest perspectives</p>
+              <h2 className="hp__heading hp__heading--center">The details guests mention after the last course</h2>
             </div>
 
             <div className={`hp__voices-ratings fade-up delay-1${voicesVis ? ' visible' : ''}`}>
