@@ -525,8 +525,6 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
-  padding: 0;
-  margin: 0;
   gap: 0;
 }
 
@@ -871,12 +869,13 @@
   flex-shrink: 0;
 }
 
+/* NOTE: this element ALSO carries the .container class — do not reset
+   margin/padding shorthand here, or you kill the auto-centering and the
+   gutter that .container provides (was a bug: stats bar pinned left). */
 .cp-hero__stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
-  padding: 0;
-  margin: 0;
   gap: 0;
 }
 
