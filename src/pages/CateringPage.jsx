@@ -332,6 +332,26 @@ export default function CateringPage() {
         </section>
 
         {/* ============================================================ */}
+        {/* MID-PAGE CTA STRIP                                           */}
+        {/* ============================================================ */}
+        <section className="cat-midcta">
+          <div className="container cat-midcta__inner">
+            <div className="cat-midcta__copy">
+              <p className="cat-midcta__eyebrow">Ready to plan?</p>
+              <h2 className="cat-midcta__title">A 2-minute form. A custom menu within 48 hours.</h2>
+            </div>
+            <div className="cat-midcta__actions">
+              <button type="button" className="btn btn--primary cat-midcta__btn" onClick={() => goToForm()}>
+                Request a Quote &rarr;
+              </button>
+              <a href={`tel:${c.contactPhone}`} className="cat-midcta__phone">
+                or call {c.contactPhone}
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================================ */}
         {/* 5. SIGNATURE OFFERINGS                                       */}
         {/* ============================================================ */}
         <section className="cat-section cat-section--alt" id="offerings">
