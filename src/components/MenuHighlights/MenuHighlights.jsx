@@ -4,6 +4,8 @@ import { useNavigation } from '../../context/NavigationContext';
 import { useInView } from '../../hooks/useInView';
 import './MenuHighlights.css';
 
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+
 export default function MenuHighlights({
   limitPerCategory = 3,
   showHeaderActions = true,
@@ -50,7 +52,9 @@ export default function MenuHighlights({
               className={`menu-col fade-up delay-${index + 1}${visible ? ' visible' : ''}`}
             >
               <header className="menu-col__header">
+                <span className="menu-col__roman" aria-hidden="true">{ROMAN[index] || ''}</span>
                 <h3 className="menu-col__title">{category.name}</h3>
+                <span className="menu-col__rule" aria-hidden="true" />
               </header>
 
               <ul className="menu-col__list">
