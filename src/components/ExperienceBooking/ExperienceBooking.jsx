@@ -455,44 +455,74 @@ export default function ExperienceBooking({
     </>
   );
 
-  const renderConfirmation = () => (
-    <div className="xb__confirmation" role="status" aria-live="polite">
-      <div className="xb__confirmation-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      </div>
-      <h3>{copy.confirmationTitle || 'Booking Confirmed'}</h3>
-      <p>{copy.confirmationMessage || 'Thank you! We\'ll send a confirmation to your email within 24 hours.'}</p>
+  const renderConfirmation = () => {
+    const token = bookingResult?.confirmation_token;
+    const bookingUrl = token
+      ? (typeof window !== 'undefined' ? `${window.location.origin}/booking/${token}` : `/booking/${token}`)
+      : '';
 
-      {selectedEvent && (
-        <dl className="xb__confirmation-details">
-          <div className="xb__confirmation-detail">
-            <dt>Event</dt>
-            <dd>{selectedEvent.title}</dd>
-          </div>
-          <div className="xb__confirmation-detail">
-            <dt>Date</dt>
-            <dd>{formatEventDate(selectedEvent.date).full}</dd>
-          </div>
-          <div className="xb__confirmation-detail">
-            <dt>Guests</dt>
-            <dd>{guests}</dd>
-          </div>
-          {totalCents > 0 && (
+    const copyBookingLink = async () => {
+      if (!bookingUrl) return;
+      try {
+        await navigator.clipboard?.writeText(bookingUrl);
+      } catch {
+        // Ignore clipboard errors silently — link is also visible
+      }
+    };
+
+    return (
+      <div className="xb__confirmation" role="status" aria-live="polite">
+        <div className="xb__confirmation-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <h3>{copy.confirmationTitle || 'Booking Confirmed'}</h3>
+        <p>{copy.confirmationMessage || 'Thank you! We\'ll send a confirmation to your email within 24 hours.'}</p>
+
+        {selectedEvent && (
+          <dl className="xb__confirmation-details">
             <div className="xb__confirmation-detail">
-              <dt>Total</dt>
-              <dd>{formatCents(totalCents)}</dd>
+              <dt>Event</dt>
+              <dd>{selectedEvent.title}</dd>
             </div>
-          )}
-        </dl>
-      )}
+            <div className="xb__confirmation-detail">
+              <dt>Date</dt>
+              <dd>{formatEventDate(selectedEvent.date).full}</dd>
+            </div>
+            <div className="xb__confirmation-detail">
+              <dt>Guests</dt>
+              <dd>{guests}</dd>
+            </div>
+            {totalCents > 0 && (
+              <div className="xb__confirmation-detail">
+                <dt>Total</dt>
+                <dd>{formatCents(totalCents)}</dd>
+              </div>
+            )}
+          </dl>
+        )}
 
-      <button type="button" className="btn btn--primary" onClick={() => navigate(PAGE_KEYS.home)}>
-        Back to La Norma
-      </button>
-    </div>
-  );
+        {token && (
+          <div className="xb__confirmation-link">
+            <p className="xb__confirmation-link__label">Save this link to view your booking later:</p>
+            <div className="xb__confirmation-link__row">
+              <a href={`/booking/${token}`} className="xb__confirmation-link__url" target="_blank" rel="noopener noreferrer">
+                {bookingUrl}
+              </a>
+              <button type="button" className="btn btn--outline-light btn--sm" onClick={copyBookingLink}>
+                Copy link
+              </button>
+            </div>
+          </div>
+        )}
+
+        <button type="button" className="btn btn--primary" onClick={() => navigate(PAGE_KEYS.home)}>
+          Back to La Norma
+        </button>
+      </div>
+    );
+  };
 
   // -- Current step content --
   const renderCurrentStep = () => {

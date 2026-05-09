@@ -469,6 +469,63 @@ async function ensureInquiriesContactType() {
   }
 }
 
+async function ensureBookingsExtendedSchema() {
+  // Adds Stripe-ready columns to bookings + creates users + booking_events_log
+  // tables. ALTER/CREATE statements use IF NOT EXISTS so this runs safely on
+  // every boot. Requires the Supabase RPC "exec_sql" function. If unavailable,
+  // logs the SQL the operator should run manually via Supabase dashboard.
+  const ddl = `
+    ALTER TABLE bookings
+      ADD COLUMN IF NOT EXISTS stripe_session_id TEXT,
+      ADD COLUMN IF NOT EXISTS stripe_payment_intent_id TEXT,
+      ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS refunded_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS cancellation_reason TEXT,
+      ADD COLUMN IF NOT EXISTS user_id BIGINT,
+      ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+
+    CREATE TABLE IF NOT EXISTS users (
+      id BIGSERIAL PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      name TEXT,
+      phone TEXT,
+      dietary_preferences TEXT,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now()
+    );
+
+    CREATE TABLE IF NOT EXISTS booking_events_log (
+      id BIGSERIAL PRIMARY KEY,
+      booking_id BIGINT REFERENCES bookings(id) ON DELETE CASCADE,
+      event_type TEXT NOT NULL,
+      payload JSONB,
+      created_at TIMESTAMPTZ DEFAULT now()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_booking_events_log_booking_id
+      ON booking_events_log(booking_id);
+    CREATE INDEX IF NOT EXISTS idx_bookings_stripe_session_id
+      ON bookings(stripe_session_id);
+    CREATE INDEX IF NOT EXISTS idx_bookings_user_id
+      ON bookings(user_id);
+  `;
+
+  try {
+    const { error } = await supabase.rpc('exec_sql', { query: ddl });
+    if (error) {
+      if (/exec_sql.*does not exist|function.*not found|Could not find the function/i.test(error.message)) {
+        console.warn('[init] exec_sql RPC missing — please run this SQL on Supabase to enable Stripe + user account schema:\n' + ddl);
+        return;
+      }
+      console.warn('[init] bookings extended schema:', error.message);
+      return;
+    }
+    console.log('[init] bookings extended schema ensured (Stripe columns + users + booking_events_log).');
+  } catch (err) {
+    console.warn('[init] bookings extended schema skipped:', err.message);
+  }
+}
+
 export async function ensureInitialized() {
   await ensureAdminUser();
   await ensureSiteContent();
@@ -482,4 +539,5 @@ export async function ensureInitialized() {
   await ensureNavLinks();
   await ensureFooterColumns();
   await ensureInquiriesContactType();
+  await ensureBookingsExtendedSchema();
 }

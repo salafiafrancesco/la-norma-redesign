@@ -451,6 +451,41 @@
   color: var(--charcoal);
 }
 
+.xb__confirmation-link {
+  max-width: 26rem;
+  margin: 0 auto 1.5rem;
+  padding: 0.95rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px dashed rgba(196, 151, 58, 0.55);
+  background: rgba(196, 151, 58, 0.06);
+  text-align: left;
+}
+
+.xb__confirmation-link__label {
+  font-family: var(--ff-accent);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--text-mid);
+  margin: 0 0 0.55rem;
+}
+
+.xb__confirmation-link__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.xb__confirmation-link__url {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  color: var(--olive);
+  text-decoration: underline;
+  word-break: break-all;
+}
+
 /* ---- Sticky mobile bar ---- */
 .xb__sticky-bar {
   display: none;
