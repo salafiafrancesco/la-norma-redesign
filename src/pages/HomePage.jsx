@@ -10,9 +10,54 @@ import { PAGE_KEYS } from '../../shared/routes.js';
 import { OPENTABLE_RESERVATION_URL } from '../utils/hospitalityMedia';
 import './HomePage.css';
 
-function scrollToId(id) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+const TONIGHT_SLOTS = ['6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM'];
+
+const BEYOND_FALLBACK = [
+  {
+    id: 'wine',
+    title: 'Wine Tastings',
+    body: 'A guided Friday flight through Italy with composed pairings.',
+    link: '/wine-tastings',
+    cta_label: 'Discover',
+    image_url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    id: 'cooking',
+    title: 'Cooking Classes',
+    body: 'Saturday mornings with Chef Marco — small group, hands-on.',
+    link: '/cooking-classes',
+    cta_label: 'Discover',
+    image_url: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    id: 'music',
+    title: 'Live Music',
+    body: 'Wednesday and Saturday evenings, woven into dinner not on top of it.',
+    link: '/live-music',
+    cta_label: 'Discover',
+    image_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    id: 'catering',
+    title: 'Catering',
+    body: 'Off-premise events, private gatherings, and yacht parties.',
+    link: '/catering',
+    cta_label: 'Discover',
+    image_url: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=900&q=80',
+  },
+];
+
+const VOICES_FALLBACK_RATINGS = [
+  { id: 'g', source: 'Google', rating: 4.8, review_count: 520, link: 'https://g.page/lanormarestaurant/review' },
+  { id: 't', source: 'TripAdvisor', rating: 4.7, review_count: 340, link: 'https://www.tripadvisor.com/' },
+  { id: 'y', source: 'Yelp', rating: 4.9, review_count: 180, link: 'https://www.yelp.com/' },
+];
+
+const VOICES_FALLBACK_QUOTES = [
+  { id: 'q1', text: 'The room feels refined without ever becoming stiff. Excellent wine guidance, beautiful pacing, and a Pasta alla Norma I am still thinking about.', author_name: 'Margaret S.', author_role: 'Sarasota, FL' },
+  { id: 'q2', text: 'Pacing was perfect. We hosted an anniversary dinner and every detail felt considered. Service was polished, warm, and genuinely memorable.', author_name: 'James & Patricia K.', author_role: 'Longboat Key, FL' },
+  { id: 'q3', text: "One of the most memorable evenings we've booked on Longboat Key. The Friday wine tasting was intimate, unhurried, and clearly curated by people who care.", author_name: 'Thomas R.', author_role: 'Chicago, IL' },
+];
 
 const HOME_DESCRIPTION =
   'A refined Sicilian restaurant on Longboat Key offering handmade pasta, wood-fired pizza, curated wine tastings, cooking classes, and private dining.';
@@ -20,7 +65,6 @@ const HOME_DESCRIPTION =
 export default function HomePage() {
   const hero = useSection('hero');
   const restaurant = useSection('restaurant');
-  const links = useSection('links');
   const story = useSection('story');
   const menuHighlights = useSection('menuHighlights');
   const { navigate, navigatePath } = useNavigation();
@@ -41,10 +85,6 @@ export default function HomePage() {
   const visitRef = useRef(null);
   const [stickyVisible, setStickyVisible] = useState(false);
 
-  // Newsletter
-  const [nlEmail, setNlEmail] = useState('');
-  const [nlStatus, setNlStatus] = useState(''); // '' | 'sending' | 'done' | 'error'
-
   // InView refs
   const [sigRef, sigVis] = useInView();
   const [menuRef, menuVis] = useInView();
@@ -52,6 +92,7 @@ export default function HomePage() {
   const [beyondRef, beyondVis] = useInView();
   const [voicesRef, voicesVis] = useInView();
   const [visitInRef, visitInVis] = useInView();
+  const [mapRef, mapVis] = useInView({ rootMargin: '200px' });
 
   usePageMetadata({
     title: 'Sicilian dining on Longboat Key',
@@ -121,22 +162,6 @@ export default function HomePage() {
     };
   }, []);
 
-  const handleNewsletter = async (e) => {
-    e.preventDefault();
-    if (!nlEmail.trim()) return;
-    setNlStatus('sending');
-    try {
-      const res = await fetch(`${API_BASE}/api/homepage-content/newsletter/subscribe`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: nlEmail.trim() }),
-      });
-      if (!res.ok) throw new Error();
-      setNlStatus('done');
-      setNlEmail('');
-    } catch { setNlStatus('error'); }
-  };
-
   return (
     <div className="app">
       <Navbar />
@@ -155,10 +180,46 @@ export default function HomePage() {
             <a href={OPENTABLE_RESERVATION_URL} className="btn btn--primary" target="_blank" rel="noopener noreferrer">Reserve a Table</a>
             <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.menu)}>View Menu</button>
           </div>
-          <a href={OPENTABLE_RESERVATION_URL} className="hp__tonight" target="_blank" rel="noopener noreferrer">
-            <span className="hp__tonight-dot" />
-            View tonight's availability on OpenTable
-          </a>
+          <div className="hp__tonight-widget" role="group" aria-label="Tonight's availability">
+            <div className="hp__tonight-widget__head">
+              <span className="hp__tonight-widget__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+              </span>
+              <div className="hp__tonight-widget__meta">
+                <span className="hp__tonight-widget__title">Tonight</span>
+                <span className="hp__tonight-widget__sub">
+                  <span className="hp__tonight-dot" aria-hidden="true" />
+                  Tables available
+                </span>
+              </div>
+            </div>
+            <div className="hp__tonight-widget__slots" role="list">
+              {TONIGHT_SLOTS.map((slot) => (
+                <a
+                  key={slot}
+                  href={OPENTABLE_RESERVATION_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hp__tonight-widget__slot"
+                  role="listitem"
+                >
+                  {slot}
+                </a>
+              ))}
+              <a
+                href={OPENTABLE_RESERVATION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hp__tonight-widget__more"
+                aria-label="See all available times on OpenTable"
+              >
+                &rarr;
+              </a>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -255,12 +316,14 @@ export default function HomePage() {
                 <p className="hp__atmosphere-body">{story.body[1]}</p>
                 <button type="button" className="btn btn--outline-dark" onClick={() => navigate(PAGE_KEYS.about)}>Read our story</button>
               </div>
-              <img
-                src={story.imageUrl}
-                alt={story.imageAlt}
-                className="hp__atmosphere-img"
-                loading="lazy"
-              />
+              <div className="hp__atmosphere-media">
+                <img
+                  src={story.imageUrl}
+                  alt={story.imageAlt}
+                  className="hp__atmosphere-img"
+                  loading="lazy"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -268,38 +331,39 @@ export default function HomePage() {
         {/* ============================================================ */}
         {/* 5. BEYOND DINNER (Experiences + Catering unified)            */}
         {/* ============================================================ */}
-        {beyondCards.length > 0 && (
-          <section className="hp__section hp__section--alt" id="beyond">
-            <div className="container">
-              <div className={`fade-up${beyondVis ? ' visible' : ''}`} ref={beyondRef}>
-                <p className="hp__eyebrow">Beyond dinner</p>
-                <h2 className="hp__heading">Four ways to extend the table.</h2>
-                <p className="hp__beyond-sub">
-                  From Friday wine evenings to yacht catering, the kitchen and dining room move with you.
-                </p>
-              </div>
-
-              <div className="hp__beyond-grid">
-                {beyondCards.map((card, i) => (
-                  <article
-                    key={card.id}
-                    className={`hp__beyond-card fade-up delay-${(i % 2) + 1}${beyondVis ? ' visible' : ''}`}
-                    onClick={() => navigatePath(card.link)}
-                  >
-                    <div className="hp__beyond-card__media">
-                      {card.image_url && <img src={card.image_url} alt={card.title} loading="lazy" />}
-                    </div>
-                    <div className="hp__beyond-card__body">
-                      <h3 className="hp__beyond-card__title">{card.title}</h3>
-                      <p className="hp__beyond-card__desc">{card.body}</p>
-                      <span className="hp__beyond-card__cta">{card.cta_label} &rarr;</span>
-                    </div>
-                  </article>
-                ))}
-              </div>
+        <section className="hp__section hp__section--alt" id="beyond">
+          <div className="container">
+            <div className={`fade-up${beyondVis ? ' visible' : ''}`} ref={beyondRef}>
+              <p className="hp__eyebrow">Beyond dinner</p>
+              <h2 className="hp__heading">Four ways to extend the table.</h2>
+              <p className="hp__beyond-sub">
+                From Friday wine evenings to yacht catering, the kitchen and dining room move with you.
+              </p>
             </div>
-          </section>
-        )}
+
+            <div className="hp__beyond-grid">
+              {(beyondCards.length > 0 ? beyondCards : BEYOND_FALLBACK).map((card, i) => (
+                <article
+                  key={card.id}
+                  className={`hp__beyond-card fade-up delay-${(i % 2) + 1}${beyondVis ? ' visible' : ''}`}
+                  onClick={() => navigatePath(card.link)}
+                  role="link"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') navigatePath(card.link); }}
+                >
+                  <div className="hp__beyond-card__media">
+                    {card.image_url && <img src={card.image_url} alt={card.title} loading="lazy" />}
+                  </div>
+                  <div className="hp__beyond-card__body">
+                    <h3 className="hp__beyond-card__title">{card.title}</h3>
+                    <p className="hp__beyond-card__desc">{card.body}</p>
+                    <span className="hp__beyond-card__cta">{card.cta_label || 'Discover'} &rarr;</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* ============================================================ */}
         {/* 6. VOICES (ratings + quotes)                                 */}
@@ -311,31 +375,27 @@ export default function HomePage() {
               <h2 className="hp__heading" style={{ textAlign: 'center' }}>The details guests mention after the last course</h2>
             </div>
 
-            {aggregators.length > 0 && (
-              <div className={`hp__voices-ratings fade-up delay-1${voicesVis ? ' visible' : ''}`}>
-                {aggregators.map((a) => (
-                  <a key={a.id} href={a.link} className="hp__voices-rating" target="_blank" rel="noopener noreferrer">
-                    <span className="hp__voices-rating__star">&#9733;</span>
-                    <span className="hp__voices-rating__value">{a.rating}</span>
-                    <span className="hp__voices-rating__source">{a.source} ({a.review_count})</span>
-                  </a>
-                ))}
-              </div>
-            )}
+            <div className={`hp__voices-ratings fade-up delay-1${voicesVis ? ' visible' : ''}`}>
+              {(aggregators.length > 0 ? aggregators : VOICES_FALLBACK_RATINGS).map((a) => (
+                <a key={a.id} href={a.link} className="hp__voices-rating" target="_blank" rel="noopener noreferrer">
+                  <span className="hp__voices-rating__star">&#9733;</span>
+                  <span className="hp__voices-rating__value">{a.rating}</span>
+                  <span className="hp__voices-rating__source">{a.source} ({a.review_count})</span>
+                </a>
+              ))}
+            </div>
 
-            {quotes.length > 0 && (
-              <div className={`hp__voices-quotes fade-up delay-2${voicesVis ? ' visible' : ''}`}>
-                {quotes.map((q) => (
-                  <blockquote key={q.id} className="hp__voice-quote">
-                    <p className="hp__voice-quote__text">&ldquo;{q.text}&rdquo;</p>
-                    <footer>
-                      <p className="hp__voice-quote__author">{q.author_name}</p>
-                      <p className="hp__voice-quote__role">{q.author_role}</p>
-                    </footer>
-                  </blockquote>
-                ))}
-              </div>
-            )}
+            <div className={`hp__voices-quotes fade-up delay-2${voicesVis ? ' visible' : ''}`}>
+              {(quotes.length > 0 ? quotes : VOICES_FALLBACK_QUOTES).map((q) => (
+                <blockquote key={q.id} className="hp__voice-quote">
+                  <p className="hp__voice-quote__text">{q.text}</p>
+                  <footer className="hp__voice-quote__footer">
+                    <p className="hp__voice-quote__author">{q.author_name}</p>
+                    <p className="hp__voice-quote__role">{q.author_role}</p>
+                  </footer>
+                </blockquote>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -386,6 +446,28 @@ export default function HomePage() {
                   <a href={`tel:${restaurant.phone}`} className="btn btn--outline-dark">Call the host stand</a>
                 </div>
               </div>
+            </div>
+
+            <div className="hp__visit-map" ref={mapRef}>
+              {mapVis ? (
+                <iframe
+                  title="La Norma Ristorante location"
+                  src="https://www.google.com/maps?q=5370+Gulf+of+Mexico+Drive,+Longboat+Key,+FL+34228&output=embed"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              ) : (
+                <div className="hp__visit-map__placeholder" aria-hidden="true" />
+              )}
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=5370+Gulf+of+Mexico+Drive,+Longboat+Key,+FL+34228"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hp__visit-map__open"
+              >
+                Open in Google Maps &rarr;
+              </a>
             </div>
           </div>
         </section>

@@ -1,47 +1,26 @@
+import { useState } from 'react';
 import { PAGE_KEYS, resolveNavigationTarget } from '../../../shared/routes.js';
 import { useNavigation } from '../../context/NavigationContext';
 import { useSection } from '../../context/ContentContext';
+import API_BASE from '../../config/api';
 import './Footer.css';
 
 export default function Footer() {
   const restaurant = useSection('restaurant');
-  const links = useSection('links');
-  const footer = useSection('footer');
   const footerNav = useSection('footerNav');
   const { navigate, navigatePath, resolveHref } = useNavigation();
   const currentYear = new Date().getFullYear();
+
+  const [nlEmail, setNlEmail] = useState('');
+  const [nlStatus, setNlStatus] = useState('');
 
   const normalizeInternalHref = (href) => {
     const destination = resolveNavigationTarget(href);
     return destination.isInternal ? destination.href : href;
   };
 
-  const actionLinks = [
-    {
-      label: 'Reserve a table',
-      href: normalizeInternalHref(
-        links.reserve?.startsWith('#')
-          ? resolveHref(PAGE_KEYS.home, links.reserve.slice(1))
-          : links.reserve,
-      ),
-    },
-    {
-      label: 'View menu',
-      href: resolveHref(PAGE_KEYS.menu),
-    },
-    {
-      label: 'Private events',
-      href: resolveHref(PAGE_KEYS.privateEvents),
-    },
-    {
-      label: 'Catering',
-      href: resolveHref(PAGE_KEYS.catering),
-    },
-  ];
-
   const handleNavClick = (event, href) => {
     if (!href) return;
-
     const destination = resolveNavigationTarget(href);
     if (destination.isInternal) {
       event.preventDefault();
@@ -49,43 +28,53 @@ export default function Footer() {
     }
   };
 
+  const handleNewsletter = async (event) => {
+    event.preventDefault();
+    if (!nlEmail.trim() || nlStatus === 'sending') return;
+    setNlStatus('sending');
+    try {
+      const res = await fetch(`${API_BASE}/api/homepage-content/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: nlEmail.trim() }),
+      });
+      if (!res.ok) throw new Error();
+      setNlStatus('done');
+      setNlEmail('');
+    } catch {
+      setNlStatus('error');
+    }
+  };
+
+  const aboutLinks = [
+    { label: 'Our story', key: PAGE_KEYS.about },
+    { label: 'Journal', key: PAGE_KEYS.blog },
+    { label: 'Private events', key: PAGE_KEYS.privateEvents },
+    { label: 'Contact', key: PAGE_KEYS.contact },
+  ];
+
+  const experienceLinks = [
+    { label: 'Wine tastings', key: PAGE_KEYS.wineTastings },
+    { label: 'Cooking classes', key: PAGE_KEYS.cookingClasses },
+    { label: 'Live music', key: PAGE_KEYS.liveMusic },
+    { label: 'Catering', key: PAGE_KEYS.catering },
+  ];
+
   return (
     <footer className="footer" role="contentinfo">
       <div className="footer__top container">
-        <div className="footer__intro">
-          <p className="footer__eyebrow">La Norma hospitality</p>
-          <h2 className="footer__headline">
-            Sicilian warmth, Gulf Coast ease, and a room built for lingering.
-          </h2>
-          <p className="footer__copy">
-            {footer.tagline || restaurant.description}
-          </p>
-
-          <div className="footer__actions">
-              {actionLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="btn btn--outline-light"
-                onClick={(event) => handleNavClick(event, link.href)}
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-        </div>
+        <p className="footer__eyebrow-line">La Norma Hospitality &middot; Longboat Key</p>
 
         <div className="footer__grid">
           <section className="footer__panel">
             <p className="footer__panel-label">Visit</p>
-            <div className="footer__brand">
-              <span className="footer__brand-name">{restaurant.name}</span>
-              <span className="footer__brand-tag">{restaurant.tagline}</span>
-            </div>
             <address className="footer__address">
               <p>{restaurant.address}</p>
               <p>{restaurant.city}, {restaurant.state} {restaurant.zip}</p>
             </address>
+            <a href={`tel:${restaurant.phone}`} className="footer__text-link">
+              {restaurant.phone}
+            </a>
             <a
               href={restaurant.mapEmbedUrl}
               className="footer__text-link"
@@ -94,41 +83,47 @@ export default function Footer() {
             >
               Get directions
             </a>
+            <p className="footer__hours-note">{restaurant.hours}</p>
           </section>
 
           <section className="footer__panel">
-            <p className="footer__panel-label">Contact</p>
-            <a href={`tel:${restaurant.phone}`} className="footer__text-link">
-              {restaurant.phone}
-            </a>
-            <a href={`mailto:${restaurant.email}`} className="footer__text-link">
-              {restaurant.email}
-            </a>
-            <p className="footer__hours">{restaurant.hours}</p>
-            <p className="footer__hours-note">{restaurant.hoursNote}</p>
-          </section>
-
-          <nav className="footer__panel" aria-label="Footer navigation">
-            <p className="footer__panel-label">Explore</p>
-            <ul className="footer__nav">
-              {footerNav.map((link) => (
-                <li key={`${link.label}-${link.href}`}>
+            <p className="footer__panel-label">About</p>
+            <ul className="footer__nav-list">
+              {aboutLinks.map((l) => l.key && (
+                <li key={l.label}>
                   <a
-                    href={normalizeInternalHref(link.href)}
-                    className="footer__nav-link"
-                    onClick={(event) => handleNavClick(event, link.href)}
+                    href={resolveHref(l.key)}
+                    className="footer__text-link"
+                    onClick={(e) => { e.preventDefault(); navigate(l.key); }}
                   >
-                    {link.label}
+                    {l.label}
                   </a>
                 </li>
               ))}
             </ul>
-          </nav>
+          </section>
+
+          <section className="footer__panel">
+            <p className="footer__panel-label">Experiences</p>
+            <ul className="footer__nav-list">
+              {experienceLinks.map((l) => l.key && (
+                <li key={l.label}>
+                  <a
+                    href={resolveHref(l.key)}
+                    className="footer__text-link"
+                    onClick={(e) => { e.preventDefault(); navigate(l.key); }}
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
 
           <section className="footer__panel">
             <p className="footer__panel-label">Follow</p>
             <div className="footer__social">
-              {Object.entries(restaurant.social).map(([platform, url]) => (
+              {Object.entries(restaurant.social || {}).map(([platform, url]) => (
                 <a
                   key={platform}
                   href={url}
@@ -142,12 +137,44 @@ export default function Footer() {
             </div>
           </section>
         </div>
+
+        <section className="footer__newsletter" aria-labelledby="footer-newsletter-heading">
+          <div className="footer__newsletter-copy">
+            <p className="footer__panel-label" id="footer-newsletter-heading">Newsletter</p>
+            <p className="footer__newsletter-tag">News from the kitchen. About monthly, never noise.</p>
+          </div>
+          <form className="footer__newsletter-form" onSubmit={handleNewsletter}>
+            <label className="sr-only" htmlFor="footer-newsletter-email">Email address</label>
+            <input
+              id="footer-newsletter-email"
+              type="email"
+              required
+              placeholder="your@email.com"
+              value={nlEmail}
+              onChange={(e) => setNlEmail(e.target.value)}
+              disabled={nlStatus === 'sending' || nlStatus === 'done'}
+            />
+            <button type="submit" className="btn btn--primary" disabled={nlStatus === 'sending' || nlStatus === 'done'}>
+              {nlStatus === 'sending' ? 'Subscribing…' : nlStatus === 'done' ? 'Subscribed' : 'Subscribe'}
+            </button>
+          </form>
+          {nlStatus === 'error' && (
+            <p className="footer__newsletter-msg footer__newsletter-msg--error">
+              Something went wrong. Please try again.
+            </p>
+          )}
+          {nlStatus === 'done' && (
+            <p className="footer__newsletter-msg footer__newsletter-msg--ok">
+              Thanks — see you in the inbox.
+            </p>
+          )}
+        </section>
       </div>
 
       <div className="footer__bottom">
         <div className="container footer__bottom-inner">
           <p className="footer__legal">
-            Copyright {currentYear} La Norma Ristorante &amp; Pizzeria. All rights reserved.
+            &copy; {currentYear} La Norma Ristorante &amp; Pizzeria. All rights reserved.
           </p>
           <div className="footer__legal-links">
             <button
@@ -155,15 +182,24 @@ export default function Footer() {
               type="button"
               onClick={() => navigate(PAGE_KEYS.privacyPolicy)}
             >
-              Privacy policy
+              Privacy
             </button>
             <button
               className="footer__legal-button"
               type="button"
               onClick={() => navigate(PAGE_KEYS.contact)}
             >
-              Contact & accessibility
+              Accessibility
             </button>
+            {footerNav?.length > 0 && (
+              <a
+                href={normalizeInternalHref(footerNav[0]?.href || '/')}
+                className="footer__legal-button"
+                onClick={(e) => handleNavClick(e, footerNav[0]?.href)}
+              >
+                Sitemap
+              </a>
+            )}
           </div>
         </div>
       </div>
