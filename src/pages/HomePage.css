@@ -766,7 +766,8 @@
 }
 
 .hp__menu-swipe {
-  overflow-x: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   touch-action: pan-y;
 }
 

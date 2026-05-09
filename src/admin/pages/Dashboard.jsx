@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import {
   blog as blogApi,
-  classes as classesApi,
+  bookings as bookingsApi,
   events as eventsApi,
   inquiries as inquiriesApi,
-  rsvp as rsvpApi,
+  homepageContent as homepageContentApi,
 } from '../api/client';
 
 export default function Dashboard({ setPage }) {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
-  const [recentRsvps, setRecentRsvps] = useState([]);
+  const [recentBookings, setRecentBookings] = useState([]);
   const [recentInquiries, setRecentInquiries] = useState([]);
   const [notices, setNotices] = useState([]);
 
@@ -18,40 +18,36 @@ export default function Dashboard({ setPage }) {
     let cancelled = false;
 
     Promise.allSettled([
-      classesApi.listWithMeta(),
       blogApi.listWithMeta(),
-      rsvpApi.list(),
+      bookingsApi.list(),
       eventsApi.listWithMeta(),
       inquiriesApi.list(),
+      homepageContentApi.listSubscribers(),
     ])
-      .then(([classesResult, blogResult, rsvpResult, eventsResult, inquiriesResult]) => {
+      .then(([blogResult, bookingsResult, eventsResult, inquiriesResult, subscribersResult]) => {
         if (cancelled) return;
 
         const nextNotices = [];
-        const classes = classesResult.status === 'fulfilled' ? classesResult.value.items : [];
         const blogPosts = blogResult.status === 'fulfilled' ? blogResult.value.items : [];
-        const rsvps = rsvpResult.status === 'fulfilled' ? rsvpResult.value : [];
+        const bookings = bookingsResult.status === 'fulfilled' ? bookingsResult.value : [];
         const events = eventsResult.status === 'fulfilled' ? eventsResult.value.items : [];
         const inquiries = inquiriesResult.status === 'fulfilled' ? inquiriesResult.value : [];
-
-        if (classesResult.status === 'rejected') {
-          nextNotices.push(`Cooking classes could not be loaded: ${classesResult.reason.message}`);
-        }
+        const subscribers = subscribersResult.status === 'fulfilled' ? subscribersResult.value : [];
 
         if (blogResult.status === 'rejected') {
           nextNotices.push(`Journal posts could not be loaded: ${blogResult.reason.message}`);
         }
-
+        if (bookingsResult.status === 'rejected') {
+          nextNotices.push(`Bookings could not be loaded: ${bookingsResult.reason.message}`);
+        }
         if (eventsResult.status === 'rejected') {
           nextNotices.push(`Events could not be loaded: ${eventsResult.reason.message}`);
         }
-
-        if (rsvpResult.status === 'rejected') {
-          nextNotices.push(`RSVP data could not be loaded: ${rsvpResult.reason.message}`);
-        }
-
         if (inquiriesResult.status === 'rejected') {
           nextNotices.push(`Inquiries could not be loaded: ${inquiriesResult.reason.message}`);
+        }
+        if (subscribersResult.status === 'rejected') {
+          nextNotices.push(`Newsletter subscribers could not be loaded: ${subscribersResult.reason.message}`);
         }
 
         setStats({
@@ -60,14 +56,14 @@ export default function Dashboard({ setPage }) {
             blogResult.status === 'fulfilled' && blogResult.value.source === 'admin'
               ? blogPosts.filter((entry) => entry.status === 'published').length
               : blogPosts.length,
-          classes: classes.length,
-          rsvps: rsvps.length,
-          pendingRsvps: rsvps.filter((entry) => entry.status === 'pending').length,
+          bookings: bookings.length,
+          pendingBookings: bookings.filter((entry) => entry.status === 'pending').length,
           events: events.length,
           inquiries: inquiries.length,
           newInquiries: inquiries.filter((entry) => entry.status === 'new').length,
+          subscribers: subscribers.length,
         });
-        setRecentRsvps(rsvps.slice(0, 5));
+        setRecentBookings(bookings.slice(0, 5));
         setRecentInquiries(inquiries.slice(0, 5));
         setNotices(nextNotices);
       })
@@ -92,12 +88,12 @@ export default function Dashboard({ setPage }) {
   }
 
   const quickLinks = [
-    { label: 'Edit homepage content', page: 'content' },
+    { label: 'Edit homepage content', page: 'homepage' },
     { label: 'Manage journal posts', page: 'blog' },
-    { label: 'Manage cooking classes', page: 'classes' },
-    { label: 'Review RSVPs', page: 'rsvp' },
-    { label: 'Manage events', page: 'events' },
+    { label: 'Review bookings', page: 'experiences' },
     { label: 'Answer inquiries', page: 'inquiries' },
+    { label: 'Newsletter subscribers', page: 'newsletter' },
+    { label: 'Catering requests', page: 'catering' },
   ];
 
   return (
@@ -113,12 +109,12 @@ export default function Dashboard({ setPage }) {
       <div className="adm-stats">
         <StatCard label="Journal posts" value={stats.posts} accent />
         <StatCard label="Published posts" value={stats.publishedPosts} />
-        <StatCard label="Upcoming classes" value={stats.classes} accent />
-        <StatCard label="Total RSVPs" value={stats.rsvps} />
-        <StatCard label="Pending RSVPs" value={stats.pendingRsvps} warn />
+        <StatCard label="Total bookings" value={stats.bookings} accent />
+        <StatCard label="Pending bookings" value={stats.pendingBookings} warn />
         <StatCard label="Upcoming events" value={stats.events} />
         <StatCard label="Total inquiries" value={stats.inquiries} />
         <StatCard label="New inquiries" value={stats.newInquiries} danger />
+        <StatCard label="Newsletter subscribers" value={stats.subscribers} />
       </div>
 
       <div className="adm-card" style={{ marginBottom: '1.25rem' }}>
@@ -140,27 +136,27 @@ export default function Dashboard({ setPage }) {
 
       <div className="adm-card" style={{ marginBottom: '1.25rem' }}>
         <div className="adm-card__title">
-          Recent RSVPs
+          Recent bookings
           <span className="adm-card__title-meta">latest five</span>
         </div>
-        {recentRsvps.length === 0 ? (
-          <p className="adm-text-muted adm-text-sm">No RSVPs yet.</p>
+        {recentBookings.length === 0 ? (
+          <p className="adm-text-muted adm-text-sm">No bookings yet.</p>
         ) : (
           <div className="adm-table-wrap">
             <table className="adm-table">
               <thead>
                 <tr>
                   <th>Guest</th>
-                  <th>Class</th>
+                  <th>Experience</th>
                   <th>Guests</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {recentRsvps.map((entry) => (
+                {recentBookings.map((entry) => (
                   <tr key={entry.id}>
                     <td>{entry.first_name} {entry.last_name}</td>
-                    <td>{entry.class_theme || 'General request'}</td>
+                    <td>{entry.event_title || entry.experience_title || 'General booking'}</td>
                     <td>{entry.guests}</td>
                     <td>
                       <span className={`adm-badge adm-badge--${entry.status}`}>{entry.status}</span>
@@ -227,7 +223,7 @@ function StatCard({ label, value, accent = false, warn = false, danger = false }
 }
 
 function formatType(type) {
-  return type
+  return (type || '')
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }

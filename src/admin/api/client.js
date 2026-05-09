@@ -273,23 +273,6 @@ export const blog = {
   delete: (id) => request('DELETE', `/blog/${id}`),
 };
 
-export const classes = {
-  list: async () => (await listCollectionWithMeta({ adminPath: '/classes/all', publicPath: '/classes' })).items,
-  listWithMeta: () => listCollectionWithMeta({ adminPath: '/classes/all', publicPath: '/classes' }),
-  get: (id) => request('GET', `/classes/${id}`),
-  create: (data) => request('POST', '/classes', data),
-  update: (id, data) => request('PUT', `/classes/${id}`, data),
-  delete: (id) => request('DELETE', `/classes/${id}`),
-};
-
-export const rsvp = {
-  list: (params = {}) => {
-    return requestCachedList('/rsvp', params);
-  },
-  updateStatus: (id, status) => request('PUT', `/rsvp/${id}`, { status }),
-  delete: (id) => request('DELETE', `/rsvp/${id}`),
-};
-
 export const events = {
   list: async (params = {}) => (
     await listCollectionWithMeta({ adminPath: '/events/all', publicPath: '/events', params })
