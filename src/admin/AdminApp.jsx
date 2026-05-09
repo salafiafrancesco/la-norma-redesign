@@ -12,6 +12,7 @@ import ImagesPage from './pages/ImagesPage';
 import EventsManager from './pages/EventsManager';
 import CateringManager from './pages/CateringManager';
 import ExperiencesManager from './pages/ExperiencesManager';
+import HomepageManager from './pages/HomepageManager';
 import InquiriesManager from './pages/InquiriesManager';
 
 function AdminContent() {
@@ -31,6 +32,7 @@ function AdminContent() {
 
   const pages = {
     dashboard:  <Dashboard setPage={setPage} />,
+    homepage:   <HomepageManager />,
     content:    <ContentEditor />,
     blog:       <BlogManager />,
     classes:    <ClassesManager />,

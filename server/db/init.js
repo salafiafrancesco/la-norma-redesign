@@ -177,6 +177,47 @@ async function ensureExperienceEvents() {
   console.log(`[init] Experience events seeded (${all.length} records).`);
 }
 
+async function ensureHomepageCollections() {
+  const { count } = await supabase
+    .from('homepage_signature_stats')
+    .select('*', { count: 'exact', head: true });
+
+  if (count > 0) return;
+
+  await supabase.from('homepage_signature_stats').insert([
+    { sort_order: 1, value: '18 years', label: 'Family-run since 2008' },
+    { sort_order: 2, value: '70+ wines', label: 'Italian wine list' },
+    { sort_order: 3, value: '250+ seats', label: 'Served weekly' },
+  ]);
+
+  await supabase.from('homepage_beyond_cards').insert([
+    { sort_order: 1, title: 'Wine Tastings', body: 'A guided Friday flight through Italy with composed pairings.', link: '/wine-tastings', cta_label: 'Discover', image_url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80' },
+    { sort_order: 2, title: 'Cooking Classes', body: 'Saturday mornings with Chef Marco — small group, hands-on.', link: '/cooking-classes', cta_label: 'Discover', image_url: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=800&q=80' },
+    { sort_order: 3, title: 'Live Music', body: 'Wednesday and Saturday evenings, woven into dinner not on top of it.', link: '/live-music', cta_label: 'Discover', image_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80' },
+    { sort_order: 4, title: 'Catering', body: 'Off-premise events, private gatherings, and yacht parties.', link: '/catering', cta_label: 'Discover', image_url: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=800&q=80' },
+  ]);
+
+  await supabase.from('homepage_voices_aggregators').insert([
+    { sort_order: 1, source: 'Google', rating: 4.8, review_count: 520, link: 'https://g.page/lanormarestaurant/review' },
+    { sort_order: 2, source: 'TripAdvisor', rating: 4.7, review_count: 340, link: 'https://tripadvisor.com/' },
+    { sort_order: 3, source: 'Yelp', rating: 4.9, review_count: 180, link: 'https://yelp.com/' },
+  ]);
+
+  await supabase.from('homepage_voices_quotes').insert([
+    { sort_order: 1, text: 'The room feels refined without ever becoming stiff. Excellent wine guidance, beautiful pacing, and a Pasta alla Norma I am still thinking about.', author_name: 'Margaret S.', author_role: 'Sarasota, FL' },
+    { sort_order: 2, text: 'Pacing was perfect. We hosted an anniversary dinner and every detail felt considered. Service was polished, warm, and genuinely memorable.', author_name: 'James & Patricia K.', author_role: 'Longboat Key, FL' },
+    { sort_order: 3, text: 'One of the most memorable evenings we\'ve booked on Longboat Key. The Friday wine tasting was intimate, unhurried, and clearly curated by people who care.', author_name: 'Thomas R.', author_role: 'Chicago, IL' },
+  ]);
+
+  await supabase.from('homepage_visit_notes').insert([
+    { sort_order: 1, day_label: 'Friday', note: 'Live wine tasting' },
+    { sort_order: 2, day_label: 'Saturday', note: 'Cooking class (mornings)' },
+    { sort_order: 3, day_label: 'Wed & Sat', note: 'Live music' },
+  ]);
+
+  console.log('[init] Homepage collections seeded.');
+}
+
 async function ensureCateringPageContent() {
   // Only seed if tiers table is empty (it's the anchor table)
   const { count } = await supabase
@@ -295,6 +336,7 @@ export async function ensureInitialized() {
   await ensureEvents();
   await ensureBlogPosts();
   await ensureExperienceEvents();
+  await ensureHomepageCollections();
   await ensureCateringPageContent();
   await ensureCateringRequestsTable();
 }

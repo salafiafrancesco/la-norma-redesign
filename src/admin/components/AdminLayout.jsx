@@ -2,7 +2,8 @@ import { useAdmin } from '../context/AdminContext';
 
 const NAV = [
   { key: 'dashboard', icon: '\u25A6', label: 'Dashboard' },
-  { key: 'content',   icon: '\u270E', label: 'Site Content', group: 'Content' },
+  { key: 'homepage',  icon: '\u2302', label: 'Homepage', group: 'Content' },
+  { key: 'content',   icon: '\u270E', label: 'Site Content' },
   { key: 'blog',      icon: '\u2756', label: 'Journal' },
   { key: 'experiences', icon: '\u2726', label: 'Experiences', group: 'Experiences' },
   { key: 'classes',   icon: '\u2605', label: 'Cooking Classes (legacy)' },
@@ -15,6 +16,7 @@ const NAV = [
 
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
+  homepage: 'Homepage',
   content: 'Site Content',
   blog: 'Journal',
   classes: 'Cooking Classes',

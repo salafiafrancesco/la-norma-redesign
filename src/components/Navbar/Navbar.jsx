@@ -17,9 +17,14 @@ const IMMERSIVE_PAGES = new Set([
 const NAV_LINKS = [
   { label: 'Home', pageKey: PAGE_KEYS.home },
   { label: 'Menu', pageKey: PAGE_KEYS.menu },
-  { label: 'Cooking Classes', pageKey: PAGE_KEYS.cookingClasses },
-  { label: 'Wine Tasting', pageKey: PAGE_KEYS.wineTastings },
-  { label: 'Live Music', pageKey: PAGE_KEYS.liveMusic },
+  {
+    label: 'Experiences',
+    dropdown: [
+      { label: 'Cooking Classes', pageKey: PAGE_KEYS.cookingClasses },
+      { label: 'Wine Tastings', pageKey: PAGE_KEYS.wineTastings },
+      { label: 'Live Music', pageKey: PAGE_KEYS.liveMusic },
+    ],
+  },
   { label: 'Catering', pageKey: PAGE_KEYS.catering },
 ];
 
@@ -75,10 +80,8 @@ export default function Navbar() {
   };
 
   const isLinkActive = (link) => {
-    if (link.pageKey) {
-      return page === link.pageKey;
-    }
-
+    if (link.pageKey) return page === link.pageKey;
+    if (link.dropdown) return link.dropdown.some((sub) => page === sub.pageKey);
     return false;
   };
 
@@ -97,7 +100,26 @@ export default function Navbar() {
 
         <nav className="navbar__nav" aria-label="Primary navigation">
           {NAV_LINKS.map((link) => (
-            link.pageKey ? (
+            link.dropdown ? (
+              <div key={link.label} className={`navbar__dropdown${isLinkActive(link) ? ' is-active' : ''}`}>
+                <button type="button" className="navbar__link navbar__link--dropdown">
+                  {link.label}
+                  <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+                <div className="navbar__dropdown-menu">
+                  {link.dropdown.map((sub) => (
+                    <a
+                      key={sub.label}
+                      href={resolveHref(sub.pageKey)}
+                      className={`navbar__dropdown-item${page === sub.pageKey ? ' is-active' : ''}`}
+                      onClick={(event) => handlePageLink(event, sub.pageKey)}
+                    >
+                      {sub.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : link.pageKey ? (
               <a
                 key={link.label}
                 href={resolveHref(link.pageKey)}
@@ -184,7 +206,21 @@ export default function Navbar() {
 
           <nav className="navbar__mobile-nav" aria-label="Mobile navigation">
             {NAV_LINKS.map((link) => (
-              link.pageKey ? (
+              link.dropdown ? (
+                <div key={link.label}>
+                  <span className="navbar__mobile-link navbar__mobile-link--group">{link.label}</span>
+                  {link.dropdown.map((sub) => (
+                    <a
+                      key={sub.label}
+                      href={resolveHref(sub.pageKey)}
+                      className={`navbar__mobile-link navbar__mobile-link--sub${page === sub.pageKey ? ' is-active' : ''}`}
+                      onClick={(event) => handlePageLink(event, sub.pageKey)}
+                    >
+                      {sub.label}
+                    </a>
+                  ))}
+                </div>
+              ) : link.pageKey ? (
                 <a
                   key={link.label}
                   href={resolveHref(link.pageKey)}

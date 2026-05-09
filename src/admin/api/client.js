@@ -320,6 +320,15 @@ export const bookings = {
   delete: (id) => request('DELETE', `/bookings/${id}`),
 };
 
+export const homepageContent = {
+  getAll: () => request('GET', '/homepage-content/all'),
+  getCollection: (collection) => request('GET', `/homepage-content/${collection}`),
+  create: (collection, data) => request('POST', `/homepage-content/${collection}`, data),
+  update: (collection, id, data) => request('PUT', `/homepage-content/${collection}/${id}`, data),
+  delete: (collection, id) => request('DELETE', `/homepage-content/${collection}/${id}`),
+  listSubscribers: () => request('GET', '/homepage-content/newsletter/subscribers'),
+};
+
 export const cateringContent = {
   getAll: () => request('GET', '/catering-content/all'),
   getCollection: (collection) => request('GET', `/catering-content/${collection}`),
