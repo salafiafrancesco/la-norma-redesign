@@ -53,38 +53,46 @@
 }
 
 .navbar__logo {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-width: 0;
-  text-decoration: none;
-}
-
-.navbar__logo-mark {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 2.65rem;
-  height: 2.65rem;
-  border-radius: 999px;
-  border: 1px solid rgba(248, 243, 235, 0.22);
-  color: var(--gold-light);
-  font-family: var(--ff-accent);
-  font-size: 0.95rem;
-  letter-spacing: 0.08em;
-  font-weight: 600;
-  text-transform: uppercase;
-  background:
-    linear-gradient(180deg, rgba(248, 243, 235, 0.08), rgba(248, 243, 235, 0.03)),
-    rgba(248, 243, 235, 0.04);
+  min-width: 0;
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
-.navbar__logo-copy {
-  font-family: var(--ff-display);
-  font-size: 1.08rem;
-  color: var(--cream);
-  line-height: 1;
-  white-space: nowrap;
+.navbar__logo-img {
+  display: block;
+  height: 2.6rem;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  /* Logo ships as dark-on-light — render it as cream on the dark navbar.
+     The brightness(0) flattens to black, then invert(1) flips to white,
+     and the warm filter chain biases it toward cream/gold for premium feel. */
+  filter:
+    brightness(0)
+    invert(1)
+    sepia(0.18)
+    saturate(420%)
+    hue-rotate(355deg)
+    brightness(1.05);
+  transition: opacity var(--dur-fast) var(--ease), filter var(--dur-base) var(--ease);
+}
+
+.navbar__logo:hover .navbar__logo-img {
+  opacity: 0.88;
+}
+
+@media (max-width: 720px) {
+  .navbar__logo-img {
+    height: 2.15rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar__logo-img {
+    height: 1.9rem;
+  }
 }
 
 .navbar__nav {
