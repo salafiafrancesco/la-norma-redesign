@@ -258,6 +258,26 @@ export const footer = {
 
 export const footerNav = footer.navItems;
 
+export const general = {
+  hoursWeekly: [
+    { day: 'Monday', hours: '5:00 PM – 9:00 PM', closed: false },
+    { day: 'Tuesday', hours: '5:00 PM – 9:00 PM', closed: false },
+    { day: 'Wednesday', hours: '5:00 PM – 9:00 PM', closed: false },
+    { day: 'Thursday', hours: '5:00 PM – 9:00 PM', closed: false },
+    { day: 'Friday', hours: '5:00 PM – 9:00 PM', closed: false },
+    { day: 'Saturday', hours: '5:00 PM – 9:00 PM', closed: false },
+    { day: 'Sunday', hours: '5:00 PM – 9:00 PM', closed: false },
+  ],
+  schemaOrg: {
+    cuisine: ['Italian', 'Sicilian', 'Mediterranean'],
+    priceRange: '$$$',
+    opens: '17:00',
+    closes: '21:00',
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    acceptsReservations: true,
+  },
+};
+
 export const siteDefaults = {
   restaurant,
   links,
@@ -273,4 +293,5 @@ export const siteDefaults = {
   catering,
   footer,
   footerNav,
+  general,
 };

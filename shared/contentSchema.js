@@ -147,6 +147,14 @@ export const CONTENT_SECTIONS = [
     description: 'Footer navigation and supporting tagline.',
     hint: 'Object with { "tagline", "nav_items": [{ "label", "href" }] }',
   },
+  {
+    key: 'general',
+    label: 'General Settings',
+    icon: 'Settings',
+    editor: 'json',
+    description: 'Weekly opening hours table and SEO/structured data overrides used across the site.',
+    hint: 'Object with { "hoursWeekly": [{ "day": "Monday", "hours": "5:00 PM – 9:00 PM", "closed": false }, ...], "schemaOrg": { "cuisine": ["Italian","Sicilian","Mediterranean"], "priceRange": "$$$", "opens": "17:00", "closes": "21:00", "dayOfWeek": ["Monday",...], "acceptsReservations": true } }',
+  },
 ];
 
 export const CONTENT_SECTION_MAP = Object.fromEntries(

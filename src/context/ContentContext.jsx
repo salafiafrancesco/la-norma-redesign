@@ -105,6 +105,7 @@ function transform(api = {}) {
   const testimonialsData = api.testimonials || {};
   const cateringData = api.catering || {};
   const footerData = api.footer || {};
+  const generalData = api.general || {};
 
   const links = {
     reserve: linksData.reserve ?? defaults.links.reserve,
@@ -306,6 +307,13 @@ function transform(api = {}) {
     }
   });
 
+  const general = {
+    hoursWeekly: Array.isArray(generalData.hoursWeekly) && generalData.hoursWeekly.length
+      ? generalData.hoursWeekly
+      : defaults.general.hoursWeekly,
+    schemaOrg: { ...defaults.general.schemaOrg, ...(generalData.schemaOrg || {}) },
+  };
+
   return {
     restaurant,
     links,
@@ -321,6 +329,7 @@ function transform(api = {}) {
     catering: cateringContent,
     footer,
     footerNav,
+    general,
   };
 }
 

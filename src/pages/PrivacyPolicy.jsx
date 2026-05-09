@@ -1,11 +1,16 @@
 import { PAGE_KEYS } from '../../shared/routes.js';
 import Navbar from '../components/Navbar/Navbar';
 import { useNavigation } from '../context/NavigationContext';
+import { useSection } from '../context/ContentContext';
 import { usePageMetadata } from '../hooks/usePageMetadata';
 import './PrivacyPolicy.css';
 
 export default function PrivacyPolicy() {
   const { navigate } = useNavigation();
+  const restaurant = useSection('restaurant');
+  const fullName = `${restaurant.name} ${restaurant.tagline}`.trim();
+  const fullAddress = `${restaurant.address}, ${restaurant.city}, ${restaurant.state} ${restaurant.zip}`;
+  const telHref = `tel:${(restaurant.phone || '').replace(/[^+\d]/g, '')}`;
 
   usePageMetadata({
     title: 'Privacy Policy',
@@ -29,9 +34,9 @@ export default function PrivacyPolicy() {
 
           <Section title="1. Who We Are">
             <p>
-              La Norma Ristorante &amp; Pizzeria is located at 5370 Gulf of Mexico Drive, Longboat Key, FL 34228.
-              You can reach us at <a href="mailto:info@lanormarestaurant.com">info@lanormarestaurant.com</a> or by phone at{' '}
-              <a href="tel:+19415550192">+1 (941) 555-0192</a>.
+              {fullName} is located at {fullAddress}.
+              You can reach us at <a href={`mailto:${restaurant.email}`}>{restaurant.email}</a> or by phone at{' '}
+              <a href={telHref}>{restaurant.phone}</a>.
             </p>
             <p>
               This policy explains what guest data we collect, why we collect it, how it is used, and the choices
@@ -85,7 +90,7 @@ export default function PrivacyPolicy() {
           <Section title="7. Your Rights">
             <p>You may request access to, correction of, or deletion of personal data we hold about you.</p>
             <p>
-              To make a request, email <a href="mailto:info@lanormarestaurant.com">info@lanormarestaurant.com</a>.
+              To make a request, email <a href={`mailto:${restaurant.email}`}>{restaurant.email}</a>.
               We will respond as promptly as reasonably possible.
             </p>
           </Section>
@@ -105,11 +110,11 @@ export default function PrivacyPolicy() {
 
           <Section title="10. Contact">
             <address>
-              La Norma Ristorante &amp; Pizzeria<br />
-              5370 Gulf of Mexico Drive<br />
-              Longboat Key, FL 34228<br />
-              <a href="mailto:info@lanormarestaurant.com">info@lanormarestaurant.com</a><br />
-              <a href="tel:+19415550192">+1 (941) 555-0192</a>
+              {fullName}<br />
+              {restaurant.address}<br />
+              {restaurant.city}, {restaurant.state} {restaurant.zip}<br />
+              <a href={`mailto:${restaurant.email}`}>{restaurant.email}</a><br />
+              <a href={telHref}>{restaurant.phone}</a>
             </address>
           </Section>
 

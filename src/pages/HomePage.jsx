@@ -18,16 +18,6 @@ const STATS_FALLBACK = [
   { id: 'seats', value: '250+ seats', label: 'Served weekly' },
 ];
 
-const HOURS_ROWS = [
-  { day: 'Monday', hours: '5:00 PM – 9:00 PM' },
-  { day: 'Tuesday', hours: '5:00 PM – 9:00 PM' },
-  { day: 'Wednesday', hours: '5:00 PM – 9:00 PM' },
-  { day: 'Thursday', hours: '5:00 PM – 9:00 PM' },
-  { day: 'Friday', hours: '5:00 PM – 9:00 PM' },
-  { day: 'Saturday', hours: '5:00 PM – 9:00 PM' },
-  { day: 'Sunday', hours: '5:00 PM – 9:00 PM' },
-];
-
 const BEYOND_FALLBACK = [
   {
     id: 'wine',
@@ -83,8 +73,11 @@ export default function HomePage() {
   const restaurant = useSection('restaurant');
   const story = useSection('story');
   const menuHighlights = useSection('menuHighlights');
+  const general = useSection('general');
   const { navigate, navigatePath } = useNavigation();
   const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+  const hoursRows = general?.hoursWeekly || [];
+  const schemaOrg = general?.schemaOrg || {};
 
   // Dynamic collections from API
   const [stats, setStats] = useState([]);
@@ -216,9 +209,9 @@ export default function HomePage() {
       description: HOME_DESCRIPTION,
       url: window.location.origin,
       telephone: restaurant.phone,
-      servesCuisine: ['Italian', 'Sicilian', 'Mediterranean'],
-      priceRange: '$$$',
-      acceptsReservations: true,
+      servesCuisine: schemaOrg.cuisine,
+      priceRange: schemaOrg.priceRange,
+      acceptsReservations: schemaOrg.acceptsReservations,
       address: {
         '@type': 'PostalAddress',
         streetAddress: restaurant.address,
@@ -229,9 +222,9 @@ export default function HomePage() {
       },
       openingHoursSpecification: {
         '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        opens: '17:00',
-        closes: '21:00',
+        dayOfWeek: schemaOrg.dayOfWeek,
+        opens: schemaOrg.opens,
+        closes: schemaOrg.closes,
       },
     }],
   });
@@ -624,7 +617,7 @@ export default function HomePage() {
                   </div>
 
                   <ul className="hp__hours-list">
-                    {HOURS_ROWS.map((row) => (
+                    {hoursRows.map((row) => (
                       <li
                         key={row.day}
                         className={`hp__hours-row${row.day === todayName ? ' is-today' : ''}`}
@@ -677,7 +670,7 @@ export default function HomePage() {
               {mapVis ? (
                 <iframe
                   title="La Norma Ristorante location"
-                  src="https://www.google.com/maps?q=5370+Gulf+of+Mexico+Drive,+Longboat+Key,+FL+34228&output=embed"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(`${restaurant.address}, ${restaurant.city}, ${restaurant.state} ${restaurant.zip}`)}&output=embed`}
                   loading="lazy"
                   allowFullScreen
                   referrerPolicy="no-referrer-when-downgrade"
@@ -686,7 +679,7 @@ export default function HomePage() {
                 <div className="hp__visit-map__placeholder" aria-hidden="true" />
               )}
               <a
-                href="https://www.google.com/maps/search/?api=1&query=5370+Gulf+of+Mexico+Drive,+Longboat+Key,+FL+34228"
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.address}, ${restaurant.city}, ${restaurant.state} ${restaurant.zip}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hp__visit-map__open"
