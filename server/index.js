@@ -18,7 +18,6 @@ import cateringRoutes from './routes/catering.js';
 import cateringContentRoutes from './routes/cateringContent.js';
 import classRoutes from './routes/classes.js';
 import contentRoutes from './routes/content.js';
-import eventRoutes from './routes/events.js';
 import experienceEventRoutes from './routes/experienceEvents.js';
 import homepageContentRoutes from './routes/homepageContent.js';
 import inquiryRoutes from './routes/inquiries.js';
@@ -129,7 +128,6 @@ app.use('/api/homepage-content', homepageContentRoutes);
 app.use('/api/rsvp', bookingSubmissionLimiter, rsvpRoutes);
 app.use('/api/site-navigation', siteNavigationRoutes);
 app.use('/api/upload', uploadRoutes);
-app.use('/api/events', eventRoutes);
 app.use('/api/inquiries', bookingSubmissionLimiter, inquiryRoutes);
 
 app.get('/', (_req, res) => {

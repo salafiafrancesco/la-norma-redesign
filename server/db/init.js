@@ -75,22 +75,6 @@ async function ensureCookingClasses() {
   console.log('[init] Cooking classes seeded.');
 }
 
-async function ensureEvents() {
-  const { count } = await supabase
-    .from('events')
-    .select('*', { count: 'exact', head: true });
-
-  if (count > 0) return;
-
-  const records = [
-    ...generateUpcomingWineTastingRecords(),
-    ...generateUpcomingLiveMusicRecords(),
-  ];
-  const { error } = await supabase.from('events').insert(records);
-  if (error) throw new Error(`[init] Events: ${error.message}`);
-  console.log('[init] Events seeded.');
-}
-
 async function ensureBlogPosts() {
   const { count } = await supabase
     .from('blog_posts')
@@ -560,7 +544,6 @@ export async function ensureInitialized() {
   await ensureAdminUser();
   await ensureSiteContent();
   await ensureCookingClasses();
-  await ensureEvents();
   await ensureBlogPosts();
   await ensureExperienceEvents();
   await ensureHomepageCollections();

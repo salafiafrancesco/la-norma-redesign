@@ -13,6 +13,31 @@ import './ExperiencePage.css';
 const CONTACT_FIELD_NAMES = new Set(['first_name', 'last_name', 'email', 'phone']);
 const REVIEW_FIELD_NAMES = new Set(['message']);
 
+// Maps an `experience_events` row to the shape this catalog UI expects.
+// Bridges the legacy `events` schema (replaced) and the unified
+// `experience_events` schema used by the Experiences admin + booking flow.
+function adaptExperienceEvent(raw) {
+  if (!raw || typeof raw !== 'object') return raw;
+  const capacity = Number.isFinite(raw.capacity) ? raw.capacity : 0;
+  const seatsBooked = Number.isFinite(raw.seats_booked) ? raw.seats_booked : 0;
+  const time = raw.start_time && raw.end_time
+    ? `${raw.start_time} - ${raw.end_time}`
+    : raw.start_time || '';
+  return {
+    id: raw.id,
+    title: raw.title,
+    description: raw.description || '',
+    date: raw.date,
+    time,
+    price: Number.isFinite(raw.price_cents) ? Math.round(raw.price_cents / 100) : 0,
+    max_spots: capacity,
+    spots_left: Math.max(0, capacity - seatsBooked),
+    image_url: raw.image_url || '',
+    category: raw.type,
+    active: raw.status === 'published',
+  };
+}
+
 function formatEventDate(iso) {
   return new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', {
     weekday: 'long',
@@ -116,7 +141,7 @@ export default function ExperiencePage({ config }) {
     setEvents([]);
     setEventsLoading(true);
 
-    fetch(`${API_BASE}/api/events?category=${config.events.category}`)
+    fetch(`${API_BASE}/api/experience-events?type=${config.events.category}`)
       .then(async (response) => {
         if (!response.ok) {
           throw new Error('Unable to load events right now.');
@@ -125,7 +150,7 @@ export default function ExperiencePage({ config }) {
         return response.json();
       })
       .then((data) => {
-        if (!cancelled) setEvents(data);
+        if (!cancelled) setEvents(Array.isArray(data) ? data.map(adaptExperienceEvent) : []);
       })
       .catch(() => {
         if (!cancelled) setEvents([]);
