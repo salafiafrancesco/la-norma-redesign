@@ -399,24 +399,57 @@ export default function CateringPage() {
         <section className="cat-section cat-yacht" id="yacht">
           <div className="cat-yacht__bg" style={{ backgroundImage: `url(${c.yachtImageUrl})` }} role="img" aria-label="Yacht catering on Sarasota Bay" />
           <div className="cat-yacht__overlay" />
+          <span className="cat-yacht__monogram" aria-hidden="true">LN</span>
           <div className="cat-yacht__content container">
             <div className={`cat-yacht__grid fade-up${yachtVis ? ' visible' : ''}`} ref={yachtRef}>
               <div className="cat-yacht__copy">
-                <p className="cat-section__eyebrow" style={{ color: 'var(--gold-light, #E0C97F)' }}>{c.yachtEyebrow}</p>
-                <h2 className="cat-section__heading" style={{ color: 'var(--cream)' }}>{c.yachtHeading}</h2>
-                {(c.yachtBody || '').split('\n').filter(Boolean).map((p, i) => (
-                  <p key={i} className="cat-yacht__body">{p}</p>
-                ))}
-                <button type="button" className="btn btn--primary" onClick={() => goToForm('Yacht Party')}>
-                  {c.yachtCtaLabel} &rarr;
+                <p className="cat-yacht__eyebrow">
+                  <span className="cat-yacht__eyebrow-rule" aria-hidden="true" />
+                  {c.yachtEyebrow}
+                </p>
+                <h2 className="cat-yacht__heading">{c.yachtHeading}</h2>
+                <div className="cat-yacht__lead">
+                  {(c.yachtBody || '').split('\n').filter(Boolean).map((p, i) => (
+                    <p key={i} className="cat-yacht__body">{p}</p>
+                  ))}
+                </div>
+                <button type="button" className="cat-yacht__cta" onClick={() => goToForm('Yacht Party')}>
+                  <span>{c.yachtCtaLabel}</span>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </button>
               </div>
               <aside className="cat-yacht__panel">
-                <p className="cat-yacht__panel-label">What we handle</p>
+                <div className="cat-yacht__panel-head">
+                  <span className="cat-yacht__panel-num" aria-hidden="true">04</span>
+                  <p className="cat-yacht__panel-label">What we handle</p>
+                </div>
                 <ul className="cat-yacht__panel-list">
-                  {(c.yachtSidePanel || []).map((item) => <li key={item}>{item}</li>)}
+                  {(c.yachtSidePanel || []).map((item, i) => (
+                    <li key={item}>
+                      <span className="cat-yacht__panel-bullet" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
                 </ul>
               </aside>
+            </div>
+
+            {/* Credentials strip */}
+            <div className="cat-yacht__creds" aria-hidden="true">
+              <div className="cat-yacht__cred">
+                <span className="cat-yacht__cred-value">30 min</span>
+                <span className="cat-yacht__cred-label">Dockside delivery</span>
+              </div>
+              <div className="cat-yacht__cred">
+                <span className="cat-yacht__cred-value">Galley-ready</span>
+                <span className="cat-yacht__cred-label">No on-board cooking</span>
+              </div>
+              <div className="cat-yacht__cred">
+                <span className="cat-yacht__cred-value">Sarasota Bay</span>
+                <span className="cat-yacht__cred-label">Home water</span>
+              </div>
             </div>
           </div>
         </section>
@@ -425,17 +458,53 @@ export default function CateringPage() {
         {/* MID-PAGE CTA STRIP                                           */}
         {/* ============================================================ */}
         <section className="cat-midcta">
+          <span className="cat-midcta__ornament cat-midcta__ornament--tl" aria-hidden="true" />
+          <span className="cat-midcta__ornament cat-midcta__ornament--br" aria-hidden="true" />
           <div className="container cat-midcta__inner">
             <div className="cat-midcta__copy">
-              <p className="cat-midcta__eyebrow">Ready to plan?</p>
-              <h2 className="cat-midcta__title">A 2-minute form. A custom menu within 48 hours.</h2>
+              <p className="cat-midcta__eyebrow">
+                <span className="cat-midcta__eyebrow-mark" aria-hidden="true" />
+                Ready to plan?
+              </p>
+              <h2 className="cat-midcta__title">
+                A custom Sicilian menu, <em>delivered to your event in 48 hours.</em>
+              </h2>
+              <p className="cat-midcta__lead">
+                Tell us the date, the room, and the headcount. Our chef returns a tailored menu and transparent estimate before your next coffee.
+              </p>
+
+              <ul className="cat-midcta__trust" aria-label="Service guarantees">
+                <li>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><polyline points="4 12 10 18 20 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Custom menu, never templated
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><polyline points="4 12 10 18 20 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Reply within one business day
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><polyline points="4 12 10 18 20 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  No obligation, no deposit to start
+                </li>
+              </ul>
             </div>
+
             <div className="cat-midcta__actions">
-              <button type="button" className="btn btn--primary cat-midcta__btn" onClick={() => goToForm()}>
-                Request a Quote &rarr;
+              <button type="button" className="cat-midcta__btn" onClick={() => goToForm()}>
+                <span>Request a Quote</span>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
+              <div className="cat-midcta__divider" aria-hidden="true">
+                <span>or</span>
+              </div>
               <a href={`tel:${c.contactPhone}`} className="cat-midcta__phone">
-                or call {c.contactPhone}
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="cat-midcta__phone-label">Call directly</span>
+                <span className="cat-midcta__phone-num">{c.contactPhone}</span>
               </a>
             </div>
           </div>
