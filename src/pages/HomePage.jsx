@@ -146,6 +146,62 @@ export default function HomePage() {
   const [menuRef, menuVis] = useInView();
   const [atmoRef, atmoVis] = useInView();
   const [beyondRef, beyondVis] = useInView();
+
+  // Beyond Dinner — mobile carousel state (autoscroll + dots)
+  const beyondScrollRef = useRef(null);
+  const beyondAutoTimer = useRef(null);
+  const beyondPauseTimer = useRef(null);
+  const [beyondActive, setBeyondActive] = useState(0);
+  const [beyondPaused, setBeyondPaused] = useState(false);
+  const beyondList = beyondCards.length > 0 ? beyondCards : BEYOND_FALLBACK;
+  const beyondCount = beyondList.length;
+
+  // Auto-advance every 4.5s on mobile, only when section is in view + not paused
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    if (beyondPaused || !beyondVis || beyondCount < 2) return undefined;
+    const mq = window.matchMedia('(max-width: 980px)');
+    if (!mq.matches) return undefined;
+
+    beyondAutoTimer.current = setInterval(() => {
+      setBeyondActive((i) => (i + 1) % beyondCount);
+    }, 4500);
+
+    return () => clearInterval(beyondAutoTimer.current);
+  }, [beyondPaused, beyondVis, beyondCount]);
+
+  // Programmatic scroll when active card changes
+  useEffect(() => {
+    const container = beyondScrollRef.current;
+    if (!container) return;
+    const cards = container.querySelectorAll('.hp__beyond-card');
+    const card = cards[beyondActive];
+    if (!card) return;
+    const left = card.offsetLeft - container.offsetLeft;
+    container.scrollTo({ left, behavior: 'smooth' });
+  }, [beyondActive]);
+
+  // Pause autoscroll on user interaction, resume after 7s of inactivity
+  const handleBeyondInteract = () => {
+    setBeyondPaused(true);
+    clearTimeout(beyondPauseTimer.current);
+    beyondPauseTimer.current = setTimeout(() => setBeyondPaused(false), 7000);
+  };
+
+  // Track manual scroll to keep active dot in sync
+  const handleBeyondScroll = () => {
+    const container = beyondScrollRef.current;
+    if (!container) return;
+    const cards = container.querySelectorAll('.hp__beyond-card');
+    let nearest = 0;
+    let minDist = Infinity;
+    const target = container.scrollLeft;
+    cards.forEach((c, i) => {
+      const dist = Math.abs(c.offsetLeft - container.offsetLeft - target);
+      if (dist < minDist) { minDist = dist; nearest = i; }
+    });
+    if (nearest !== beyondActive) setBeyondActive(nearest);
+  };
   const [voicesRef, voicesVis] = useInView();
   const [visitInRef, visitInVis] = useInView();
   const [mapRef, mapVis] = useInView({ rootMargin: '200px' });
@@ -466,8 +522,14 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="hp__beyond-grid">
-              {(beyondCards.length > 0 ? beyondCards : BEYOND_FALLBACK).map((card, i) => (
+            <div
+              className="hp__beyond-grid"
+              ref={beyondScrollRef}
+              onScroll={handleBeyondScroll}
+              onTouchStart={handleBeyondInteract}
+              onMouseEnter={handleBeyondInteract}
+            >
+              {beyondList.map((card, i) => (
                 <article
                   key={card.id}
                   className={`hp__beyond-card fade-up delay-${(i % 2) + 1}${beyondVis ? ' visible' : ''}`}
@@ -490,6 +552,20 @@ export default function HomePage() {
                     </span>
                   </div>
                 </article>
+              ))}
+            </div>
+
+            <div className="hp__beyond-dots" role="tablist" aria-label="Carousel pagination">
+              {beyondList.map((card, i) => (
+                <button
+                  key={card.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === beyondActive}
+                  aria-label={`Go to ${card.title}`}
+                  className={`hp__beyond-dot${i === beyondActive ? ' is-active' : ''}`}
+                  onClick={() => { setBeyondActive(i); handleBeyondInteract(); }}
+                />
               ))}
             </div>
           </div>
