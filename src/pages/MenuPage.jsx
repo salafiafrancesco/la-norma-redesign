@@ -31,29 +31,59 @@ export default function MenuPage() {
   });
 
   return (
-    <div className="editorial-page">
+    <div className="editorial-page editorial-page--menu">
       <Navbar />
 
-      <main id="main-content" className="editorial-main">
-        <div className="container">
-          <header className="editorial-hero">
-            <p className="editorial-hero__eyebrow">The menu</p>
-            <h1 className="editorial-hero__heading">A Sicilian menu with enough range to plan dinner properly.</h1>
-            <p className="editorial-hero__subheading">
-              Signature pasta, wood-fired pizza, seafood, antipasti, and desserts shaped around a warm, polished dinner
-              service rather than a generic list of options.
+      <header className="mp-hero">
+        <div
+          className="mp-hero__bg"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1800&q=85)' }}
+          role="img"
+          aria-label="House-made Sicilian pasta, plated"
+        />
+        <div className="mp-hero__overlay" />
+        <div className="mp-hero__content container">
+          <span className="mp-hero__rule" aria-hidden="true" />
+          <div className="mp-hero__copy">
+            <p className="mp-hero__eyebrow">La Norma Ristorante · Longboat Key</p>
+            <h1 className="mp-hero__heading">The Menu</h1>
+            <h2 className="mp-hero__h2">House-made pasta, wood-fired pizza, Sicilian classics.</h2>
+            <p className="mp-hero__sub">
+              Built around a warm, polished dinner service — antipasti through dessert, with seasonal Sicilian inflections and an Italian wine list.
             </p>
-            <div className="editorial-hero__actions">
+            <div className="mp-hero__actions">
               <button type="button" className="btn btn--primary" onClick={() => navigate(PAGE_KEYS.home, { anchor: 'reserve' })}>
                 Reserve dinner
               </button>
-              <button type="button" className="btn btn--outline-dark" onClick={() => navigate(PAGE_KEYS.privateEvents)}>
+              <button type="button" className="btn btn--outline-light" onClick={() => navigate(PAGE_KEYS.privateEvents)}>
                 Plan a private dinner
               </button>
             </div>
-          </header>
+          </div>
         </div>
+        <div className="mp-hero__stats-bar">
+          <div className="container mp-hero__stats">
+            <div className="mp-hero__stat" style={{ animationDelay: '0.4s' }}>
+              <span className="mp-hero__stat-value">Daily fresh</span>
+              <span className="mp-hero__stat-label">Hand-rolled pasta</span>
+            </div>
+            <div className="mp-hero__stat" style={{ animationDelay: '0.52s' }}>
+              <span className="mp-hero__stat-value">550°C</span>
+              <span className="mp-hero__stat-label">Wood-fired oven</span>
+            </div>
+            <div className="mp-hero__stat" style={{ animationDelay: '0.64s' }}>
+              <span className="mp-hero__stat-value">70+ wines</span>
+              <span className="mp-hero__stat-label">Italian wine list</span>
+            </div>
+          </div>
+        </div>
+        <a href="#specialties" className="mp-hero__scroll" aria-label="Scroll to the menu">
+          <span>Scroll</span>
+          <span className="mp-hero__scroll-line" aria-hidden="true" />
+        </a>
+      </header>
 
+      <main id="main-content" className="editorial-main editorial-main--no-top">
         <Specialties />
         <MenuHighlights limitPerCategory={0} showHeaderActions={false} showFooterNote />
 
