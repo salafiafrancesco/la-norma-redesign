@@ -12,7 +12,7 @@ import {
 } from '../lib/validation.js';
 
 const router = Router();
-const INQUIRY_TYPES = new Set(['wine_tasting', 'live_music', 'private_event']);
+const INQUIRY_TYPES = new Set(['wine_tasting', 'live_music', 'private_event', 'contact']);
 const INQUIRY_STATUSES = new Set(['new', 'read', 'replied']);
 
 router.post('/', async (req, res) => {

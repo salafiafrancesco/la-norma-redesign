@@ -212,6 +212,132 @@
 
 
 /* ================================================================== */
+/* Contact form (lives inside an editorial-card on /contact)          */
+/* ================================================================== */
+.editorial-contact-form .editorial-card__lead {
+  color: var(--text-mid);
+  margin-bottom: 1.5rem;
+}
+
+.editorial-contact-form__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.editorial-contact-form__row {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .editorial-contact-form__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.editorial-contact-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.editorial-contact-form__field label {
+  font-family: var(--ff-accent);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--charcoal);
+}
+
+.editorial-contact-form__field label span {
+  color: var(--terracotta);
+  margin-left: 0.15rem;
+}
+
+.editorial-contact-form__field input,
+.editorial-contact-form__field textarea {
+  font-family: var(--ff-body);
+  font-size: 1rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(39, 61, 47, 0.18);
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--charcoal);
+  transition: border-color var(--dur-fast) var(--ease),
+              box-shadow var(--dur-fast) var(--ease);
+}
+
+.editorial-contact-form__field input:focus,
+.editorial-contact-form__field textarea:focus {
+  outline: none;
+  border-color: var(--olive);
+  box-shadow: 0 0 0 3px rgba(59, 88, 68, 0.12);
+}
+
+.editorial-contact-form__field textarea {
+  resize: vertical;
+  min-height: 7rem;
+  line-height: 1.5;
+}
+
+.editorial-contact-form__field.has-error input,
+.editorial-contact-form__field.has-error textarea {
+  border-color: #c53030;
+}
+
+.editorial-contact-form__field-error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #c53030;
+}
+
+.editorial-contact-form__error {
+  padding: 0.75rem 0.95rem;
+  border-radius: 0.6rem;
+  background: rgba(197, 48, 48, 0.08);
+  border: 1px solid rgba(197, 48, 48, 0.25);
+  color: #c53030;
+  font-size: 0.9rem;
+}
+
+.editorial-contact-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.editorial-contact-form__note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-light);
+  font-style: italic;
+}
+
+.editorial-contact-form__success {
+  padding: 1.5rem 1.25rem;
+  border-radius: 0.85rem;
+  background: rgba(59, 88, 68, 0.08);
+  border: 1px solid rgba(59, 88, 68, 0.25);
+  text-align: center;
+}
+
+.editorial-contact-form__success h3 {
+  font-family: var(--ff-display);
+  font-size: 1.35rem;
+  margin: 0 0 0.4rem;
+  color: var(--olive);
+}
+
+.editorial-contact-form__success p {
+  margin: 0;
+  color: var(--text-mid);
+}
+
+
+/* ================================================================== */
 /* MENU PAGE — full-bleed photographic hero (mp-hero)                 */
 /* Same treatment as catering hero: gold rule, dramatic H1, stats bar */
 /* ================================================================== */

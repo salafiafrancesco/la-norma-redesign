@@ -5,6 +5,7 @@ const TYPE_LABELS = {
   wine_tasting:  { label: 'Wine Tasting',   color: '#7c3aed', bg: '#ede9fe' },
   live_music:    { label: 'Live Music',      color: '#b45309', bg: '#fef3c7' },
   private_event: { label: 'Private Event',   color: '#0369a1', bg: '#e0f2fe' },
+  contact:       { label: 'Contact',         color: '#047857', bg: '#d1fae5' },
 };
 
 const STATUS_OPTIONS = ['new', 'read', 'replied'];
@@ -88,6 +89,7 @@ export default function InquiriesManager() {
       <div className="adm-flex adm-gap-2" style={{ marginBottom: '1.25rem', flexWrap: 'wrap' }}>
         <select className="adm-select" style={{ width: 'auto', minWidth: 160 }} value={typeFilter} onChange={e => { setLoading(true); setTypeFilter(e.target.value); }}>
           <option value="">All types</option>
+          <option value="contact">Contact</option>
           <option value="wine_tasting">Wine Tasting</option>
           <option value="live_music">Live Music</option>
           <option value="private_event">Private Event</option>

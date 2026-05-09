@@ -65,6 +65,9 @@ export default function ClassesManager() {
 
   return (
     <>
+      <div className="adm-alert adm-alert--error" style={{ marginBottom: '1rem' }}>
+        <strong>Deprecated.</strong> This panel manages the legacy <code>cooking_classes</code> table, which is no longer read by any public page. Use <strong>Experiences</strong> instead for current cooking class events.
+      </div>
       {error && <div className="adm-alert adm-alert--error">{error}</div>}
       {readOnly && (
         <div className="adm-alert adm-alert--info">

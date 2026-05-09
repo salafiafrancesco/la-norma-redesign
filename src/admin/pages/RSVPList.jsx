@@ -71,10 +71,13 @@ export default function RSVPList() {
 
   return (
     <>
+      <div className="adm-alert adm-alert--error" style={{ marginBottom: '1rem' }}>
+        <strong>Deprecated.</strong> This panel reads from the legacy <code>rsvp</code> table. No public form posts here anymore — current bookings live in <strong>Experiences → Bookings</strong>.
+      </div>
       {error && <div className="adm-alert adm-alert--error">{error}</div>}
 
       <div className="adm-toolbar">
-        <h2 className="adm-section-title">RSVPs & Bookings</h2>
+        <h2 className="adm-section-title">RSVPs &amp; Bookings</h2>
       </div>
 
       {/* Filter tabs */}
