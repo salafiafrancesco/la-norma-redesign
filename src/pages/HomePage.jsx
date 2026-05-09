@@ -175,53 +175,85 @@ export default function HomePage() {
   const beyondScrollRef = useRef(null);
   const beyondAutoTimer = useRef(null);
   const beyondPauseTimer = useRef(null);
+  const beyondProgrammaticUntil = useRef(0); // timestamp until which onScroll events should be ignored
   const [beyondActive, setBeyondActive] = useState(0);
   const [beyondPaused, setBeyondPaused] = useState(false);
   const beyondList = beyondCards.length > 0 ? beyondCards : BEYOND_FALLBACK;
   const beyondCount = beyondList.length;
 
-  // Auto-advance every 4.5s on mobile, only when section is in view + not paused
+  // Auto-advance every 4.5s on mobile, only when section is in view + not paused.
+  // Re-evaluate on resize so resizing past the breakpoint starts/stops the loop.
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
     if (beyondPaused || !beyondVis || beyondCount < 2) return undefined;
+
+    let intervalId = null;
+    const start = () => {
+      if (intervalId) return;
+      intervalId = setInterval(() => {
+        setBeyondActive((i) => (i + 1) % beyondCount);
+      }, 4500);
+    };
+    const stop = () => {
+      if (!intervalId) return;
+      clearInterval(intervalId);
+      intervalId = null;
+    };
+
     const mq = window.matchMedia('(max-width: 980px)');
-    if (!mq.matches) return undefined;
+    const sync = () => (mq.matches ? start() : stop());
+    sync();
 
-    beyondAutoTimer.current = setInterval(() => {
-      setBeyondActive((i) => (i + 1) % beyondCount);
-    }, 4500);
+    if (mq.addEventListener) mq.addEventListener('change', sync);
+    else mq.addListener?.(sync);
 
-    return () => clearInterval(beyondAutoTimer.current);
+    return () => {
+      stop();
+      if (mq.removeEventListener) mq.removeEventListener('change', sync);
+      else mq.removeListener?.(sync);
+    };
   }, [beyondPaused, beyondVis, beyondCount]);
 
-  // Programmatic scroll when active card changes
+  // Programmatic scroll when active card changes — uses scrollIntoView so we
+  // never have to do offset arithmetic against an offsetParent we don't control.
   useEffect(() => {
     const container = beyondScrollRef.current;
     if (!container) return;
     const cards = container.querySelectorAll('.hp__beyond-card');
     const card = cards[beyondActive];
     if (!card) return;
-    const left = card.offsetLeft - container.offsetLeft;
-    container.scrollTo({ left, behavior: 'smooth' });
+
+    // Tell the onScroll handler to ignore the next ~700 ms of scroll events,
+    // otherwise the smooth-scroll fires onScroll, which would call setBeyondActive
+    // back to whatever is "nearest" mid-animation, creating a feedback loop.
+    beyondProgrammaticUntil.current = Date.now() + 700;
+
+    card.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
   }, [beyondActive]);
 
-  // Pause autoscroll on user interaction, resume after 7s of inactivity
+  // Pause autoscroll on user interaction, resume after 7s of inactivity.
+  // Note: NOT bound to onTouchStart anymore — that fired on every vertical
+  // page scroll over the carousel and silently killed the loop. We only pause
+  // on direct interaction with the dots / the cards (click).
   const handleBeyondInteract = () => {
     setBeyondPaused(true);
     clearTimeout(beyondPauseTimer.current);
     beyondPauseTimer.current = setTimeout(() => setBeyondPaused(false), 7000);
   };
 
-  // Track manual scroll to keep active dot in sync
+  // Track manual scroll to keep active dot in sync.
+  // Skip while a programmatic scroll is in flight (see ref above).
   const handleBeyondScroll = () => {
+    if (Date.now() < beyondProgrammaticUntil.current) return;
     const container = beyondScrollRef.current;
     if (!container) return;
     const cards = container.querySelectorAll('.hp__beyond-card');
+    if (!cards.length) return;
+    const containerRect = container.getBoundingClientRect();
     let nearest = 0;
     let minDist = Infinity;
-    const target = container.scrollLeft;
     cards.forEach((c, i) => {
-      const dist = Math.abs(c.offsetLeft - container.offsetLeft - target);
+      const dist = Math.abs(c.getBoundingClientRect().left - containerRect.left);
       if (dist < minDist) { minDist = dist; nearest = i; }
     });
     if (nearest !== beyondActive) setBeyondActive(nearest);
@@ -562,8 +594,6 @@ export default function HomePage() {
               className="hp__beyond-grid"
               ref={beyondScrollRef}
               onScroll={handleBeyondScroll}
-              onTouchStart={handleBeyondInteract}
-              onMouseEnter={handleBeyondInteract}
             >
               {beyondList.map((card, i) => (
                 <article
