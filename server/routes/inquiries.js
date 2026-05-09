@@ -10,6 +10,7 @@ import {
   normalizeOptionalText,
   normalizeText,
 } from '../lib/validation.js';
+import { notifyAdmin, renderFields } from '../lib/notify.js';
 
 const router = Router();
 const INQUIRY_TYPES = new Set(['wine_tasting', 'live_music', 'private_event', 'contact']);
@@ -59,6 +60,25 @@ router.post('/', async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    const typeLabel = type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const { text, html } = renderFields([
+      ['Type', typeLabel],
+      ['Name', `${firstName} ${lastName}`],
+      ['Email', email],
+      ['Phone', phone || '—'],
+      ['Date', date || 'Flexible'],
+      ['Guests', guestSelection.display || '—'],
+      ['Occasion', occasion || '—'],
+      ['Message', message || '—'],
+    ]);
+    await notifyAdmin({
+      subject: `New ${typeLabel} inquiry — ${firstName} ${lastName}`,
+      text,
+      html,
+      replyTo: email,
+    });
+
     res.status(201).json({ ok: true, id: data.id });
   } catch (error) {
     console.error('[inquiries/create]', error);

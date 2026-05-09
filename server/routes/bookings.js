@@ -10,6 +10,7 @@ import {
   normalizeOptionalText,
   normalizeText,
 } from '../lib/validation.js';
+import { notifyAdmin, renderFields } from '../lib/notify.js';
 
 const router = Router();
 const VALID_STATUSES = new Set(['pending', 'paid', 'confirmed', 'cancelled', 'refunded']);
@@ -150,6 +151,37 @@ router.post('/', async (req, res) => {
       .single();
 
     if (insertError) throw insertError;
+
+    // Resolve event title for the notification (best-effort).
+    let eventTitle = null;
+    if (eventId) {
+      const { data: ev } = await supabase
+        .from('experience_events')
+        .select('title')
+        .eq('id', eventId)
+        .single();
+      eventTitle = ev?.title || null;
+    }
+    const formattedTotal = totalCents > 0
+      ? `${(totalCents / 100).toFixed(2)} ${currency}`
+      : 'Pending';
+    const { text, html } = renderFields([
+      ['Experience', eventTitle || 'General booking'],
+      ['Customer', customerName],
+      ['Email', customerEmail],
+      ['Phone', customerPhone || '—'],
+      ['Guests', guests],
+      ['Total', formattedTotal],
+      ['Payment', paymentMode],
+      ['Status', initialStatus],
+      ['Special requests', specialRequests || '—'],
+    ]);
+    await notifyAdmin({
+      subject: `New booking — ${customerName}${eventTitle ? ` for ${eventTitle}` : ''}`,
+      text,
+      html,
+      replyTo: customerEmail,
+    });
 
     res.status(201).json({
       ok: true,

@@ -11,6 +11,7 @@ import {
   normalizeText,
 } from '../lib/validation.js';
 import { CATERING_EVENT_TYPES, CATERING_REQUEST_STATUSES } from '../../shared/cateringDefaults.js';
+import { notifyAdmin, renderFields } from '../lib/notify.js';
 
 const router = Router();
 const VALID_TYPES = new Set(CATERING_EVENT_TYPES);
@@ -61,6 +62,25 @@ router.post('/requests', async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    const { text, html } = renderFields([
+      ['Name', name],
+      ['Email', email],
+      ['Phone', phone || '—'],
+      ['Event date', eventDate || 'Flexible'],
+      ['Event type', eventType || '—'],
+      ['Guests', guests ?? '—'],
+      ['Location type', locationType || '—'],
+      ['Budget range', budgetRange || '—'],
+      ['Message', message || '—'],
+    ]);
+    await notifyAdmin({
+      subject: `New catering request — ${name}${eventType ? ` (${eventType})` : ''}`,
+      text,
+      html,
+      replyTo: email,
+    });
+
     res.status(201).json({ ok: true, id: data.id });
   } catch (error) {
     console.error('[catering/create]', error);

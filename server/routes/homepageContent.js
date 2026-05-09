@@ -2,6 +2,7 @@ import { Router } from 'express';
 import requireAuth from '../middleware/auth.js';
 import supabase from '../db/supabase.js';
 import { isValidEmail, normalizeText } from '../lib/validation.js';
+import { notifyAdmin } from '../lib/notify.js';
 
 const router = Router();
 
@@ -121,6 +122,14 @@ router.post('/newsletter/subscribe', async (req, res) => {
       .upsert({ email, source: 'footer', subscribed_at: new Date().toISOString(), unsubscribed_at: null }, { onConflict: 'email' });
 
     if (error) throw error;
+
+    await notifyAdmin({
+      subject: `New newsletter subscriber — ${email}`,
+      text: `Source: footer form\nEmail: ${email}\nSubscribed at: ${new Date().toISOString()}`,
+      html: `<p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;">A new visitor subscribed to the newsletter from the footer form.</p>
+<p style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;"><strong>${email}</strong></p>`,
+    });
+
     res.status(201).json({ ok: true });
   } catch (error) {
     console.error('[newsletter/subscribe]', error);
