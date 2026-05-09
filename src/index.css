@@ -54,9 +54,9 @@
   --sp-4xl:  6.5rem;
   --sp-5xl:  10rem;
 
-  /* Section padding */
-  --section-py: clamp(4.75rem, 8vw, 7.75rem);
-  --section-header-space: clamp(2.75rem, 5vw, 4rem);
+  /* Section padding — uniform across the homepage. Desktop 96px / mobile 56px. */
+  --section-py: 6rem;
+  --section-header-space: 4rem;
   --section-gap: clamp(1rem, 2vw, 1.35rem);
   --section-gap-lg: clamp(1.25rem, 2.6vw, 1.75rem);
   --card-gap: clamp(1rem, 1.8vw, 1.35rem);
@@ -82,6 +82,13 @@
   --dur-fast: 0.2s;
   --dur-base: 0.38s;
   --dur-slow: 0.65s;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --section-py: 3.5rem;
+    --section-header-space: 2.25rem;
+  }
 }
 
 /* Skip-to-content link */

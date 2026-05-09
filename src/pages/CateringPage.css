@@ -2921,3 +2921,196 @@
     animation: none;
   }
 }
+
+
+/* ================================================================== */
+/* STATEMENT — premium editorial redesign                             */
+/* ================================================================== */
+
+.cat-statement {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.75rem, 4vw, 3rem);
+  align-items: start;
+}
+
+/* Image — smaller, framed, with offset gold accent shape behind */
+.cat-statement__media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  max-width: 22rem;
+  margin-inline: auto;
+  width: 100%;
+  border-radius: 1rem;
+  overflow: visible;
+  box-shadow: none;
+  isolation: isolate;
+}
+
+.cat-statement__media::before {
+  content: '';
+  position: absolute;
+  inset: 1.25rem -1.25rem -1.25rem 1.25rem;
+  border: 1px solid var(--gold);
+  border-radius: 1rem;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.cat-statement__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 1rem;
+  box-shadow: 0 28px 60px -28px rgba(39, 61, 47, 0.45),
+              0 12px 28px -16px rgba(39, 61, 47, 0.18);
+}
+
+/* Copy — editorial typography with lead paragraph */
+.cat-statement__copy {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 36rem;
+}
+
+.cat-statement__copy .cat-section__eyebrow {
+  margin-bottom: 0.25rem;
+}
+
+.cat-statement__copy .cat-section__heading {
+  font-size: clamp(1.85rem, 4vw, 2.85rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+  max-width: 22ch;
+}
+
+.cat-statement__body {
+  color: var(--text-mid);
+  font-size: clamp(0.98rem, 1.5vw, 1.05rem);
+  line-height: 1.8;
+  margin: 0;
+  max-width: 56ch;
+}
+
+/* First paragraph as a lead — slightly larger, charcoal accent */
+.cat-statement__body:first-of-type {
+  font-family: var(--ff-accent);
+  font-size: clamp(1.05rem, 1.7vw, 1.18rem);
+  line-height: 1.65;
+  color: var(--charcoal);
+  font-style: italic;
+  position: relative;
+  padding-left: 1.1rem;
+  border-left: 2px solid var(--gold);
+}
+
+/* Highlights — vertical icon cards instead of pills */
+.cat-statement__highlights {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+}
+
+.cat-statement__highlights li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.1rem 0.85rem 1.1rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(196, 151, 58, 0.22);
+  font-family: var(--ff-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--charcoal);
+  letter-spacing: -0.005em;
+  line-height: 1.4;
+  transition: border-color var(--dur-fast) var(--ease),
+              background var(--dur-fast) var(--ease);
+}
+
+.cat-statement__highlights li:hover {
+  border-color: rgba(196, 151, 58, 0.5);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.cat-statement__highlights li::before {
+  content: '\2726';
+  flex-shrink: 0;
+  width: 1.85rem;
+  height: 1.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(196, 151, 58, 0.12);
+  color: var(--gold);
+  font-size: 0.95rem;
+  position: static;
+  transform: none;
+}
+
+/* Layout — image right of text on tablet/desktop */
+@media (min-width: 720px) {
+  .cat-statement__highlights {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+
+  .cat-statement__highlights li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    text-align: left;
+    padding: 1rem 1.1rem;
+  }
+}
+
+@media (min-width: 980px) {
+  .cat-statement {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.7fr);
+    gap: clamp(2.5rem, 5vw, 4.5rem);
+    align-items: center;
+  }
+
+  .cat-statement__media {
+    order: 2;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  /* Slightly larger image on desktop, but still proportional */
+  .cat-statement__media::before {
+    inset: 1.5rem -1.5rem -1.5rem 1.5rem;
+  }
+
+  .cat-statement__copy .cat-section__heading {
+    font-size: clamp(2.25rem, 3.5vw, 3.1rem);
+    max-width: 18ch;
+  }
+}
+
+@media (max-width: 540px) {
+  .cat-statement__media {
+    max-width: 16rem;
+  }
+
+  .cat-statement__media::before {
+    inset: 0.85rem -0.85rem -0.85rem 0.85rem;
+  }
+
+  .cat-statement__body:first-of-type {
+    padding-left: 0.85rem;
+    font-size: 1rem;
+  }
+
+  .cat-statement__copy .cat-section__heading {
+    font-size: clamp(1.6rem, 7vw, 2rem);
+  }
+}

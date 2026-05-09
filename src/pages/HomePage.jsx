@@ -79,6 +79,45 @@ export default function HomePage() {
   // Menu tabs
   const categories = menuHighlights.categories || [];
   const [activeTab, setActiveTab] = useState(0);
+  const swipeStart = useRef(null);
+
+  const handleTabSwipeStart = (event) => {
+    const touch = event.touches?.[0];
+    if (!touch) return;
+    swipeStart.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+  };
+
+  const handleTabSwipeEnd = (event) => {
+    if (!swipeStart.current) return;
+    const touch = event.changedTouches?.[0];
+    if (!touch) {
+      swipeStart.current = null;
+      return;
+    }
+    const dx = touch.clientX - swipeStart.current.x;
+    const dy = touch.clientY - swipeStart.current.y;
+    const dt = Math.max(Date.now() - swipeStart.current.time, 1);
+    swipeStart.current = null;
+
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+    const velocity = Math.abs(dx) / dt;
+    if (Math.abs(dx) < 80 && velocity < 0.3) return;
+
+    setActiveTab((current) => {
+      if (dx < 0) return Math.min(current + 1, categories.length - 1);
+      return Math.max(current - 1, 0);
+    });
+  };
+
+  const handleTabKey = (event) => {
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      setActiveTab((current) => Math.min(current + 1, categories.length - 1));
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      setActiveTab((current) => Math.max(current - 1, 0));
+    }
+  };
 
   // Sticky bar
   const heroRef = useRef(null);
@@ -253,53 +292,97 @@ export default function HomePage() {
         {/* ============================================================ */}
         <section className="hp__section hp__section--alt" id="menu-preview">
           <div className="container">
-            <div className={`fade-up${menuVis ? ' visible' : ''}`} ref={menuRef}>
+            <div className={`hp__menu-inner fade-up${menuVis ? ' visible' : ''}`} ref={menuRef}>
               <p className="hp__eyebrow">{menuHighlights.label}</p>
               <h2 className="hp__heading" style={{ whiteSpace: 'pre-line' }}>{menuHighlights.headline}</h2>
-            </div>
 
-            {hero.imageUrl && (
-              <img
-                src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&q=80"
-                alt="La Norma signature dishes"
-                className={`hp__menu-image fade-up delay-1${menuVis ? ' visible' : ''}`}
-                loading="lazy"
-              />
-            )}
+              <picture>
+                <img
+                  src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80"
+                  alt="La Norma signature dish — close-up, moody lighting"
+                  className={`hp__menu-image fade-up delay-1${menuVis ? ' visible' : ''}`}
+                  loading="lazy"
+                  data-is-placeholder="true"
+                />
+              </picture>
 
-            {categories.length > 0 && (
-              <>
-                <div className="hp__menu-tabs" role="tablist">
-                  {categories.map((cat, i) => (
-                    <button
-                      key={cat.name}
-                      role="tab"
-                      aria-selected={i === activeTab}
-                      className={`hp__menu-tab${i === activeTab ? ' is-active' : ''}`}
-                      onClick={() => setActiveTab(i)}
+              {categories.length > 0 && (
+                <>
+                  <div
+                    className="hp__menu-tabs"
+                    role="tablist"
+                    aria-label="Menu categories"
+                    onKeyDown={handleTabKey}
+                  >
+                    {categories.map((cat, i) => (
+                      <button
+                        key={cat.name}
+                        type="button"
+                        role="tab"
+                        aria-selected={i === activeTab}
+                        tabIndex={i === activeTab ? 0 : -1}
+                        className={`hp__menu-tab${i === activeTab ? ' is-active' : ''}`}
+                        onClick={() => setActiveTab(i)}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div
+                    className="hp__menu-swipe"
+                    onTouchStart={handleTabSwipeStart}
+                    onTouchEnd={handleTabSwipeEnd}
+                  >
+                    <div
+                      key={activeTab}
+                      className={`hp__menu-list fade-up delay-1${menuVis ? ' visible' : ''}`}
+                      role="tabpanel"
+                      aria-live="polite"
                     >
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
-
-                <div className={`hp__menu-list fade-up delay-1${menuVis ? ' visible' : ''}`} role="tabpanel">
-                  {(categories[activeTab]?.items || []).slice(0, 5).map((item) => (
-                    <div key={item.name} className="hp__menu-item">
-                      <div className="hp__menu-item-info">
-                        <p className="hp__menu-item-name">{item.name}</p>
-                        <p className="hp__menu-item-desc">{item.desc}</p>
-                      </div>
-                      <span className="hp__menu-item-price">{item.price}</span>
+                      {(() => {
+                        const items = categories[activeTab]?.items || [];
+                        const visible = items.slice(0, 5);
+                        const remaining = items.length - visible.length;
+                        return (
+                          <>
+                            {visible.map((item) => (
+                              <div key={item.name} className="hp__menu-item">
+                                <div className="hp__menu-item-info">
+                                  <p className="hp__menu-item-name">{item.name}</p>
+                                  {item.desc && <p className="hp__menu-item-desc">{item.desc}</p>}
+                                </div>
+                                <span className="hp__menu-item-price">{item.price}</span>
+                              </div>
+                            ))}
+                            {remaining > 0 && (
+                              <button
+                                type="button"
+                                className="hp__menu-item hp__menu-item--more"
+                                onClick={() => navigate(PAGE_KEYS.menu)}
+                              >
+                                <span className="hp__menu-item-name">View {remaining} more</span>
+                                <span className="hp__menu-item-price">&rarr;</span>
+                              </button>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                <div className="hp__menu-cta">
-                  <button type="button" className="btn btn--outline-dark" onClick={() => navigate(PAGE_KEYS.menu)}>Browse the full menu</button>
-                </div>
-              </>
-            )}
+                  <div className="hp__menu-cta">
+                    <button
+                      type="button"
+                      className="hp__menu-cta-btn"
+                      onClick={() => navigate(PAGE_KEYS.menu)}
+                    >
+                      Browse the full menu
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </section>
 

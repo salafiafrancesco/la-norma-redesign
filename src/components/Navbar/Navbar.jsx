@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSection } from '../../context/ContentContext';
 import { useNavigation } from '../../context/NavigationContext';
 import { PAGE_KEYS } from '../../../shared/routes.js';
@@ -36,12 +36,34 @@ const SECONDARY_LINKS = [
   { label: 'Privacy Policy', pageKey: PAGE_KEYS.privacyPolicy },
 ];
 
+const MOBILE_PRIMARY = [
+  { label: 'Home', pageKey: PAGE_KEYS.home },
+  { label: 'Menu', pageKey: PAGE_KEYS.menu },
+  { label: 'Catering', pageKey: PAGE_KEYS.catering },
+];
+
+const MOBILE_EXPERIENCES = [
+  { label: 'Cooking Classes', pageKey: PAGE_KEYS.cookingClasses },
+  { label: 'Wine Tastings', pageKey: PAGE_KEYS.wineTastings },
+  { label: 'Live Music', pageKey: PAGE_KEYS.liveMusic },
+];
+
+const MOBILE_SECONDARY = [
+  { label: 'About', pageKey: PAGE_KEYS.about },
+  { label: 'Journal', pageKey: PAGE_KEYS.blog },
+  { label: 'Contact', pageKey: PAGE_KEYS.contact },
+];
+
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export default function Navbar() {
   const restaurant = useSection('restaurant');
   const links = useSection('links');
   const { navigate, page, resolveHref } = useNavigation();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const drawerRef = useRef(null);
+  const hamburgerRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 24);
@@ -51,17 +73,49 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Body scroll lock + ESC + focus trap while drawer open
   useEffect(() => {
     if (!menuOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const drawer = drawerRef.current;
+    const focusables = drawer
+      ? Array.from(drawer.querySelectorAll(FOCUSABLE_SELECTOR))
+      : [];
+    focusables[0]?.focus();
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setMenuOpen(false);
+        return;
+      }
+
+      if (event.key !== 'Tab' || !drawer) return;
+
+      const items = Array.from(drawer.querySelectorAll(FOCUSABLE_SELECTOR));
+      if (items.length === 0) return;
+
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      hamburgerRef.current?.focus();
+    };
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
@@ -164,6 +218,7 @@ export default function Navbar() {
         </div>
 
         <button
+          ref={hamburgerRef}
           className={`navbar__hamburger${menuOpen ? ' is-open' : ''}`}
           type="button"
           onClick={() => setMenuOpen((current) => !current)}
@@ -183,16 +238,16 @@ export default function Navbar() {
         onClick={closeMenu}
         aria-hidden={!menuOpen}
       >
-        <div className="navbar__mobile-shell" onClick={(event) => event.stopPropagation()}>
+        <div
+          className="navbar__mobile-shell"
+          ref={drawerRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site navigation"
+          onClick={(event) => event.stopPropagation()}
+        >
           <div className="navbar__mobile-top">
-            <div className="navbar__mobile-brand">
-              <span className="navbar__mobile-brand-mark" aria-hidden="true">LN</span>
-              <div>
-                <p className="navbar__mobile-eyebrow">La Norma</p>
-                <p className="navbar__mobile-kicker">Navigation</p>
-              </div>
-            </div>
-
+            <span className="navbar__mobile-brand-label">{restaurant.name}</span>
             <button
               className="navbar__mobile-close"
               type="button"
@@ -205,79 +260,67 @@ export default function Navbar() {
           </div>
 
           <nav className="navbar__mobile-nav" aria-label="Mobile navigation">
-            {NAV_LINKS.map((link) => (
-              link.dropdown ? (
-                <div key={link.label}>
-                  <span className="navbar__mobile-link navbar__mobile-link--group">{link.label}</span>
-                  {link.dropdown.map((sub) => (
-                    <a
-                      key={sub.label}
-                      href={resolveHref(sub.pageKey)}
-                      className={`navbar__mobile-link navbar__mobile-link--sub${page === sub.pageKey ? ' is-active' : ''}`}
-                      onClick={(event) => handlePageLink(event, sub.pageKey)}
-                    >
-                      {sub.label}
-                    </a>
-                  ))}
-                </div>
-              ) : link.pageKey ? (
+            <div className="navbar__mobile-group">
+              {MOBILE_PRIMARY.map((link) => (
                 <a
                   key={link.label}
                   href={resolveHref(link.pageKey)}
-                  className={`navbar__mobile-link${isLinkActive(link) ? ' is-active' : ''}`}
+                  className={`navbar__mobile-link${page === link.pageKey ? ' is-active' : ''}`}
                   onClick={(event) => handlePageLink(event, link.pageKey)}
                 >
                   {link.label}
                 </a>
-              ) : (
+              ))}
+            </div>
+
+            <div className="navbar__mobile-group">
+              <span className="navbar__mobile-group-label">Experiences</span>
+              {MOBILE_EXPERIENCES.map((link) => (
                 <a
                   key={link.label}
-                  href={resolveHref(PAGE_KEYS.home, link.anchor)}
-                  className={`navbar__mobile-link${isLinkActive(link) ? ' is-active' : ''}`}
-                  onClick={(event) => handleHomeAnchor(event, link.anchor)}
+                  href={resolveHref(link.pageKey)}
+                  className={`navbar__mobile-link navbar__mobile-link--sub${page === link.pageKey ? ' is-active' : ''}`}
+                  onClick={(event) => handlePageLink(event, link.pageKey)}
                 >
                   {link.label}
                 </a>
-              )
-            ))}
+              ))}
+            </div>
 
-            {SECONDARY_LINKS.map((link) => (
-              <a
-                key={link.label}
-                href={resolveHref(link.pageKey)}
-                className="navbar__mobile-link navbar__mobile-link--subtle"
-                onClick={(event) => handlePageLink(event, link.pageKey)}
-              >
-                {link.label}
-              </a>
-            ))}
+            <div className="navbar__mobile-group">
+              {MOBILE_SECONDARY.map((link) => (
+                <a
+                  key={link.label}
+                  href={resolveHref(link.pageKey)}
+                  className={`navbar__mobile-link${page === link.pageKey ? ' is-active' : ''}`}
+                  onClick={(event) => handlePageLink(event, link.pageKey)}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
           </nav>
 
-          <div className="navbar__mobile-ctas">
-            <a
-              href={resolveHref(PAGE_KEYS.home, 'reserve')}
-              className="btn btn--outline-light"
-              onClick={(event) => handleHomeAnchor(event, 'reserve')}
-            >
-              View dinner booking
-            </a>
+          <div className="navbar__mobile-footer">
             <a
               href={OPENTABLE_RESERVATION_URL}
-              className="btn btn--primary"
+              className="btn btn--primary navbar__mobile-reserve"
               target="_blank"
               rel="noopener noreferrer"
               onClick={closeMenu}
             >
-              Reserve on OpenTable
+              Reserve a table
             </a>
-          </div>
-
-          <div className="navbar__mobile-meta">
-            <p>{restaurant.hours}</p>
-            <p>{restaurant.address}, {restaurant.city}</p>
-            <a href={`tel:${restaurant.phone}`} className="navbar__mobile-phone" onClick={closeMenu}>
-              {restaurant.phone}
-            </a>
+            <div className="navbar__mobile-contact">
+              <a
+                href={`tel:${restaurant.phone}`}
+                className="navbar__mobile-phone"
+                onClick={closeMenu}
+              >
+                {restaurant.phone}
+              </a>
+              <span className="navbar__mobile-hours">{restaurant.hours}</span>
+            </div>
           </div>
         </div>
       </div>

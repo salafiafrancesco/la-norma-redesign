@@ -2,10 +2,21 @@
 /* HomePage — Premium editorial layout                                */
 /* ================================================================== */
 
-/* ---- Shared section ---- */
+/* ---- Shared section ----
+   All homepage sections use --section-py uniformly (96px desktop / 56px mobile).
+   Token defined in index.css with a media-query override at 768px.
+*/
 .hp__section {
   padding: var(--section-py) 0;
   scroll-margin-top: 7.5rem;
+  min-height: auto;
+}
+
+/* Defensive: prevent any descendant from inflating section min-height with vh. */
+@media (max-width: 480px) {
+  .hp__section {
+    min-height: auto;
+  }
 }
 
 .hp__section--alt {
