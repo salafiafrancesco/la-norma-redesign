@@ -9,6 +9,8 @@ import {
   PORT,
 } from './config.js';
 
+import auditLog from './middleware/auditLog.js';
+import auditLogRoutes from './routes/auditLog.js';
 import authRoutes from './routes/auth.js';
 import blogRoutes from './routes/blog.js';
 import bookingRoutes from './routes/bookings.js';
@@ -108,6 +110,13 @@ const authLimiter = rateLimit({
 
 app.use('/api', apiLimiter);
 
+// Audit-log middleware is mounted globally on /api so its res.on('finish')
+// listener attaches before requireAuth populates req.admin. The listener
+// itself checks req.admin at finish time and skips if unauthenticated /
+// non-mutating.
+app.use('/api', auditLog);
+
+app.use('/api/admin-audit-log', auditLogRoutes);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/bookings', bookingSubmissionLimiter, bookingRoutes);

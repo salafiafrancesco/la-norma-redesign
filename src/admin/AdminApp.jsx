@@ -15,6 +15,7 @@ import MenuManager from './pages/MenuManager';
 import NavigationManager from './pages/NavigationManager';
 import FooterManager from './pages/FooterManager';
 import NewsletterManager from './pages/NewsletterManager';
+import AuditLogManager from './pages/AuditLogManager';
 import ThemeManager from './pages/ThemeManager';
 
 function AdminContent() {
@@ -46,6 +47,7 @@ function AdminContent() {
     catering:   <CateringManager />,
     inquiries:  <InquiriesManager />,
     newsletter: <NewsletterManager />,
+    auditlog:   <AuditLogManager />,
   };
 
   return (

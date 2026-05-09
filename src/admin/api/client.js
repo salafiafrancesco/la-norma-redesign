@@ -359,6 +359,10 @@ export const inquiries = {
   bulkRestore: (ids) => request('POST', '/inquiries/bulk-restore', { ids }),
 };
 
+export const auditLog = {
+  list: (params = {}) => requestCachedList('/admin-audit-log', params),
+};
+
 export const uploads = {
   list: () => request('GET', '/upload'),
   upload: async (file) => {
