@@ -37,6 +37,19 @@ const LOCAL_DEV_ORIGINS = [
   'http://localhost:5180',
 ];
 
+// Vercel auto-injects these on every deployment; we trust them so the API
+// works on production / preview / branch URLs without manual whitelist setup.
+//   VERCEL_PROJECT_PRODUCTION_URL — stable prod URL (no protocol)
+//   VERCEL_URL                    — current deployment URL (per-deploy)
+//   VERCEL_BRANCH_URL             — branch alias URL (for previews)
+const vercelOrigins = [
+  process.env.VERCEL_PROJECT_PRODUCTION_URL,
+  process.env.VERCEL_URL,
+  process.env.VERCEL_BRANCH_URL,
+]
+  .filter(Boolean)
+  .map((host) => `https://${host}`);
+
 const envOrigins = [
   ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : []),
   ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : []),
@@ -44,4 +57,6 @@ const envOrigins = [
   .map((value) => value.trim())
   .filter(Boolean);
 
-export const ALLOWED_ORIGINS = [...new Set([...LOCAL_DEV_ORIGINS, ...envOrigins])];
+export const ALLOWED_ORIGINS = [
+  ...new Set([...LOCAL_DEV_ORIGINS, ...vercelOrigins, ...envOrigins]),
+];

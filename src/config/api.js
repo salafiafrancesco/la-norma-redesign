@@ -1,17 +1,15 @@
 /**
  * Central API base URL.
- * Set VITE_API_URL in Vercel project settings → Environment Variables.
- * Value must be the full backend origin, no trailing slash.
- * Example: https://la-norma-redesign.onrender.com
+ *
+ * Default (recommended): leave VITE_API_URL UNSET. Frontend and backend live
+ * on the same Vercel deployment — calls go to the relative path /api/*,
+ * which vercel.json rewrites to the api/index.js Vercel Function. Same-origin
+ * requests skip CORS entirely.
+ *
+ * Override only if the API is hosted elsewhere (e.g. a separate Vercel
+ * project or a different host). Value must be the full backend origin, no
+ * trailing slash. Example: https://api.lanormarestaurant.com
  */
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
-
-if (!API_BASE && import.meta.env.PROD) {
-  console.error(
-    '[La Norma] VITE_API_URL is not set. ' +
-    'All API calls will be routed to the current origin and will fail. ' +
-    'Add VITE_API_URL to your Vercel environment variables.'
-  );
-}
 
 export default API_BASE;
