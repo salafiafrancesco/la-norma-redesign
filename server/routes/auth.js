@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import otplib from 'otplib';
+import * as otplib from 'otplib';
 import qrcode from 'qrcode';
 
-// otplib v13 dropped the named ESM export — pull `authenticator` off the
-// default export instead.
+// otplib v13 in pure ESM exposes neither a default nor a named
+// `authenticator` export — only the namespace. Pull it off the namespace.
 const { authenticator } = otplib;
 import supabase from '../db/supabase.js';
 import requireAuth from '../middleware/auth.js';
