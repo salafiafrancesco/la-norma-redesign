@@ -12,6 +12,16 @@ import './HomePage.css';
 
 const TONIGHT_SLOTS = ['6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM'];
 
+const HOURS_ROWS = [
+  { day: 'Monday', hours: '5:00 PM – 9:00 PM' },
+  { day: 'Tuesday', hours: '5:00 PM – 9:00 PM' },
+  { day: 'Wednesday', hours: '5:00 PM – 9:00 PM' },
+  { day: 'Thursday', hours: '5:00 PM – 9:00 PM' },
+  { day: 'Friday', hours: '5:00 PM – 9:00 PM' },
+  { day: 'Saturday', hours: '5:00 PM – 9:00 PM' },
+  { day: 'Sunday', hours: '5:00 PM – 9:00 PM' },
+];
+
 const BEYOND_FALLBACK = [
   {
     id: 'wine',
@@ -68,6 +78,7 @@ export default function HomePage() {
   const story = useSection('story');
   const menuHighlights = useSection('menuHighlights');
   const { navigate, navigatePath } = useNavigation();
+  const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
   // Dynamic collections from API
   const [stats, setStats] = useState([]);
@@ -494,10 +505,27 @@ export default function HomePage() {
 
             <div className={`hp__visit-grid fade-up delay-1${visitInVis ? ' visible' : ''}`}>
               <div className="hp__visit-info">
-                <div className="hp__visit-group">
-                  <h3>When</h3>
-                  <p>{restaurant.hours}</p>
-                  <p>{restaurant.hoursNote}</p>
+                <div className="hp__hours-panel" aria-label="Opening hours">
+                  <div className="hp__hours-head">
+                    <p className="hp__hours-label">Opening hours</p>
+                    <p className="hp__hours-main">{restaurant.hours}</p>
+                  </div>
+
+                  <ul className="hp__hours-list">
+                    {HOURS_ROWS.map((row) => (
+                      <li
+                        key={row.day}
+                        className={`hp__hours-row${row.day === todayName ? ' is-today' : ''}`}
+                      >
+                        <span className="hp__hours-day">
+                          {row.day}
+                          {row.day === todayName && <span className="hp__today-badge">Today</span>}
+                        </span>
+                        <span className="hp__hours-time">{row.hours}</span>
+                      </li>
+                    ))}
+                  </ul>
+
                   {visitNotes.length > 0 && (
                     <div className="hp__visit-specials">
                       {visitNotes.map((n) => (
@@ -507,17 +535,19 @@ export default function HomePage() {
                   )}
                 </div>
 
-                <div className="hp__visit-group">
-                  <h3>Where</h3>
-                  <p>{restaurant.address}</p>
-                  <p>{restaurant.city}, {restaurant.state} {restaurant.zip}</p>
-                  <a href={restaurant.mapEmbedUrl} target="_blank" rel="noopener noreferrer">Get directions &rarr;</a>
-                </div>
+                <div className="hp__visit-row">
+                  <div className="hp__visit-group">
+                    <h3>Where</h3>
+                    <p>{restaurant.address}</p>
+                    <p>{restaurant.city}, {restaurant.state} {restaurant.zip}</p>
+                    <a href={restaurant.mapEmbedUrl} target="_blank" rel="noopener noreferrer">Get directions &rarr;</a>
+                  </div>
 
-                <div className="hp__visit-group">
-                  <h3>Contact</h3>
-                  <p><a href={`tel:${restaurant.phone}`}>{restaurant.phone}</a></p>
-                  <p><a href={`mailto:${restaurant.email}`}>{restaurant.email}</a></p>
+                  <div className="hp__visit-group">
+                    <h3>Contact</h3>
+                    <p><a href={`tel:${restaurant.phone}`}>{restaurant.phone}</a></p>
+                    <p><a href={`mailto:${restaurant.email}`}>{restaurant.email}</a></p>
+                  </div>
                 </div>
               </div>
 
