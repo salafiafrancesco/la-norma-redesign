@@ -196,7 +196,7 @@ export default function CateringPage() {
               <div className="cat-statement__copy">
                 <p className="cat-section__eyebrow">{c.statementEyebrow}</p>
                 <h2 className="cat-section__heading">{c.statementHeading}</h2>
-                {c.statementBody.split('\n').filter(Boolean).map((p, i) => (
+                {(c.statementBody || '').split('\n').filter(Boolean).map((p, i) => (
                   <p key={i} className="cat-statement__body">{p}</p>
                 ))}
                 {c.statementHighlights?.length > 0 && (
@@ -253,7 +253,7 @@ export default function CateringPage() {
               <div className="cat-yacht__copy">
                 <p className="cat-section__eyebrow" style={{ color: 'var(--gold-light, #E0C97F)' }}>{c.yachtEyebrow}</p>
                 <h2 className="cat-section__heading" style={{ color: 'var(--cream)' }}>{c.yachtHeading}</h2>
-                {c.yachtBody.split('\n').filter(Boolean).map((p, i) => (
+                {(c.yachtBody || '').split('\n').filter(Boolean).map((p, i) => (
                   <p key={i} className="cat-yacht__body">{p}</p>
                 ))}
                 <button type="button" className="btn btn--primary" onClick={() => { setField('event_type', 'Yacht Party'); scrollToId('catering-request'); }}>

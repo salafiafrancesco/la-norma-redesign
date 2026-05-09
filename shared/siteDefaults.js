@@ -235,7 +235,8 @@ export const orderOnline = {
   sub: 'Our most-loved dishes are available for pickup or delivery with the same attention to detail and restraint as the dining room.',
 };
 
-export { cateringDefaults as catering } from './cateringDefaults.js';
+import { cateringDefaults } from './cateringDefaults.js';
+export const catering = cateringDefaults;
 
 export const footer = {
   tagline: 'Sicilian soul, Gulf Coast ease, and a dining room built for lingering.',
