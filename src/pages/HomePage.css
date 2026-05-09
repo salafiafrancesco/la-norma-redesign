@@ -1230,114 +1230,123 @@
 }
 
 /* ================================================================== */
-/* VOICES                                                             */
+/* VOICES — minimal, narrow, editorial                                */
 /* ================================================================== */
+.hp__section--voices {
+  padding-block: clamp(3.5rem, 6vw, 5.5rem);
+}
+
+.hp__voices {
+  max-width: 38rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hp__voices-heading {
+  font-style: italic;
+  font-size: clamp(1.6rem, 2.6vw, 2rem);
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+}
+
 .hp__voices-ratings {
-  display: flex;
-  justify-content: center;
+  display: inline-flex;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 2rem;
-  margin-bottom: 2.5rem;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: clamp(2rem, 3.5vw, 3rem);
 }
 
 .hp__voices-rating {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
   text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(39, 61, 47, 0.06);
-  transition: box-shadow var(--dur-fast) var(--ease);
+  padding: 0.15rem 1.1rem;
+  border-right: 1px solid rgba(39, 61, 47, 0.18);
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+.hp__voices-rating:last-child {
+  border-right: none;
 }
 
 .hp__voices-rating:hover {
-  box-shadow: var(--shadow-sm);
+  opacity: 0.65;
 }
 
 .hp__voices-rating__star {
   color: var(--gold);
-  font-size: 1.15rem;
+  font-size: 0.85rem;
+  letter-spacing: 0;
 }
 
 .hp__voices-rating__value {
   font-family: var(--ff-display);
-  font-size: 1.2rem;
-  color: var(--charcoal);
-}
-
-.hp__voices-rating__source {
-  font-size: 0.78rem;
-  color: var(--text-light);
-}
-
-.hp__voices-quotes {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
-  max-width: 72rem;
-  margin: 0 auto;
-}
-
-.hp__voice-quote {
-  position: relative;
-  padding: 0.5rem clamp(1.5rem, 3vw, 2.5rem);
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid rgba(39, 61, 47, 0.1);
-}
-
-.hp__voice-quote:last-child {
-  border-right: none;
-}
-
-.hp__voice-quote::before {
-  content: '\201C';
-  position: absolute;
-  top: -1rem;
-  left: clamp(1rem, 2.5vw, 2rem);
-  font-family: var(--ff-display);
-  font-size: clamp(4rem, 7vw, 5.5rem);
-  line-height: 1;
-  color: var(--terracotta);
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-.hp__voice-quote__text {
-  flex: 1;
-  font-family: var(--ff-display);
-  font-size: clamp(1.125rem, 1.55vw, 1.32rem);
-  line-height: 1.55;
-  color: var(--charcoal);
-  margin: 0 0 1.25rem;
-  font-style: normal;
-  position: relative;
-  z-index: 1;
-}
-
-.hp__voice-quote__footer {
-  border-top: 1px solid rgba(39, 61, 47, 0.08);
-  padding-top: 0.85rem;
-  margin: 0;
-}
-
-.hp__voice-quote__author {
-  font-family: var(--ff-body);
-  font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 1rem;
   color: var(--charcoal);
   letter-spacing: 0.01em;
 }
 
-.hp__voice-quote__role {
-  font-family: var(--ff-body);
-  font-size: 0.78rem;
+.hp__voices-rating__source {
+  font-size: 0.7rem;
   color: var(--text-light);
-  margin-top: 0.2rem;
-  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.hp__voices-quotes {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.hp__voice-quote {
+  position: relative;
+  margin: 0;
+  padding: clamp(1.5rem, 3vw, 2.25rem) 0;
+  border-top: 1px solid rgba(39, 61, 47, 0.1);
+}
+
+.hp__voice-quote:last-child {
+  border-bottom: 1px solid rgba(39, 61, 47, 0.1);
+}
+
+.hp__voice-quote__text {
+  font-family: var(--ff-display);
+  font-style: italic;
+  font-size: clamp(1rem, 1.35vw, 1.15rem);
+  line-height: 1.65;
+  color: var(--charcoal);
+  margin: 0 0 0.9rem;
+  quotes: '\201C' '\201D';
+}
+
+.hp__voice-quote__text::before {
+  content: open-quote;
+  margin-right: 0.05em;
+}
+
+.hp__voice-quote__text::after {
+  content: close-quote;
+  margin-left: 0.05em;
+}
+
+.hp__voice-quote__footer {
+  margin: 0;
+}
+
+.hp__voice-quote__author {
+  display: inline-block;
+  font-family: var(--ff-body);
+  font-size: 0.7rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.hp__voice-quote__author::before {
+  content: '— ';
 }
 
 /* ================================================================== */
@@ -1742,23 +1751,16 @@
       linear-gradient(180deg, rgba(16, 22, 20, 0.05) 25%, rgba(16, 22, 20, 0.55) 55%, rgba(16, 22, 20, 0.94) 100%);
   }
 
-  .hp__voices-quotes {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+  .hp__voices {
+    max-width: 32rem;
   }
 
-  .hp__voice-quote {
-    border-right: none;
-    border-bottom: 1px solid rgba(39, 61, 47, 0.1);
-    padding: 1rem 0.5rem 1.5rem;
+  .hp__voices-ratings {
+    gap: 0;
   }
 
-  .hp__voice-quote:last-child {
-    border-bottom: none;
-  }
-
-  .hp__voice-quote::before {
-    left: 0;
+  .hp__voices-rating {
+    padding: 0.15rem 0.75rem;
   }
 
   .hp__visit-grid {

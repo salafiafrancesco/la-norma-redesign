@@ -567,33 +567,32 @@ export default function HomePage() {
         {/* ============================================================ */}
         {/* 6. VOICES (ratings + quotes)                                 */}
         {/* ============================================================ */}
-        <section className="hp__section" id="voices">
+        <section className="hp__section hp__section--voices" id="voices">
           <div className="container">
-            <div className={`fade-up${voicesVis ? ' visible' : ''}`} ref={voicesRef}>
+            <div className={`hp__voices fade-up${voicesVis ? ' visible' : ''}`} ref={voicesRef}>
               <p className="hp__eyebrow hp__eyebrow--center">Guest perspectives</p>
-              <h2 className="hp__heading hp__heading--center">The details guests mention after the last course</h2>
-            </div>
+              <h2 className="hp__heading hp__heading--center hp__voices-heading">In their words.</h2>
 
-            <div className={`hp__voices-ratings fade-up delay-1${voicesVis ? ' visible' : ''}`}>
-              {(aggregators.length > 0 ? aggregators : VOICES_FALLBACK_RATINGS).map((a) => (
-                <a key={a.id} href={a.link} className="hp__voices-rating" target="_blank" rel="noopener noreferrer">
-                  <span className="hp__voices-rating__star">&#9733;</span>
-                  <span className="hp__voices-rating__value">{a.rating}</span>
-                  <span className="hp__voices-rating__source">{a.source} ({a.review_count})</span>
-                </a>
-              ))}
-            </div>
+              <div className="hp__voices-ratings">
+                {(aggregators.length > 0 ? aggregators : VOICES_FALLBACK_RATINGS).map((a) => (
+                  <a key={a.id} href={a.link} className="hp__voices-rating" target="_blank" rel="noopener noreferrer">
+                    <span className="hp__voices-rating__star" aria-hidden="true">&#9733;</span>
+                    <span className="hp__voices-rating__value">{a.rating}</span>
+                    <span className="hp__voices-rating__source">{a.source}</span>
+                  </a>
+                ))}
+              </div>
 
-            <div className={`hp__voices-quotes fade-up delay-2${voicesVis ? ' visible' : ''}`}>
-              {(quotes.length > 0 ? quotes : VOICES_FALLBACK_QUOTES).map((q) => (
-                <blockquote key={q.id} className="hp__voice-quote">
-                  <p className="hp__voice-quote__text">{q.text}</p>
-                  <footer className="hp__voice-quote__footer">
-                    <p className="hp__voice-quote__author">{q.author_name}</p>
-                    <p className="hp__voice-quote__role">{q.author_role}</p>
-                  </footer>
-                </blockquote>
-              ))}
+              <div className="hp__voices-quotes">
+                {(quotes.length > 0 ? quotes : VOICES_FALLBACK_QUOTES).slice(0, 2).map((q) => (
+                  <blockquote key={q.id} className="hp__voice-quote">
+                    <p className="hp__voice-quote__text">{q.text}</p>
+                    <footer className="hp__voice-quote__footer">
+                      <span className="hp__voice-quote__author">{q.author_name}</span>
+                    </footer>
+                  </blockquote>
+                ))}
+              </div>
             </div>
           </div>
         </section>
