@@ -200,13 +200,13 @@ export default function Navbar() {
           aria-label="Go to La Norma homepage"
           onClick={(event) => handlePageLink(event, PAGE_KEYS.home)}
         >
-          <img
-            src="/logo.png"
-            alt={`${restaurant.name} logo`}
-            className="navbar__logo-img"
-            width="180"
-            height="56"
-          />
+          <span className="navbar__logo-mark" aria-hidden="true">
+            <span className="navbar__logo-mark-text">LN</span>
+          </span>
+          <span className="navbar__logo-wordmark">
+            <span className="navbar__logo-name">La Norma</span>
+            <span className="navbar__logo-tag">Ristorante &amp; Pizzeria</span>
+          </span>
         </a>
 
         <nav className="navbar__nav" aria-label="Primary navigation">
