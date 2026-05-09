@@ -155,6 +155,46 @@ export const CONTENT_SECTIONS = [
     description: 'Weekly opening hours table and SEO/structured data overrides used across the site.',
     hint: 'Object with { "hoursWeekly": [{ "day": "Monday", "hours": "5:00 PM – 9:00 PM", "closed": false }, ...], "schemaOrg": { "cuisine": ["Italian","Sicilian","Mediterranean"], "priceRange": "$$$", "opens": "17:00", "closes": "21:00", "dayOfWeek": ["Monday",...], "acceptsReservations": true } }',
   },
+  {
+    key: 'cookingClassesPage',
+    label: 'Cooking Classes Page',
+    icon: 'Page',
+    editor: 'json',
+    description: 'Hero, includes, FAQ, testimonials and CTA for the /cooking-classes page.',
+    hint: 'Object with { "description", "hero": { "image_url", "image_alt", "eyebrow", "headline", "sub", "primary_cta_label", "secondary_cta_label", "stats": [{ "value", "label" }] }, "booking_copy": { "label", "heading", "confirmation_title", "confirmation_message", "submit_label" }, "includes_section": { "label", "heading", "items": [{ "title", "desc" }] }, "testimonials": [{ "quote", "author", "context" }], "faq_section": { "label", "heading", "items": [{ "q", "a" }] }, "cta": { "heading", "body", "primary_label", "secondary_label" } }',
+  },
+  {
+    key: 'wineTastingsPage',
+    label: 'Wine Tastings Page',
+    icon: 'Page',
+    editor: 'json',
+    description: 'Hero, what to expect, FAQ, testimonials and CTA for the /wine-tastings page.',
+    hint: 'Object with { "description", "hero": { "image_url", "image_alt", "eyebrow", "headline", "sub", "primary_cta_label", "secondary_cta_label", "stats": [{ "value", "label" }] }, "booking_copy": { "label", "heading", "confirmation_title", "confirmation_message", "submit_label" }, "expect_section": { "label", "heading", "items": [string], "suited_for": [string] }, "testimonials": [{ "quote", "author", "context" }], "faq_section": { "label", "heading", "items": [{ "q", "a" }] }, "cta": { "heading", "body", "primary_label", "secondary_label" } }',
+  },
+  {
+    key: 'liveMusicPage',
+    label: 'Live Music Page',
+    icon: 'Page',
+    editor: 'json',
+    description: 'Hero, FAQ and CTA for the /live-music page.',
+    hint: 'Object with { "description", "hero": { "image_url", "image_alt", "eyebrow", "headline", "sub", "primary_cta_label", "secondary_cta_label", "stats": [{ "value", "label" }] }, "booking_copy": { "label", "heading", "confirmation_title", "confirmation_message", "submit_label" }, "faq_section": { "label", "heading", "items": [{ "q", "a" }] }, "cta": { "heading", "body", "primary_label", "secondary_label" } }',
+  },
+  {
+    key: 'aboutPage',
+    label: 'About Page',
+    icon: 'Page',
+    editor: 'json',
+    description: 'Hero copy, values list and "best next steps" panel for /about.',
+    hint: 'Object with { "hero": { "eyebrow", "headline" }, "values": [{ "title", "body" }], "next_steps": { "heading", "body", "primary_label", "secondary_label" } }',
+  },
+  {
+    key: 'faqPage',
+    label: 'FAQ Page',
+    icon: 'Page',
+    editor: 'json',
+    description: 'Hero copy and FAQ list for /faq.',
+    hint: 'Object with { "hero": { "eyebrow", "headline", "sub" }, "items": [{ "question", "answer" }], "editorial": { "heading", "body" } }',
+  },
 ];
 
 export const CONTENT_SECTION_MAP = Object.fromEntries(

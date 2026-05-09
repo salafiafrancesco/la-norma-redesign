@@ -106,6 +106,11 @@ function transform(api = {}) {
   const cateringData = api.catering || {};
   const footerData = api.footer || {};
   const generalData = api.general || {};
+  const cookingClassesPageData = api.cookingClassesPage || {};
+  const wineTastingsPageData = api.wineTastingsPage || {};
+  const liveMusicPageData = api.liveMusicPage || {};
+  const aboutPageData = api.aboutPage || {};
+  const faqPageData = api.faqPage || {};
 
   const links = {
     reserve: linksData.reserve ?? defaults.links.reserve,
@@ -314,6 +319,48 @@ function transform(api = {}) {
     schemaOrg: { ...defaults.general.schemaOrg, ...(generalData.schemaOrg || {}) },
   };
 
+  // Page-level CMS sections — merge API data over hardcoded defaults.
+  // For nested objects we shallow-merge; for arrays we replace iff the API
+  // version is non-empty, otherwise we keep the default array.
+  const mergeArrayOrDefault = (apiValue, fallback) =>
+    Array.isArray(apiValue) && apiValue.length > 0 ? apiValue : fallback;
+
+  const buildExperiencePage = (apiData, fallback) => ({
+    description: apiData.description || fallback.description,
+    hero: { ...fallback.hero, ...(apiData.hero || {}), stats: mergeArrayOrDefault(apiData.hero?.stats, fallback.hero.stats) },
+    booking_copy: { ...fallback.booking_copy, ...(apiData.booking_copy || {}) },
+    includes_section: fallback.includes_section
+      ? { ...fallback.includes_section, ...(apiData.includes_section || {}), items: mergeArrayOrDefault(apiData.includes_section?.items, fallback.includes_section.items) }
+      : undefined,
+    expect_section: fallback.expect_section
+      ? {
+          ...fallback.expect_section,
+          ...(apiData.expect_section || {}),
+          items: mergeArrayOrDefault(apiData.expect_section?.items, fallback.expect_section.items),
+          suited_for: mergeArrayOrDefault(apiData.expect_section?.suited_for, fallback.expect_section.suited_for),
+        }
+      : undefined,
+    testimonials: fallback.testimonials ? mergeArrayOrDefault(apiData.testimonials, fallback.testimonials) : undefined,
+    faq_section: { ...fallback.faq_section, ...(apiData.faq_section || {}), items: mergeArrayOrDefault(apiData.faq_section?.items, fallback.faq_section.items) },
+    cta: { ...fallback.cta, ...(apiData.cta || {}) },
+  });
+
+  const cookingClassesPage = buildExperiencePage(cookingClassesPageData, defaults.cookingClassesPage);
+  const wineTastingsPage = buildExperiencePage(wineTastingsPageData, defaults.wineTastingsPage);
+  const liveMusicPage = buildExperiencePage(liveMusicPageData, defaults.liveMusicPage);
+
+  const aboutPage = {
+    hero: { ...defaults.aboutPage.hero, ...(aboutPageData.hero || {}) },
+    values: mergeArrayOrDefault(aboutPageData.values, defaults.aboutPage.values),
+    next_steps: { ...defaults.aboutPage.next_steps, ...(aboutPageData.next_steps || {}) },
+  };
+
+  const faqPage = {
+    hero: { ...defaults.faqPage.hero, ...(faqPageData.hero || {}) },
+    items: mergeArrayOrDefault(faqPageData.items, defaults.faqPage.items),
+    editorial: { ...defaults.faqPage.editorial, ...(faqPageData.editorial || {}) },
+  };
+
   return {
     restaurant,
     links,
@@ -330,6 +377,11 @@ function transform(api = {}) {
     footer,
     footerNav,
     general,
+    cookingClassesPage,
+    wineTastingsPage,
+    liveMusicPage,
+    aboutPage,
+    faqPage,
   };
 }
 

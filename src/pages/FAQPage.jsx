@@ -1,13 +1,14 @@
 import Footer from '../components/Footer/Footer';
 import Navbar from '../components/Navbar/Navbar';
 import { useNavigation } from '../context/NavigationContext';
+import { useSection } from '../context/ContentContext';
 import { usePageMetadata } from '../hooks/usePageMetadata';
-import { GENERAL_FAQS } from '../data/sitePages';
 import { PAGE_KEYS } from '../../shared/routes.js';
 import './EditorialPage.css';
 
 export default function FAQPage() {
   const { navigate } = useNavigation();
+  const faqPage = useSection('faqPage');
 
   usePageMetadata({
     title: 'FAQ',
@@ -17,7 +18,7 @@ export default function FAQPage() {
       {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
-        mainEntity: GENERAL_FAQS.map((item) => ({
+        mainEntity: faqPage.items.map((item) => ({
           '@type': 'Question',
           name: item.question,
           acceptedAnswer: {
@@ -36,12 +37,9 @@ export default function FAQPage() {
       <main id="main-content" className="editorial-main">
         <div className="container">
           <header className="editorial-hero">
-            <p className="editorial-hero__eyebrow">FAQ</p>
-            <h1 className="editorial-hero__heading">Answers guests usually want before they decide to book.</h1>
-            <p className="editorial-hero__subheading">
-              The essentials on reservations, experiences, dietary requests, and planning a more intentional evening at
-              La Norma.
-            </p>
+            <p className="editorial-hero__eyebrow">{faqPage.hero.eyebrow}</p>
+            <h1 className="editorial-hero__heading">{faqPage.hero.headline}</h1>
+            <p className="editorial-hero__subheading">{faqPage.hero.sub}</p>
             <div className="editorial-hero__actions">
               <button type="button" className="btn btn--primary" onClick={() => navigate(PAGE_KEYS.home, { anchor: 'reserve' })}>
                 Reserve dinner
@@ -53,7 +51,7 @@ export default function FAQPage() {
           </header>
 
           <div className="editorial-faq-list">
-            {GENERAL_FAQS.map((item) => (
+            {faqPage.items.map((item) => (
               <details key={item.question} className="editorial-faq-item">
                 <summary>{item.question}</summary>
                 <p>{item.answer}</p>
@@ -62,11 +60,8 @@ export default function FAQPage() {
           </div>
 
           <section className="editorial-support">
-            <h2 className="editorial-support__title">Need help with something more specific?</h2>
-            <p className="editorial-support__body">
-              Guests planning a tasting, a private event, or a celebratory dinner often need a faster recommendation.
-              The team can help direct you to the right format quickly.
-            </p>
+            <h2 className="editorial-support__title">{faqPage.editorial.heading}</h2>
+            <p className="editorial-support__body">{faqPage.editorial.body}</p>
             <div className="editorial-support__actions">
               <button type="button" className="btn btn--primary" onClick={() => navigate(PAGE_KEYS.privateEvents)}>
                 Private events

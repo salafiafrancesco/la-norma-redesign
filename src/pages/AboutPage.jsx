@@ -3,14 +3,18 @@ import Navbar from '../components/Navbar/Navbar';
 import { useSection } from '../context/ContentContext';
 import { useNavigation } from '../context/NavigationContext';
 import { usePageMetadata } from '../hooks/usePageMetadata';
-import { ABOUT_VALUES } from '../data/sitePages';
 import { PAGE_KEYS } from '../../shared/routes.js';
 import './EditorialPage.css';
 
 export default function AboutPage() {
   const story = useSection('story');
   const restaurant = useSection('restaurant');
+  const aboutPage = useSection('aboutPage');
   const { navigate } = useNavigation();
+  const heroEyebrow = aboutPage.hero.eyebrow;
+  const heroHeadline = aboutPage.hero.headline;
+  const values = aboutPage.values;
+  const nextSteps = aboutPage.next_steps;
 
   usePageMetadata({
     title: 'About La Norma',
@@ -25,8 +29,8 @@ export default function AboutPage() {
       <main id="main-content" className="editorial-main">
         <div className="container">
           <header className="editorial-hero">
-            <p className="editorial-hero__eyebrow">About La Norma</p>
-            <h1 className="editorial-hero__heading">A Sicilian restaurant designed to feel generous, polished, and personal.</h1>
+            <p className="editorial-hero__eyebrow">{heroEyebrow}</p>
+            <h1 className="editorial-hero__heading">{heroHeadline}</h1>
             <p className="editorial-hero__subheading">
               {story.quote} The aim is simple: serve food with regional integrity, keep the room warm, and let guests
               feel looked after from first arrival to final course.
@@ -50,7 +54,7 @@ export default function AboutPage() {
               </div>
 
               <div className="editorial-value-grid" style={{ marginTop: '1.5rem' }}>
-                {ABOUT_VALUES.map((item) => (
+                {values.map((item) => (
                   <article key={item.title} className="editorial-value-card">
                     <h3>{item.title}</h3>
                     <p>{item.body}</p>
@@ -70,13 +74,9 @@ export default function AboutPage() {
               </section>
 
               <section className="editorial-side-card">
-                <h2 className="editorial-side-card__title">Best next steps</h2>
+                <h2 className="editorial-side-card__title">{nextSteps.heading}</h2>
                 <div className="editorial-side-card__body">
-                  <p>If you are visiting for dinner, reserve early for the timing you actually want.</p>
-                  <p style={{ marginTop: '0.8rem' }}>
-                    If you want something more memorable, the cooking classes, wine tastings, and private events extend
-                    the same hospitality beyond a standard table booking.
-                  </p>
+                  <p>{nextSteps.body}</p>
                 </div>
               </section>
             </aside>

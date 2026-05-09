@@ -258,6 +258,201 @@ export const footer = {
 
 export const footerNav = footer.navItems;
 
+export const cookingClassesPage = {
+  description:
+    'Reserve an intimate Sicilian cooking class at La Norma with Chef Marco — handmade pasta, wine, and a shared meal on Longboat Key.',
+  hero: {
+    image_url: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1800&q=80',
+    image_alt: 'Chef preparing fresh pasta in La Norma kitchen',
+    eyebrow: 'Saturday mornings at La Norma',
+    headline: 'Cooking Classes',
+    sub: 'Cook like a Sicilian. Three and a half hours of hands-on pasta, wine, and a shared meal you made yourself.',
+    primary_cta_label: 'Reserve My Spot',
+    secondary_cta_label: "What's included",
+    stats: [
+      { value: '3.5 hrs', label: 'Duration' },
+      { value: '$95', label: 'Per guest' },
+      { value: '8 max', label: 'Guests per class' },
+    ],
+  },
+  booking_copy: {
+    label: 'Reserve your Saturday',
+    heading: 'Book a cooking class',
+    confirmation_title: "You're in!",
+    confirmation_message: "We'll send a confirmation email within 24 hours with arrival details and what to expect.",
+    submit_label: 'Reserve My Spot',
+  },
+  includes_section: {
+    label: "What's included",
+    heading: 'Everything you need for the morning',
+    items: [
+      { title: 'All ingredients', desc: 'Seasonal produce, pantry staples, and premium imports — everything is supplied.' },
+      { title: 'Wine pairing', desc: 'A welcome pour and thoughtful pairings throughout the class and meal.' },
+      { title: 'Recipe cards', desc: 'Take-home instructions so the class lives on in your kitchen.' },
+      { title: 'Chef guidance', desc: 'Hands-on instruction from Chef Marco and the La Norma kitchen team.' },
+    ],
+  },
+  testimonials: [
+    { quote: 'The best morning we spent in Florida. Chef Marco made us feel like family, and the pasta was extraordinary.', author: 'Margaret S.', context: 'Sarasota, FL' },
+    { quote: 'Worth every penny. We left with real skills and a deep appreciation for Sicilian cooking.', author: 'David & Claire K.', context: 'Chicago, IL' },
+  ],
+  faq_section: {
+    label: 'Questions',
+    heading: 'A few details before you reserve',
+    items: [
+      { q: 'Do I need any cooking experience?', a: 'No. Classes are designed to feel welcoming and hands-on whether you cook every day or almost never.' },
+      { q: 'How long does each class last?', a: 'Expect around three and a half hours from welcome aperitivo to the shared meal at the end.' },
+      { q: 'What is included in the price?', a: 'Ingredients, wine, printed recipes, the sit-down meal, and direct guidance from the kitchen team are all included.' },
+      { q: 'How many guests attend each class?', a: 'We cap each session at eight guests so the experience stays personal and hands-on.' },
+      { q: 'Can I reserve a private class?', a: 'Yes. Private buyouts are available for celebrations, team gatherings, and special occasions.' },
+      { q: 'What is the cancellation policy?', a: 'Full refund up to 48 hours before. 50% up to 24 hours. No refund after that, but we can often reschedule.' },
+    ],
+  },
+  cta: {
+    heading: 'A morning worth clearing the calendar for.',
+    body: "Saturdays at La Norma are capped at eight. Reserve the one you want while there's still room.",
+    primary_label: 'Reserve My Spot',
+    secondary_label: 'Back to La Norma',
+  },
+};
+
+export const wineTastingsPage = {
+  description:
+    'Join a sommelier-led Friday wine tasting at La Norma — curated Italian pours, seasonal antipasti, and an intimate Longboat Key evening.',
+  hero: {
+    image_url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=1800&q=80',
+    image_alt: 'Sommelier pouring wine during a tasting at La Norma',
+    eyebrow: 'Friday evenings at La Norma',
+    headline: 'Wine Tastings',
+    sub: 'An intimate tasting that still feels like dinner, not a classroom. Guided pours, warm lighting, and an evening worth planning around.',
+    primary_cta_label: 'Book Your Friday',
+    secondary_cta_label: 'What to expect',
+    stats: [
+      { value: '4–6', label: 'Curated pours' },
+      { value: '14 max', label: 'Seats per tasting' },
+      { value: 'Friday', label: 'Weekly cadence' },
+    ],
+  },
+  booking_copy: {
+    label: 'Reserve your Friday',
+    heading: 'Book your Friday tasting',
+    confirmation_title: 'Request received!',
+    confirmation_message: "We'll confirm your tasting reservation within 24 hours with timing and arrival details.",
+    submit_label: 'Request Reservation',
+  },
+  expect_section: {
+    label: 'Included in your reservation',
+    heading: 'What guests can expect each Friday',
+    items: [
+      '4–6 curated Italian pours with guided commentary',
+      'Seasonal antipasti pairings crafted by the kitchen',
+      'Background on regions, producers, and grape stories',
+      'A relaxed, unhurried pace designed for conversation',
+      'Take-home tasting notes and recommendations',
+    ],
+    suited_for: ['Date nights', 'Couples', 'Small groups', 'Celebrations', 'Wine curious'],
+  },
+  testimonials: [
+    { quote: "The best Friday evening we've had since moving here. Intimate, personal, and genuinely educational.", author: 'Elena & Marcus', context: 'Longboat Key, FL' },
+    { quote: 'Not pretentious at all. Just great wine, great food, and a sommelier who made everyone feel comfortable.', author: 'Tanya R.', context: 'Sarasota, FL' },
+  ],
+  faq_section: {
+    label: 'Questions',
+    heading: 'A few details guests often ask',
+    items: [
+      { q: 'Do I need wine knowledge?', a: 'Not at all. The tasting is conversational and accessible — designed for enjoyment, not expertise.' },
+      { q: 'What is included?', a: '4–6 pours, seasonal antipasti pairings, guided commentary, and tasting notes to take home.' },
+      { q: 'Can the tasting be booked privately?', a: 'Yes. Private tastings can be arranged for groups of 6 or more — reach out by email.' },
+      { q: 'How quickly do requests get confirmed?', a: "Within 24 hours. We'll follow up with timing details and any final notes." },
+    ],
+  },
+  cta: {
+    heading: 'An evening built for good company and better pours.',
+    body: 'Fridays at La Norma are intentionally limited. Request the evening you want before it fills.',
+    primary_label: 'Book Your Friday',
+    secondary_label: 'Back to La Norma',
+  },
+};
+
+export const liveMusicPage = {
+  description:
+    'Live jazz, acoustic sets, and evening performances woven into dinner at La Norma — no cover, just a better atmosphere on Longboat Key.',
+  hero: {
+    image_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=1800&q=80',
+    image_alt: 'Musician performing live at La Norma',
+    eyebrow: 'Wednesday & Saturday evenings',
+    headline: 'Live Music',
+    sub: 'Music woven into dinner, not layered on top of it. Jazz, acoustic, and elegant performances that elevate the room.',
+    primary_cta_label: 'Reserve a Music Night',
+    secondary_cta_label: 'View Menu',
+    stats: [
+      { value: 'Free', label: 'No cover charge' },
+      { value: 'Wed + Sat', label: 'Most weeks' },
+      { value: '50 seats', label: 'Intimate dining room' },
+    ],
+  },
+  booking_copy: {
+    label: 'Reserve your evening',
+    heading: 'Reserve a music night',
+    confirmation_title: 'Request received!',
+    confirmation_message: "We'll confirm your table within 24 hours. Music is complimentary with dinner — no separate charge.",
+    submit_label: 'Send Request',
+  },
+  faq_section: {
+    label: 'Questions',
+    heading: 'A few things guests ask about',
+    items: [
+      { q: 'Is there a cover charge?', a: 'No. Music is complimentary with dinner — no tickets or separate charge.' },
+      { q: 'Can I request a specific part of the room?', a: "Yes. Mention seating preferences in the notes and we'll do our best to accommodate." },
+      { q: 'What kind of music do you host?', a: 'Jazz, acoustic, bossa nova, and Mediterranean-influenced sets — chosen to complement the dining room, not compete with it.' },
+      { q: 'Can musicians be booked for private events?', a: 'Yes. Reach out to discuss live music for private dinners, celebrations, or corporate evenings.' },
+    ],
+  },
+  cta: {
+    heading: 'Dinner first. Atmosphere always.',
+    body: 'Ask about the next performance night and let us shape the evening around your table.',
+    primary_label: 'Reserve Your Table',
+    secondary_label: 'Back to La Norma',
+  },
+};
+
+export const aboutPage = {
+  hero: {
+    eyebrow: 'About La Norma',
+    headline: 'A Sicilian dining room on Longboat Key, run with patience and polish.',
+  },
+  values: [
+    { title: 'Sicilian point of view', body: 'The menu holds a clear regional identity, from pasta alla Norma to a wine list that stays close to Italy.' },
+    { title: 'Hospitality first', body: 'The room is designed to feel calm, warm, and attentive rather than over-staged or formal for its own sake.' },
+    { title: 'Experiences with intent', body: 'Cooking classes, wine tastings, and private events are extensions of the dining room, not side projects.' },
+  ],
+  next_steps: {
+    heading: 'Best next steps',
+    body: 'Whether you are planning dinner, a class, or a celebration, the team is happy to help shape the evening with you.',
+    primary_label: 'Reserve a table',
+    secondary_label: 'Get in touch',
+  },
+};
+
+export const faqPage = {
+  hero: {
+    eyebrow: 'Guest questions',
+    headline: 'Questions guests often ask before reserving',
+    sub: 'Quick answers about reservations, dietary needs, private events, and how the experiences work.',
+  },
+  items: [
+    { question: 'Do I need a reservation for dinner?', answer: 'Walk-ins are welcome whenever availability allows. Reservations are strongly recommended for weekends, music nights, and seasonal peaks.' },
+    { question: 'Do you accommodate dietary restrictions?', answer: 'Vegetarian, gluten-aware, and allergy-sensitive requests can usually be accommodated with advance notice.' },
+    { question: 'Can I plan a private event or celebratory dinner?', answer: 'Yes. La Norma hosts rehearsal dinners, milestone celebrations, and hosted evenings with tailored menus.' },
+    { question: 'How do cooking class and tasting confirmations work?', answer: 'Each request is reviewed directly by the team. We confirm within 24 hours.' },
+    { question: 'Is live music ticketed?', answer: 'No. Live music is part of the dinner experience. Reservations are recommended.' },
+  ],
+  editorial: {
+    heading: 'Still need help?',
+    body: 'For anything not covered here, reach out directly. The team is happy to walk through options and tailor the evening with you.',
+  },
+};
+
 export const general = {
   hoursWeekly: [
     { day: 'Monday', hours: '5:00 PM – 9:00 PM', closed: false },
@@ -294,4 +489,9 @@ export const siteDefaults = {
   footer,
   footerNav,
   general,
+  cookingClassesPage,
+  wineTastingsPage,
+  liveMusicPage,
+  aboutPage,
+  faqPage,
 };
