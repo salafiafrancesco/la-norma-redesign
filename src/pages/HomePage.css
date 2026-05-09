@@ -525,16 +525,18 @@
 .hp__menu-inner {
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(1.75rem, 3.5vw, 3rem);
+  gap: clamp(1.5rem, 3vw, 2.25rem);
   align-items: start;
   max-width: none;
   margin-inline: 0;
 }
 
-.hp__menu-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+.hp__menu-header {
+  margin-bottom: 0.25rem;
+}
+
+.hp__menu-header .hp__eyebrow {
+  margin-bottom: 0.85rem;
 }
 
 .hp__menu-heading {
@@ -543,8 +545,14 @@
   line-height: 1.05;
   color: var(--charcoal);
   letter-spacing: -0.012em;
-  margin: 0 0 1.75rem;
+  margin: 0;
   max-width: 18ch;
+}
+
+.hp__menu-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .hp__menu-figure {
@@ -554,79 +562,139 @@
   overflow: hidden;
   isolation: isolate;
   box-shadow:
-    0 28px 60px -28px rgba(39, 61, 47, 0.45),
-    0 12px 30px -16px rgba(39, 61, 47, 0.18);
+    0 32px 70px -30px rgba(39, 61, 47, 0.5),
+    0 14px 32px -18px rgba(39, 61, 47, 0.22);
+}
+
+.hp__menu-figure::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 22, 20, 0) 42%,
+    rgba(16, 22, 20, 0.55) 72%,
+    rgba(16, 22, 20, 0.94) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .hp__menu-image {
   width: 100%;
   aspect-ratio: 4 / 5;
   object-fit: cover;
-  object-position: center;
+  object-position: center 38%;
   display: block;
-  transition: transform 0.8s var(--ease-out);
+  transition: transform 0.9s var(--ease-out);
 }
 
 .hp__menu-figure:hover .hp__menu-image {
-  transform: scale(1.04);
+  transform: scale(1.035);
 }
 
 .hp__menu-caption {
   position: absolute;
-  left: 1rem;
-  bottom: 1rem;
+  left: clamp(1.25rem, 2.5vw, 2rem);
+  right: clamp(1.25rem, 2.5vw, 2rem);
+  bottom: clamp(1.4rem, 2.5vw, 1.85rem);
   z-index: 2;
-  padding: 0.7rem 1rem 0.75rem;
-  background: rgba(16, 22, 20, 0.78);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 0.65rem;
   display: grid;
-  gap: 0.15rem;
-  border-left: 2px solid var(--gold-light);
+  gap: 0.45rem;
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .hp__menu-caption__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
   font-family: var(--ff-accent);
-  font-size: 0.68rem;
-  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--gold-light);
+  font-style: italic;
+}
+
+.hp__menu-caption__label::before {
+  content: '';
+  width: 1.6rem;
+  height: 1px;
+  background: var(--gold-light);
+  opacity: 0.7;
+  flex-shrink: 0;
 }
 
 .hp__menu-caption__name {
   font-family: var(--ff-display);
   font-style: italic;
-  font-size: 0.95rem;
+  font-weight: 500;
+  font-size: clamp(1.55rem, 2.2vw, 2rem);
+  line-height: 1.08;
+  letter-spacing: -0.005em;
   color: var(--cream);
-  line-height: 1.2;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+.hp__menu-caption__detail {
+  font-family: var(--ff-accent);
+  font-style: italic;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: rgba(248, 243, 235, 0.82);
+  letter-spacing: 0.01em;
 }
 
 @media (min-width: 980px) {
   .hp__menu-inner {
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    gap: clamp(2.5rem, 5vw, 4.5rem);
-    align-items: stretch;
+    grid-template-rows: auto 1fr;
+    column-gap: clamp(2.5rem, 5vw, 4.5rem);
+    row-gap: 0;
+    align-items: start;
+  }
+
+  .hp__menu-header {
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 1.75rem;
+  }
+
+  .hp__menu-text {
+    grid-column: 1;
+    grid-row: 2;
   }
 
   .hp__menu-figure {
+    grid-column: 2;
+    grid-row: 1 / span 2;
     align-self: stretch;
+    min-height: 32rem;
   }
 
   .hp__menu-image {
     aspect-ratio: auto;
     height: 100%;
-    min-height: 30rem;
+    min-height: 32rem;
   }
 }
 
 @media (max-width: 640px) {
-  .hp__menu-image {
-    aspect-ratio: 4 / 3;
-  }
-
   .hp__menu-figure {
     border-radius: 1rem;
+  }
+
+  .hp__menu-image {
+    aspect-ratio: 4 / 5;
+  }
+
+  .hp__menu-caption__detail {
+    font-size: 0.86rem;
   }
 }
 
