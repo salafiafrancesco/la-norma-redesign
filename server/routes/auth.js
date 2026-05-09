@@ -8,6 +8,19 @@ import { isValidEmail, normalizeText } from '../lib/validation.js';
 
 const router = Router();
 
+// Friendly response when /api/auth/login is opened in a browser address bar.
+// The actual login form lives at /admin and submits via POST.
+router.get('/login', (_req, res) => {
+  res
+    .status(405)
+    .set('Allow', 'POST')
+    .json({
+      error: 'Method Not Allowed.',
+      message: 'POST credentials to this endpoint to obtain a JWT, or visit /admin to use the login form.',
+      loginPage: '/admin',
+    });
+});
+
 router.post('/login', async (req, res) => {
   try {
     const username = normalizeText(req.body.username);

@@ -1,7 +1,9 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/admin/:path*", "destination": "/index.html" },
     { "source": "/((?!api|assets|favicon\\.svg|robots\\.txt|sitemap\\.xml).*)", "destination": "/index.html" }
+  ],
+  "redirects": [
+    { "source": "/login", "destination": "/admin", "permanent": false }
   ]
 }
