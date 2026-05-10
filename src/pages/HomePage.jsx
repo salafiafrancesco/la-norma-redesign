@@ -178,31 +178,18 @@ export default function HomePage() {
   const beyondTweenFrame = useRef(0);         // rAF id for in-flight smooth-scroll tween
   const [beyondActive, setBeyondActive] = useState(0);
   const [beyondPaused, setBeyondPaused] = useState(false);
-  // Continuous in-viewport flag — distinct from `beyondVis` (the one-shot
-  // fade-in flag). The autoplay must pause whenever the section leaves the
-  // viewport, otherwise programmatic scrolls of the carousel keep firing on
-  // an off-screen container and iOS Safari drags the document back to it.
-  const [beyondOnScreen, setBeyondOnScreen] = useState(false);
   const beyondList = beyondCards.length > 0 ? beyondCards : BEYOND_FALLBACK;
   const beyondCount = beyondList.length;
 
-  useEffect(() => {
-    const container = beyondScrollRef.current;
-    if (!container || typeof IntersectionObserver === 'undefined') return undefined;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      setBeyondOnScreen(entry.isIntersecting);
-    }, { threshold: 0.25 });
-
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
-
-  // Auto-advance every 4.5s on mobile, only when section is in view + not paused.
-  // Re-evaluate on resize so resizing past the breakpoint starts/stops the loop.
+  // Auto-advance every 4.5s on mobile, starting once the section has been
+  // seen at least once (beyondVis is the one-shot fade-in flag).
+  // We can safely keep the loop running after the section leaves the
+  // viewport: the programmatic scroll below uses per-frame scrollLeft
+  // assignment, which cannot scroll the document — only the carousel's own
+  // overflow:auto box.
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
-    if (beyondPaused || !beyondOnScreen || beyondCount < 2) return undefined;
+    if (beyondPaused || !beyondVis || beyondCount < 2) return undefined;
 
     let intervalId = null;
     const start = () => {
