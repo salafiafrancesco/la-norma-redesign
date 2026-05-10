@@ -173,19 +173,35 @@ export default function HomePage() {
 
   // Beyond Dinner — mobile carousel state (autoscroll + dots)
   const beyondScrollRef = useRef(null);
-  const beyondAutoTimer = useRef(null);
   const beyondPauseTimer = useRef(null);
   const beyondProgrammaticUntil = useRef(0); // timestamp until which onScroll events should be ignored
   const [beyondActive, setBeyondActive] = useState(0);
   const [beyondPaused, setBeyondPaused] = useState(false);
+  // Continuous in-viewport flag — distinct from `beyondVis` (the one-shot
+  // fade-in flag). The autoplay must pause whenever the section leaves the
+  // viewport, otherwise programmatic scrolls of the carousel keep firing on
+  // an off-screen container and iOS Safari drags the document back to it.
+  const [beyondOnScreen, setBeyondOnScreen] = useState(false);
   const beyondList = beyondCards.length > 0 ? beyondCards : BEYOND_FALLBACK;
   const beyondCount = beyondList.length;
+
+  useEffect(() => {
+    const container = beyondScrollRef.current;
+    if (!container || typeof IntersectionObserver === 'undefined') return undefined;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setBeyondOnScreen(entry.isIntersecting);
+    }, { threshold: 0.25 });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   // Auto-advance every 4.5s on mobile, only when section is in view + not paused.
   // Re-evaluate on resize so resizing past the breakpoint starts/stops the loop.
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
-    if (beyondPaused || !beyondVis || beyondCount < 2) return undefined;
+    if (beyondPaused || !beyondOnScreen || beyondCount < 2) return undefined;
 
     let intervalId = null;
     const start = () => {
@@ -214,8 +230,15 @@ export default function HomePage() {
     };
   }, [beyondPaused, beyondVis, beyondCount]);
 
-  // Programmatic scroll when active card changes — uses scrollIntoView so we
-  // never have to do offset arithmetic against an offsetParent we don't control.
+  // Programmatic scroll when active card changes.
+  // We deliberately do NOT use scrollIntoView: it scrolls every scrollable
+  // ancestor (the document included) to reveal the card. We also avoid
+  // smooth scrolling on the container itself: with `scroll-snap-type: x
+  // mandatory` + `-webkit-overflow-scrolling: touch`, iOS Safari can
+  // sometimes scroll the document to "reveal" the snap target while a
+  // smooth programmatic scroll is in flight. Setting `scrollLeft` directly
+  // on the carousel keeps the page completely still — the snap engine then
+  // animates the snap visually on its own.
   useEffect(() => {
     const container = beyondScrollRef.current;
     if (!container) return;
@@ -223,12 +246,17 @@ export default function HomePage() {
     const card = cards[beyondActive];
     if (!card) return;
 
-    // Tell the onScroll handler to ignore the next ~700 ms of scroll events,
-    // otherwise the smooth-scroll fires onScroll, which would call setBeyondActive
-    // back to whatever is "nearest" mid-animation, creating a feedback loop.
-    beyondProgrammaticUntil.current = Date.now() + 700;
+    // Tell the onScroll handler to ignore the next ~500 ms of scroll events,
+    // otherwise the snap-induced scroll fires onScroll, which would call
+    // setBeyondActive back to whatever is "nearest" mid-animation, creating
+    // a feedback loop.
+    beyondProgrammaticUntil.current = Date.now() + 500;
 
-    card.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    const targetLeft = card.getBoundingClientRect().left
+      - container.getBoundingClientRect().left
+      + container.scrollLeft;
+
+    container.scrollLeft = targetLeft;
   }, [beyondActive]);
 
   // Pause autoscroll on user interaction, resume after 7s of inactivity.
