@@ -305,6 +305,7 @@ async function ensureNavLinks() {
         { sort_order: 1, label: 'Cooking Classes', page_key: 'cooking-classes', parent_id: expParent.id, scope: 'desktop' },
         { sort_order: 2, label: 'Wine Tastings', page_key: 'wine-tastings', parent_id: expParent.id, scope: 'desktop' },
         { sort_order: 3, label: 'Live Music', page_key: 'live-music', parent_id: expParent.id, scope: 'desktop' },
+        { sort_order: 4, label: 'Private Events', page_key: 'private-events', parent_id: expParent.id, scope: 'desktop' },
       ]
     : [];
 
@@ -313,6 +314,7 @@ async function ensureNavLinks() {
     { sort_order: 10, label: 'Cooking Classes', page_key: 'cooking-classes', scope: 'mobile' },
     { sort_order: 11, label: 'Wine Tastings', page_key: 'wine-tastings', scope: 'mobile' },
     { sort_order: 12, label: 'Live Music', page_key: 'live-music', scope: 'mobile' },
+    { sort_order: 13, label: 'Private Events', page_key: 'private-events', scope: 'mobile' },
     { sort_order: 20, label: 'About', page_key: 'about', scope: 'both' },
     { sort_order: 21, label: 'Journal', page_key: 'blog', scope: 'mobile' },
     { sort_order: 22, label: 'FAQ', page_key: 'faq', scope: 'mobile' },
@@ -327,6 +329,64 @@ async function ensureNavLinks() {
   }
 
   console.log(`[init] nav_links seeded (${top.length + allChildren.length} records).`);
+}
+
+// Idempotent backfill: inserts Private Events nav rows on existing
+// deployments that were seeded before /private-events shipped.
+// Safe to run repeatedly — no-ops if rows already present.
+async function ensurePrivateEventsNavLinks() {
+  try {
+    const { data: existing, error: queryError } = await supabase
+      .from('nav_links')
+      .select('id, label, page_key, parent_id, scope, is_dropdown_parent')
+      .eq('page_key', 'private-events');
+    if (queryError) {
+      if (/relation.*does not exist|Could not find the table|schema cache/i.test(queryError.message)) return;
+      console.warn('[init] private-events nav check skipped:', queryError.message);
+      return;
+    }
+
+    const hasDesktopChild = (existing || []).some((r) => r.scope === 'desktop' && r.parent_id);
+    const hasMobile = (existing || []).some((r) => r.scope === 'mobile' && !r.parent_id);
+    if (hasDesktopChild && hasMobile) return;
+
+    const rows = [];
+    if (!hasDesktopChild) {
+      const { data: dropdownParent } = await supabase
+        .from('nav_links')
+        .select('id')
+        .eq('is_dropdown_parent', true)
+        .eq('label', 'Experiences')
+        .maybeSingle();
+      if (dropdownParent?.id) {
+        rows.push({
+          sort_order: 4,
+          label: 'Private Events',
+          page_key: 'private-events',
+          parent_id: dropdownParent.id,
+          scope: 'desktop',
+        });
+      }
+    }
+    if (!hasMobile) {
+      rows.push({
+        sort_order: 13,
+        label: 'Private Events',
+        page_key: 'private-events',
+        scope: 'mobile',
+      });
+    }
+
+    if (rows.length === 0) return;
+    const { error: insertError } = await supabase.from('nav_links').insert(rows);
+    if (insertError) {
+      console.warn('[init] private-events nav backfill failed:', insertError.message);
+      return;
+    }
+    console.log(`[init] private-events nav backfilled (${rows.length} row${rows.length === 1 ? '' : 's'}).`);
+  } catch (err) {
+    console.warn('[init] private-events nav backfill threw:', err.message);
+  }
 }
 
 async function ensureFooterColumns() {
@@ -550,6 +610,7 @@ export async function ensureInitialized() {
   await ensureCateringPageContent();
   await ensureCateringRequestsTable();
   await ensureNavLinks();
+  await ensurePrivateEventsNavLinks();
   await ensureFooterColumns();
   await ensureInquiriesContactType();
   await ensureBookingsExtendedSchema();
