@@ -6,14 +6,23 @@
 }
 
 .journal-main {
-  padding-top: clamp(6.25rem, 11vw, 8.25rem);
+  /* No top padding here on purpose: the dark .journal-hero starts at
+     the very top of the page, under the floating navbar. The hero's own
+     padding-top below provides the navbar offset, and its dark gradient
+     background fills that space — without this the cream page bg showed
+     through as an empty white strip below the navbar. */
+  padding-top: 0;
 }
 
-.journal-hero,
 .journal-listing,
 .article-body,
 .article-related {
   padding: var(--section-py) 0;
+}
+
+.journal-hero {
+  /* Bigger top padding to clear the floating navbar; bottom keeps section-py. */
+  padding-block: clamp(8rem, 13vw, 10rem) var(--section-py);
 }
 
 .journal-hero {

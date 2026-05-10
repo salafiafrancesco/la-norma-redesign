@@ -359,6 +359,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* Gap between hero copy and the stats bar — without it the bottom CTA
+     button presses against the stats bar on desktop. */
+  gap: clamp(2rem, 4vw, 3.5rem);
   padding-top: 7rem;
   padding-bottom: 0;
   background: #101614;
@@ -690,6 +693,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* Gap between hero copy and the stats bar — keeps the bottom CTA
+     from pressing against the stats strip on desktop. */
+  gap: clamp(2rem, 4vw, 3.5rem);
   padding-top: 7rem;
   padding-bottom: 0;
   background: #101614;
