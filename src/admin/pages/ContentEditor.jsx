@@ -8,6 +8,45 @@ import VideoField from '../components/VideoField';
 
 const IMAGE_KEYS = ['image_url', 'imageUrl'];
 
+// Sections grouped into three logical categories so the picker stays
+// readable when there are 20+ sections. Any section key not listed here
+// (e.g. a future addition) is appended to the "Other" group at the end.
+const SECTION_GROUPS = [
+  {
+    label: 'Site & brand',
+    keys: ['restaurant', 'links', 'general', 'footer', 'theme'],
+  },
+  {
+    label: 'Homepage',
+    keys: ['hero', 'story', 'specialties', 'experiences', 'menu', 'testimonials', 'reservation_banner', 'order_online'],
+  },
+  {
+    label: 'Pages',
+    keys: ['catering', 'menuPage', 'aboutPage', 'contactPage', 'faqPage', 'cookingClassesPage', 'wineTastingsPage', 'liveMusicPage', 'privateEventsPage'],
+  },
+];
+
+function buildGroupedSections() {
+  const placed = new Set();
+  const groups = SECTION_GROUPS.map((group) => ({
+    label: group.label,
+    items: group.keys
+      .map((key) => CONTENT_SECTION_MAP[key])
+      .filter(Boolean)
+      .map((section) => {
+        placed.add(section.key);
+        return section;
+      }),
+  }));
+
+  const orphans = CONTENT_SECTIONS.filter((section) => !placed.has(section.key));
+  if (orphans.length > 0) {
+    groups.push({ label: 'Other', items: orphans });
+  }
+
+  return groups.filter((group) => group.items.length > 0);
+}
+
 function buildEditState(sectionConfig, data = {}) {
   if (!sectionConfig) return {};
 
@@ -32,6 +71,8 @@ export default function ContentEditor() {
     () => CONTENT_SECTION_MAP[activeSection],
     [activeSection],
   );
+
+  const groupedSections = useMemo(() => buildGroupedSections(), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,19 +132,26 @@ export default function ContentEditor() {
 
   return (
     <>
-      <div className="adm-tabs">
-        {CONTENT_SECTIONS.map((section) => (
-          <button
-            key={section.key}
-            className={`adm-tab${activeSection === section.key ? ' is-active' : ''}`}
-            type="button"
-            onClick={() => {
-              setLoading(true);
-              setActiveSection(section.key);
-            }}
-          >
-            {section.label}
-          </button>
+      <div className="adm-section-picker">
+        {groupedSections.map((group) => (
+          <div className="adm-section-picker__group" key={group.label}>
+            <p className="adm-section-picker__label">{group.label}</p>
+            <div className="adm-section-picker__pills">
+              {group.items.map((section) => (
+                <button
+                  key={section.key}
+                  type="button"
+                  className={`adm-section-pill${activeSection === section.key ? ' is-active' : ''}`}
+                  onClick={() => {
+                    setLoading(true);
+                    setActiveSection(section.key);
+                  }}
+                >
+                  {section.label}
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
