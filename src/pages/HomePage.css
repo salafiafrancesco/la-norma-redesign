@@ -1533,6 +1533,12 @@
 /* ================================================================== */
 .hp__section--voices {
   padding-block: clamp(3.5rem, 6vw, 5.5rem);
+  /* Warmer cream variant — sits between the cooler `--alt` cream of the
+     surrounding sections and adds rhythm to the page palette without
+     breaking it. Faint terracotta wash + slightly warmer cream base. */
+  background:
+    radial-gradient(ellipse at center top, rgba(184, 92, 56, 0.06), transparent 48%),
+    linear-gradient(180deg, rgba(244, 233, 216, 0.98) 0%, rgba(234, 217, 189, 0.88) 100%);
 }
 
 .hp__voices {
