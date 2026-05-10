@@ -506,7 +506,10 @@
 
 .navbar__mobile-link {
   display: block;
-  padding: 0;
+  /* No padding reset here on purpose: .navbar__mobile-link--sub adds
+     padding-left to make room for the leading dash, and any shorthand
+     here would override that and let the dash overlap the text. */
+  padding-block: 0;
   background: none;
   border: none;
   border-radius: 0;
