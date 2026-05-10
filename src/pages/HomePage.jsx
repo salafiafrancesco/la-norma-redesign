@@ -175,6 +175,7 @@ export default function HomePage() {
   const beyondScrollRef = useRef(null);
   const beyondPauseTimer = useRef(null);
   const beyondProgrammaticUntil = useRef(0); // timestamp until which onScroll events should be ignored
+  const beyondTweenFrame = useRef(0);         // rAF id for in-flight smooth-scroll tween
   const [beyondActive, setBeyondActive] = useState(0);
   const [beyondPaused, setBeyondPaused] = useState(false);
   // Continuous in-viewport flag — distinct from `beyondVis` (the one-shot
@@ -231,14 +232,16 @@ export default function HomePage() {
   }, [beyondPaused, beyondVis, beyondCount]);
 
   // Programmatic scroll when active card changes.
-  // We deliberately do NOT use scrollIntoView: it scrolls every scrollable
-  // ancestor (the document included) to reveal the card. We also avoid
-  // smooth scrolling on the container itself: with `scroll-snap-type: x
-  // mandatory` + `-webkit-overflow-scrolling: touch`, iOS Safari can
-  // sometimes scroll the document to "reveal" the snap target while a
-  // smooth programmatic scroll is in flight. Setting `scrollLeft` directly
-  // on the carousel keeps the page completely still — the snap engine then
-  // animates the snap visually on its own.
+  // We deliberately avoid:
+  //   - `card.scrollIntoView(...)` — scrolls every scrollable ancestor
+  //     (document included), jumping the page to the section.
+  //   - `container.scrollTo({ behavior: 'smooth' })` — on iOS Safari with
+  //     `scroll-snap-type: x mandatory` + `-webkit-overflow-scrolling:
+  //     touch`, a smooth programmatic scroll on an off-screen container
+  //     can drag the document to reveal the snap target.
+  // Instead we run our own rAF tween that sets `scrollLeft` per frame.
+  // It's plain DOM property assignment — the document cannot move — and
+  // the snap engine only fires once at the end, on the already-correct value.
   useEffect(() => {
     const container = beyondScrollRef.current;
     if (!container) return;
@@ -246,17 +249,36 @@ export default function HomePage() {
     const card = cards[beyondActive];
     if (!card) return;
 
-    // Tell the onScroll handler to ignore the next ~500 ms of scroll events,
-    // otherwise the snap-induced scroll fires onScroll, which would call
-    // setBeyondActive back to whatever is "nearest" mid-animation, creating
-    // a feedback loop.
-    beyondProgrammaticUntil.current = Date.now() + 500;
-
     const targetLeft = card.getBoundingClientRect().left
       - container.getBoundingClientRect().left
       + container.scrollLeft;
 
-    container.scrollLeft = targetLeft;
+    const start = container.scrollLeft;
+    const delta = targetLeft - start;
+    if (Math.abs(delta) < 1) return undefined;
+
+    const duration = 420;
+    const startTime = performance.now();
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+    // Suppress the scroll listener for the whole tween + a little overshoot,
+    // otherwise mid-tween onScroll fires would snap `beyondActive` back to
+    // whatever card is "nearest" right now and create a feedback loop.
+    beyondProgrammaticUntil.current = startTime + duration + 120;
+
+    cancelAnimationFrame(beyondTweenFrame.current);
+
+    const step = (now) => {
+      const t = Math.min(1, (now - startTime) / duration);
+      container.scrollLeft = start + delta * easeOutCubic(t);
+      if (t < 1) {
+        beyondTweenFrame.current = requestAnimationFrame(step);
+      }
+    };
+
+    beyondTweenFrame.current = requestAnimationFrame(step);
+
+    return () => cancelAnimationFrame(beyondTweenFrame.current);
   }, [beyondActive]);
 
   // Pause autoscroll on user interaction, resume after 7s of inactivity.
