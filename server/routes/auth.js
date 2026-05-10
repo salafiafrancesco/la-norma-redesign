@@ -1,15 +1,8 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { createRequire } from 'node:module';
 import qrcode from 'qrcode';
-
-// otplib v13 ships as CommonJS with no real ESM entry. Both
-// `import {authenticator}` and `import * as otplib` fail in Node ESM
-// (no named/default export, namespace contains undefined fields).
-// createRequire is the canonical Node-supported interop path.
-const require = createRequire(import.meta.url);
-const { authenticator } = require('otplib');
+import { authenticator } from 'otplib';
 import supabase from '../db/supabase.js';
 import requireAuth from '../middleware/auth.js';
 import { JWT_SECRET } from '../config.js';
