@@ -353,6 +353,9 @@
 @media (max-width: 720px) {
   .cat-hero__content {
     gap: 0.85rem;
+    /* Breathing room between the second CTA and the stats bar that sits
+       directly below it on stacked-mobile layout. */
+    padding-bottom: 1.75rem;
   }
 
   .cat-hero__rule {

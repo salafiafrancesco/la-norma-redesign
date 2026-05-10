@@ -613,6 +613,9 @@
 @media (max-width: 720px) {
   .mp-hero__content {
     gap: 0.85rem;
+    /* Breathing room between the second CTA and the stats bar that sits
+       directly below it on stacked-mobile layout. */
+    padding-bottom: 1.75rem;
   }
 
   .mp-hero__rule {
@@ -961,6 +964,9 @@
 @media (max-width: 720px) {
   .cp-hero__heading { font-size: clamp(2.8rem, 11vw, 4.2rem); }
   .cp-hero__h2 { font-size: clamp(1.2rem, 5vw, 1.7rem); }
+  /* Breathing room between the second CTA and the stats bar that sits
+     directly below it on stacked-mobile layout. */
+  .cp-hero__content { padding-bottom: 1.75rem; }
   .cp-hero__actions .btn { width: 100%; }
   .cp-hero__stats { grid-template-columns: 1fr; }
   .cp-hero__stat {
